@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}리뷰 삭제{% endblock %}
+
+{% block content %}
+<h1>리뷰 삭제</h1>
+<p>정말로 삭제하시겠습니까?</p>
+
+<article>
+  <h3>[{{ object.route }}] ★ {{ object.rating }} — {{ object.summary }}</h3>
+  <p style="white-space:pre-line">{{ object.content|truncatechars:200 }}</p>
+</article>
+
+<form method="post">
+  {% csrf_token %}
+  <button type="submit">삭제</button>
+  <a href="{% url 'reviews:detail' object.pk %}">취소</a>
+</form>
+{% endblock %}
