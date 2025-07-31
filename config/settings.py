@@ -66,7 +66,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
-    'apps.users.middleware.RequirePhoneMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -153,6 +152,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #로그인 관련 셋팅
 SITE_ID = 1
 LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
+# 이메일 로그인 관련 설정
+ACCOUNT_LOGIN_METHODS = {"email"}
+ACCOUNT_SIGNUP_FIELDS = ["username*", "email*", "password1*", "password2*"]
+ACCOUNT_UNIQUE_EMAIL = True #이메일 중복 허용 불가
 
 AUTHENTICATION_BACKENDS = (
     #추가 장고에서 사용자의 이름을 기준으로 로그인하도록 설정

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>{{ username }}님, 환영합니다! 🎉</h1>
+
+  <form method="post" action="{% url 'account_logout' %}">
+    {% csrf_token %}
+    <button type="submit">로그아웃</button>
+  </form>
+{% endblock %}
