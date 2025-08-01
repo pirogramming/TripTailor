@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}리뷰 상세{% endblock %}
+
+{% block content %}
+<article>
+  <h1>[{{ review.route }}] ★ {{ review.rating }} — {{ review.summary }}</h1>
+  <div>by {{ review.user }} · {{ review.created_at|date:"Y-m-d H:i" }}</div>
+  <p style="white-space:pre-line">{{ review.content }}</p>
+
+  {% if review.photos.all %}
+  <h3>사진</h3>
+  <ul>
+    {% for p in review.photos.all %}
+      <li><a href="{{ p.url }}" target="_blank">{{ p.url }}</a></li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</article>
+
+<hr>
+
+<p>
+  <a href="{% url 'reviews:list' %}">← 목록</a>
+  {% if user.is_authenticated and user.pk == review.user_id %}
+    | <a href="{% url 'reviews:edit' review.pk %}">수정</a>
+    | <a href="{% url 'reviews:delete' review.pk %}">삭제</a>
+  {% endif %}
+</p>
+{% endblock %}
