@@ -1,22 +1,28 @@
 {% load socialaccount %}
+{% load static %}
 
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
     <title>Document</title>
   </head>
   <body>
-    <!-- 추가 구글 로그인 링크 -->
-    <a class="social_login3" href="{% provider_login_url 'google' %}">구글 로그인</a>
-    <!-- 추가 카카오 로그인 링크 -->
-    <a class="social_login3" href="{% provider_login_url 'kakao' %}">카카오 로그인</a>
-    <!-- 추가 네이버 로그인 링크 -->
-    <a class="social_login3" href="{% provider_login_url 'naver' %}">네이버 로그인</a>
-    <!--로컬 로그인 링크-->
-    <a class="social_login3" href="/accounts/login/">로컬 로그인</a>
-    <!--로컬 회원가입 링크-->
-    <p>계정이 없으신가요? <a href="/accounts/signup/">회원가입</a></p>
+    <div class="login_box">
+      <div class="social_login_box">
+        <!-- 추가 구글 로그인 링크 -->
+        <a class="social_login3" href="{% provider_login_url 'google' %}">구글 로그인</a>
+        <!-- 추가 카카오 로그인 링크 -->
+        <a class="social_login3" href="{% provider_login_url 'kakao' %}">카카오 로그인</a>
+        <!-- 추가 네이버 로그인 링크 -->
+        <a class="social_login3" href="{% provider_login_url 'naver' %}">네이버 로그인</a>
+        <!--로컬 로그인 링크-->
+        <a class="social_login3" href="/accounts/login/">로컬 로그인</a>
+        <!--로컬 회원가입 링크-->
+      </div>
+      <p>계정이 없으신가요? <a href="/accounts/signup/">회원가입</a></p>
+    </div>
   </body>
 </html>
