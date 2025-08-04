@@ -170,6 +170,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SITE_ID = 1
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+SOCIALACCOUNT_AUTO_SIGNUP = True
+SOCIALACCOUNT_LOGIN_ON_GET = True 
+SOCIALACCOUNT_ADAPTER = 'apps.users.adapter.MySocialAccountAdapter'
 
 # 이메일 로그인 관련 설정
 ACCOUNT_LOGIN_METHODS = {"email"}
