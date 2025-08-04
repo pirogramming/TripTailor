@@ -7,9 +7,10 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-
 from .forms import ReviewForm, ReviewPhotoFormSet
 from .models import Review
+
+
 
 class ReviewListView(ListView):
     model = Review

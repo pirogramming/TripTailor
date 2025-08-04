@@ -1,4 +1,4 @@
-## Related issue 🛠
+R## Related issue 🛠
 
 closed #<issue_number>
 
