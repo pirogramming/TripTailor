@@ -8,10 +8,29 @@
     <title>Document</title>
 </head>
 <body>
-    <input type="text">
-    {% block content %}
-    {% endblock %}
+    <nav>
+        <div class="left_nav">
+            <img src="" alt="logo">
+        </div>
+        <div class="right_nav">
+            {% if user.is_authenticated %}
+                <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="logout_button">
+                        로그아웃
+                    </button>
+                </form>
+                <a href="{% url 'my_page' %}">마이페이지</a>
+            {% else %}
+                <a href="{% url 'login' %}">로그인</a>
+                <a href="{% url 'signup' %}">회원가입</a>
+            {% endif %}
+        </div>
+    </nav>
+    <div>
+        {% block content %}
+        {% endblock %}
+    </div>
     <script src="{% static 'js/script.js' %}"></script>
 </body>
 </html>
-<!-- 동하 브랜치 다시 만듦.. -->
