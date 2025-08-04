@@ -1,7 +1,5 @@
 asgiref==3.9.1
 Django==5.2.4
-django-environ==0.12.0
-psycopg2-binary==2.9.10
 sqlparse==0.5.3
 django-allauth==65.10.0
 python-decouple==3.8
@@ -15,3 +13,10 @@ PyJWT==2.10.1
 cffi==1.17.1
 cryptography==45.0.5
 pycparser==2.22
+langchain>=0.1.14
+langchain-core>=0.1.28
+langchain_naver>=0.0.3
+langgraph>=0.0.25
+faiss-cpu>=1.7.4
+numpy>=1.24.0
+python-dotenv>=1.0.0
