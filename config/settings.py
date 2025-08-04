@@ -11,9 +11,9 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config
 import os
 from dotenv import load_dotenv
-
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -44,11 +44,22 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
     'apps.users',
     'apps.reviews',
     'apps.places',
     'apps.routes',
     'apps.tags',
+
+    #allauth 추가
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+
+    #provider 추가 (추가로 다른 사이트도 하고 싶을 경우 뒤에 이름만 변경하면 됨)
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.kakao',
+    'allauth.socialaccount.providers.naver',
 ]
 
 MIDDLEWARE = [
@@ -59,6 +70,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -66,7 +78,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / "templates"],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -153,3 +165,83 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'  # python manage.py collectstatic 시 사
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+#로그인 관련 셋팅
+SITE_ID = 1
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
+# 이메일 로그인 관련 설정
+ACCOUNT_LOGIN_METHODS = {"email"}
+ACCOUNT_SIGNUP_FIELDS = ["username*", "email*", "password1*", "password2*"]
+ACCOUNT_UNIQUE_EMAIL = True #이메일 중복 허용 불가
+
+AUTHENTICATION_BACKENDS = (
+    #추가 장고에서 사용자의 이름을 기준으로 로그인하도록 설정
+    'django.contrib.auth.backends.ModelBackend',
+
+    # 추가 'allauth'의 인증방식 추가
+    'allauth.account.auth_backends.AuthenticationBackend',
+)
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+#추가
+SOCIALACCOUNT_PROVIDERS ={
+#추가 카카오 설정
+"kakao": {
+"APP": {
+"client_id": config("KAKAO_CLIENT_ID"),
+"secret": config("KAKAO_SECRET"),
+"key": ""
+},
+# scope의 경우 내가 어떤 데이터를 가져올건지를 선택하는 것인데 사이트마다
+# 제공하는 값이 다르기 때문에 가져올 데이터를 설정한 이후 추가/삭제 해보면 됩니다.
+# SCOPE값에 제공하지 않는 값을 넣거나 하는 이유로 오류가 나올 수 있음
+"SCOPE": [
+
+],
+#추가
+"AUTH_PARAMS": {
+"access_type": "online", #추가
+'prompt': 'select_account', #추가 간편로그인을 지원해줌
+}},
+######################################################
+#네이버 설정
+"naver": {
+"APP": {
+"client_id": config("NAVER_CLIENT_ID"),
+"secret": config("NAVER_SECRET"),
+"key": ""
+},
+# scope의 경우 내가 어떤 데이터를 가져올건지를 선택하는 것인데 사이트마다
+# 제공하는 값이 다르기 때문에 가져올 데이터를 설정한 이후 추가/삭제 해보면 됩니다.
+# SCOPE값에 제공하지 않는 값을 넣거나 하는 이유로 오류가 나올 수 있음
+"SCOPE": [
+
+],
+#추가
+"AUTH_PARAMS": {
+"access_type": "online",#추가
+'prompt': 'select_account',#추가 간편로그인을 지원해줌
+}},
+######################################################
+#구글 설정
+"google": {
+"APP": {
+"client_id": config("GOOGLE_CLIENT_ID"),
+"secret": config("GOOGLE_SECRET"),
+"key": ""
+},
+# scope의 경우 내가 어떤 데이터를 가져올건지를 선택하는 것인데 사이트마다
+# 제공하는 값이 다르기 때문에 가져올 데이터를 설정한 이후 추가/삭제 해보면 됩니다.
+# SCOPE값에 제공하지 않는 값을 넣거나 하는 이유로 오류가 나올 수 있음
+"SCOPE": [
+    "profile", #구글의 경우 무조건 추가
+    "email", # 구글의 경우 무조건 추가
+],
+#추가
+"AUTH_PARAMS": {
+"access_type": "online", #추가
+'prompt': 'select_account',#추가 간편로그인을 지원해줌
+}}}
