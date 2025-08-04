@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+
+{% block content %}
+  <h2>이메일 로그인</h2>
+  <form method="post" action="{% url 'account_login' %}">
+    {% csrf_token %}
+    {% if form.errors %}
+      <p style="color: red;">입력한 정보가 올바르지 않아요 😢</p>
+    {% endif %}
+    <div>
+      <label for="id_login">이메일</label>
+      {{ form.login }}
+    </div>
+    <div>
+      <label for="id_password">비밀번호</label>
+      {{ form.password }}
+    </div>
+    <div>
+      <label>
+        {{ form.remember }} 로그인 상태 유지
+      </label>
+    </div>
+    <button type="submit">로그인</button>
+  </form>
+
+  <p><a href="{% url 'account_reset_password' %}">비밀번호를 잊으셨나요?</a></p>
+  <p><a href="{% url 'account_signup' %}">회원가입 하기</a></p>
+  <p><a href="/login/">← 소셜 로그인 페이지로 돌아가기</a></p>
+{% endblock %}
