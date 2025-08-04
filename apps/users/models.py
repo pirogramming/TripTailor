@@ -13,7 +13,6 @@ class User(AbstractUser):
     ]
     provider = models.CharField(max_length=20, choices=PROVIDER_CHOICES, default="local", blank=True)
     provider_uid = models.CharField(max_length=100, blank=True, null=True)
-    phone = models.CharField(max_length=20, unique=True)
     joined_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

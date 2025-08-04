@@ -1,0 +1,67 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    padding: 40px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+a.social_login3 {
+    display: inline-block;
+    margin: 10px;
+    padding: 12px 24px;
+    text-decoration: none;
+    color: white;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+a[href*="google"] {
+    background-color: #db4437; /* Google 빨강 */
+}
+
+a[href*="kakao"] {
+    background-color: #fee500; /* Kakao 노랑 */
+    color: #3c1e1e;
+}
+
+a[href*="naver"] {
+    background-color: #03c75a; /* Naver 초록 */
+}
+
+a[href="/accounts/login/"] {
+    background-color: #4a90e2; /* 로컬 로그인 파랑 */
+}
+
+a.social_login3:hover {
+    opacity: 0.85;
+}
+
+p {
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+p a {
+    color: #333;
+    text-decoration: underline;
+}
+
+.login_box{
+    height: 100%;
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+    margin: auto 0;
+}
+
+.social_login_box{
+    display: flex;
+    flex-flow: row;
+    justify-content: center;
+    align-items: center;
+}
