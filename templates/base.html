@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{%static 'css/style.css'%}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <title>Document</title>
 </head>
 <body>
@@ -14,16 +14,15 @@
         </div>
         <div class="right_nav">
             {% if user.is_authenticated %}
-                <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                <form action="{% url 'account_logout' %}" method="post" style="display:inline;">
                     {% csrf_token %}
                     <button type="submit" class="logout_button">
                         로그아웃
                     </button>
                 </form>
-                <a href="{% url 'my_page' %}">마이페이지</a>
             {% else %}
-                <a href="{% url 'login' %}">로그인</a>
-                <a href="{% url 'signup' %}">회원가입</a>
+                <a href="{% url 'account_login' %}">로그인</a>
+                <a href="{% url 'account_signup' %}">회원가입</a>
             {% endif %}
         </div>
     </nav>
