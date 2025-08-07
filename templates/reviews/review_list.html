@@ -20,6 +20,9 @@
       [{{ r.route }}] ★ {{ r.rating }} — {{ r.summary }}
     </a>
     <div>by {{ r.user }} · {{ r.created_at|date:"Y-m-d H:i" }}</div>
+    {% if user.is_authenticated and user == r.user %}
+      <a href="{% url 'reviews:edit' r.pk %}" class="btn btn-sm btn-outline-primary">✏️ 수정</a>
+    {% endif %}
   </li>
   {% empty %}
   <li>등록된 리뷰가 없습니다.</li>
