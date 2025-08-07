@@ -11,6 +11,7 @@ class Place(models.Model):
     is_unique = models.BooleanField(default=False)
     summary = models.TextField(blank=True, null=True)
     tags = models.ManyToManyField(Tag, blank=True, related_name='places')
+    place_class = models.IntegerField(default=0)  # class 필드 추가 (1: 레포츠, 2: 쇼핑, 3: 관광지, 4: 문화시설)
 
     def __str__(self):
         return self.name

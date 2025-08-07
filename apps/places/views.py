@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 import recommend
+from django.core.paginator import Paginator
 from .models import Place
 import re
 
@@ -62,9 +63,18 @@ def get_recommendation_context(prompt, followup):
 def main(request):
     prompt = request.GET.get('prompt', '')
     followup = request.GET.get('followup', '')
+    class_filter = request.GET.get('place_class', '')  # 대분류 선택값 받기
+
     places = Place.objects.all()
+    if class_filter and class_filter.isdigit():
+        places = places.filter(place_class=int(class_filter))
+
+    paginator = Paginator(places, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     context = get_recommendation_context(prompt, followup)
-    context['places'] = places
+    context['places'] = page_obj
+    context['place_class'] = class_filter  # 선택값 템플릿에 전달
 
     # 추천 결과가 있으면 search로 리다이렉트
     if context['recommended_places'] and not context['show_followup']:
