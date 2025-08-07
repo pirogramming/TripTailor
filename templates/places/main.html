@@ -1,31 +1,33 @@
-{% extends "base.html" %}
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <form method="get" action="">
-    <input type="text" name="prompt" placeholder="여행지 조건을 입력해보세요!" value="{{ prompt }}">
+    <input
+        type="text"
+        name="prompt"
+        placeholder="여행지 조건을 입력해보세요!"
+        value="{{ prompt }}"
+    />
+    {% if show_followup %}
+    <div>
+        <strong>🤔 {{ question }}</strong>
+        <input type="text" name="followup" placeholder="답변을 입력하세요" />
+        <button type="submit">보충 답변 제출</button>
+    </div>
+    {% else %}
     <button type="submit">추천받기</button>
+    {% endif %}
 </form>
-
-{% if recommended_places %}
-  <h2>추천 여행지</h2>
-  <ul>
-    {% for place in recommended_places %}
-      <li>
-        <strong>{{ place.name }}</strong> - {{ place.region }}<br>
-        {{ place.summary|default:"설명 없음" }}
-        <ul>
-          {% for tag in place.tags.all %}
-            <li>#{{ tag.name }}</li>
-          {% endfor %}
-        </ul>
-      </li>
-    {% endfor %}
-  </ul>
-{% endif %}
 
 <h2>전체 여행지</h2>
 <ul>
-  {% for place in places %}
-    <li>{{ place.name }} ({{ place.region }})</li>
-  {% endfor %}
+    {% for place in places %}
+    <li>
+        {{ place.name }} ({{ place.region }})
+        <ul>
+            {% for tag in place.tags.all %}
+            <li>#{{ tag.name }}</li>
+            {% endfor %}
+        </ul>
+    </li>
+    {% endfor %}
 </ul>
 {% endblock %}
