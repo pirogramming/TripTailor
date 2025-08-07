@@ -5,4 +5,4 @@ def login_page(request):
 
 
 def main_page(request):
-    return render(request, 'base.html')
+    return render(request, 'users/mypage.html')
