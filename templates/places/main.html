@@ -1,31 +1,82 @@
-{% extends "base.html" %}
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <form method="get" action="">
-    <input type="text" name="prompt" placeholder="여행지 조건을 입력해보세요!" value="{{ prompt }}">
+    <input
+        type="text"
+        name="prompt"
+        placeholder="여행지 조건을 입력해보세요!"
+        value="{{ prompt }}"
+    />
+    {% if show_followup %}
+    <div>
+        <strong>🤔 {{ question }}</strong>
+        <input type="text" name="followup" placeholder="답변을 입력하세요" />
+        <button type="submit">보충 답변 제출</button>
+    </div>
+    {% else %}
     <button type="submit">추천받기</button>
+    {% endif %}
 </form>
 
-{% if recommended_places %}
-  <h2>추천 여행지</h2>
-  <ul>
-    {% for place in recommended_places %}
-      <li>
-        <strong>{{ place.name }}</strong> - {{ place.region }}<br>
-        {{ place.summary|default:"설명 없음" }}
-        <ul>
-          {% for tag in place.tags.all %}
-            <li>#{{ tag.name }}</li>
-          {% endfor %}
-        </ul>
-      </li>
-    {% endfor %}
-  </ul>
-{% endif %}
+<!-- 대분류 클릭 버튼 -->
+<div style="margin: 16px 0">
+    <a
+        href="?{% if prompt %}prompt={{ prompt }}&{% endif %}{% if followup %}followup={{ followup }}&{% endif %}"
+        class="btn {% if not place_class %}active{% endif %}"
+        >전체</a
+    >
+    <a
+        href="?{% if prompt %}prompt={{ prompt }}&{% endif %}{% if followup %}followup={{ followup }}&{% endif %}place_class=1"
+        class="btn {% if place_class == '1' %}active{% endif %}"
+        >레포츠</a
+    >
+    <a
+        href="?{% if prompt %}prompt={{ prompt }}&{% endif %}{% if followup %}followup={{ followup }}&{% endif %}place_class=2"
+        class="btn {% if place_class == '2' %}active{% endif %}"
+        >쇼핑</a
+    >
+    <a
+        href="?{% if prompt %}prompt={{ prompt }}&{% endif %}{% if followup %}followup={{ followup }}&{% endif %}place_class=3"
+        class="btn {% if place_class == '3' %}active{% endif %}"
+        >관광지</a
+    >
+    <a
+        href="?{% if prompt %}prompt={{ prompt }}&{% endif %}{% if followup %}followup={{ followup }}&{% endif %}place_class=4"
+        class="btn {% if place_class == '4' %}active{% endif %}"
+        >문화시설</a
+    >
+</div>
+
+<style>
+    .btn {
+        display: inline-block;
+        padding: 8px 16px;
+        margin-right: 8px;
+        background: #eee;
+        color: #333;
+        border-radius: 4px;
+        text-decoration: none;
+        border: 1px solid #ccc;
+    }
+    .btn.active {
+        background: #007bff;
+        color: #fff;
+        border-color: #007bff;
+    }
+</style>
+
 
 <h2>전체 여행지</h2>
 <ul>
-  {% for place in places %}
-    <li>{{ place.name }} ({{ place.region }})</li>
-  {% endfor %}
+    {% for place in places %}
+    <li>
+        {{ place.name }} ({{ place.region }}) - 
+        {% if place.place_class == 1 %}레포츠{% elif place.place_class == 2 %}쇼핑{% elif place.place_class == 3 %}관광지{% elif place.place_class == 4 %}문화시설{% endif %}
+        <ul>
+            {% for tag in place.tags.all %}
+            <li>#{{ tag.name }}</li>
+            {% endfor %}
+        </ul>
+    </li>
+    {% endfor %}
 </ul>
 {% endblock %}

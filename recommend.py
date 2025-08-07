@@ -111,12 +111,19 @@ def extract_info(state: GraphState) -> GraphState:
     except:
         parsed = {"지역": "없음", "감정": "없음", "활동": "없음", "보충 질문": "어디에서 여행하고 싶으신가요?"}
 
+    # 추천 조건이 모두 있을 때만 recommend로 넘김
+    need_followup = (
+        parsed.get("지역", "없음") == "없음" or
+        parsed.get("감정", "없음") == "없음" or
+        parsed.get("활동", "없음") == "없음"
+    )
     return {
         **state,
         "지역": parsed.get("지역", ""),
         "감정": parsed.get("감정", ""),
         "활동": parsed.get("활동", ""),
-        "보충_질문": parsed.get("보충 질문", "")
+        "보충_질문": parsed.get("보충 질문", ""),
+        "need_followup": need_followup
     }
 
 def recommend_places(state: GraphState) -> GraphState:
@@ -174,12 +181,26 @@ def recommend_places(state: GraphState) -> GraphState:
         "장소_태그맵": place_info_map
     }
 
+# StateGraph에서 조건 분기 추가
 builder = StateGraph(GraphState)
 builder.add_node("extract_info", RunnableLambda(extract_info))
 builder.add_node("recommend", RunnableLambda(recommend_places))
+
+# 분기: 보충 질문이 필요하면 recommend로 가지 않음
+def should_recommend(state: GraphState):
+    return not state.get("need_followup", False)
+
 builder.set_entry_point("extract_info")
-builder.add_edge("extract_info", "recommend")
+builder.add_conditional_edges(
+    "extract_info",
+    should_recommend,
+    {
+        True: "recommend",
+        False: "extract_info"  # 보충 질문만 반환하고 종료
+    }
+)
 builder.set_finish_point("recommend")
+builder.set_finish_point("extract_info")
 app = builder.compile()
 
 if __name__ == "__main__":
