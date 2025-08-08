@@ -4,6 +4,10 @@
 
 {% load i18n %}
 
+{% block head %}
+  <link rel="stylesheet" href="{% static 'css/login.css' %}">
+{% endblock %}
+
 {% block content %}
   <h2>로그인</h2>
   <form method="post" action="{% url 'account_login' %}">
@@ -24,7 +28,7 @@
         {{ form.remember }} 로그인 상태 유지
       </label>
     </div>
-    <button type="submit">로그인</button>
+    <button type="submit">이메일로 로그인</button>
   </form>
 
   <p><a href="{% url 'account_reset_password' %}">비밀번호를 잊으셨나요?</a></p>
