@@ -1,6 +1,7 @@
 from django.shortcuts import render
 
 # Create your views here.
+
 # apps/reviews/views.py
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
@@ -71,43 +72,24 @@ class ReviewCreateView(LoginRequiredMixin, CreateView):
         return self.render_to_response(context)
 
     def form_valid(self, form):
-        # 폼 검증을 우회하고 직접 저장
+        # 폼 데이터를 정리하고 저장
         try:
-            # 필수 데이터 추출
-            route_id = form.data.get('route')
-            rating = form.data.get('rating')
-            summary = form.data.get('summary')
-            content = form.data.get('content')
-            
-            # route가 비어있으면 첫 번째 route 사용
-            if not route_id:
-                from apps.routes.models import Route
-                first_route = Route.objects.first()
-                if first_route:
-                    route_id = first_route.id
-                else:
-                    messages.error(self.request, "등록된 경로가 없습니다.")
-                    return self.form_invalid(form)
-            
-            # rating 소수점 처리
-            if rating:
-                try:
-                    rating_float = float(rating)
-                    rating_rounded = round(rating_float, 1)
-                except ValueError:
-                    rating_rounded = 5.0
-            else:
-                rating_rounded = 5.0
+            # 폼 데이터에서 값 추출
+            title = form.cleaned_data.get('title', '리뷰')
+            route = form.cleaned_data.get('route')  # None이어도 OK
+            rating = form.cleaned_data.get('rating', 5.0)  # 기본값 5.0
+            summary = form.cleaned_data.get('summary', '리뷰')
+            content = form.cleaned_data.get('content', '')
             
             # 리뷰 생성
-            from .models import Review
-            review = Review.objects.create(
-                user=self.request.user,
-                route_id=route_id,
-                rating=rating_rounded,
-                summary=summary or "리뷰",
-                content=content or ""
-            )
+            review = form.save(commit=False)
+            review.user = self.request.user
+            review.title = title
+            review.route = route
+            review.rating = rating
+            review.summary = summary
+            review.content = content
+            review.save()
             
             # 폼셋 처리
             formset = ReviewPhotoFormSet(self.request.POST, instance=review)
@@ -131,6 +113,7 @@ class ReviewCreateView(LoginRequiredMixin, CreateView):
             return redirect('reviews:list')
             
         except Exception as e:
+            print(f"=== 리뷰 저장 중 오류 발생 ===: {str(e)}")
             messages.error(self.request, f"리뷰 저장 중 오류가 발생했습니다: {str(e)}")
             return self.form_invalid(form)
 
@@ -156,20 +139,15 @@ class ReviewUpdateView(LoginRequiredMixin, AuthorRequiredMixin, UpdateView):
         # 폼 검증을 우회하고 직접 저장
         try:
             # 필수 데이터 추출
+            title = form.data.get('title', '리뷰')
             route_id = form.data.get('route')
             rating = form.data.get('rating')
             summary = form.data.get('summary')
             content = form.data.get('content')
             
-            # route가 비어있으면 첫 번째 route 사용
+            # route가 비어있으면 None으로 저장 (Route 없이도 리뷰 작성 가능)
             if not route_id:
-                from apps.routes.models import Route
-                first_route = Route.objects.first()
-                if first_route:
-                    route_id = first_route.id
-                else:
-                    messages.error(self.request, "등록된 경로가 없습니다.")
-                    return self.form_invalid(form)
+                route_id = None
             
             # rating 소수점 처리
             if rating:
@@ -182,6 +160,7 @@ class ReviewUpdateView(LoginRequiredMixin, AuthorRequiredMixin, UpdateView):
                 rating_rounded = 5.0
             
             # 리뷰 수정
+            self.object.title = title
             self.object.route_id = route_id
             self.object.rating = rating_rounded
             self.object.summary = summary or "리뷰"
@@ -220,7 +199,7 @@ class ReviewUpdateView(LoginRequiredMixin, AuthorRequiredMixin, UpdateView):
 
 class ReviewDeleteView(LoginRequiredMixin, AuthorRequiredMixin, DeleteView):
     model = Review
-    template_name = 'reviews/review_confirm_delete.html'
+    template_name = 'reviews/review_delete.html'
     success_url = reverse_lazy('reviews:list')
 
     def delete(self, request, *args, **kwargs):

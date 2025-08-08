@@ -17,8 +17,9 @@
   {% for r in reviews %}
   <li>
     <a href="{% url 'reviews:detail' r.pk %}">
-      [{{ r.route }}] ★ {{ r.rating }} — {{ r.summary }}
+      {{ r.title }}
     </a>
+    <div>[{{ r.route }}] ★ {{ r.rating }} — {{ r.summary }}</div>
     <div>by {{ r.user }} · {{ r.created_at|date:"Y-m-d H:i" }}</div>
     {% if user.is_authenticated and user == r.user %}
       <a href="{% url 'reviews:edit' r.pk %}" class="btn btn-sm btn-outline-primary">✏️ 수정</a>
