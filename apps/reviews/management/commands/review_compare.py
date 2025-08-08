@@ -79,7 +79,7 @@ class ReviewPipelineService:
             if api_key:
                    os.environ["CLOVASTUDIO_API_KEY"] = api_key 
 
-            llm = ChatClovaX(model="HCX-005", temperature=0, naver_api_key=api_key)
+            llm = ChatClovaX(model="HCX-005", temperature=0 )
             prompt = PromptTemplate.from_template("다음 후기를 1~2문장으로 간결 요약:\n{review}")
             out = (prompt | llm).invoke({"review": content})
             text = getattr(out, "content", str(out)).strip()
