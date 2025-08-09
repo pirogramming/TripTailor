@@ -10,7 +10,9 @@
 <body>
     <nav>
         <div class="left_nav">
-            <img src="" alt="logo">
+            <a href="{% url 'users:main_page' %}">
+                <img src="" alt="logo">
+            </a>
         </div>
         <div class="right_nav">
             {% if user.is_authenticated %}
@@ -26,7 +28,7 @@
             {% endif %}
         </div>
     </nav>
-    <div>
+    <div class="main_div">
         {% block content %}
         {% endblock %}
     </div>

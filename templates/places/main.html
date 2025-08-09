@@ -1,5 +1,7 @@
 {% extends "base.html" %}
+{% load static %}
 {% block content %}
+<link rel="stylesheet" href="{% static 'css/main.css' %}">
 <form method="get" action="">
     <input type="text" name="prompt" placeholder="여행지 조건을 입력해보세요!" value="{{ prompt }}">
     <button type="submit">추천받기</button>
@@ -23,9 +25,9 @@
 {% endif %}
 
 <h2>전체 여행지</h2>
-<ul>
+<!-- <ul>
   {% for place in places %}
     <li>{{ place.name }} ({{ place.region }})</li>
   {% endfor %}
-</ul>
+</ul> -->
 {% endblock %}
