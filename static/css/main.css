@@ -1,0 +1,38 @@
+:root {
+    --border-color: #62B3B8;
+    --background-color: #EFFEFF;
+}
+
+form {
+    height: 60px;
+    border: 2px solid var(--border-color);
+    width: 60%;
+    margin: 20% auto 0;
+    border-radius: 30px;
+    display: flex;
+    overflow: hidden;
+    background-color: var(--background-color);
+}
+
+input {
+    flex: 1;
+    padding: 0 20px;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    background-color: transparent;
+}
+
+button {
+    width: 120px;
+    background-color: var(--border-color);
+    color: white;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #4ca2a7;
+}
