@@ -70,7 +70,7 @@ def build_context_from_cached(prompt, followup, cached, user):
     parsed_recs = parse_recommendations(recommendations)
     names = [r["name"] for r in parsed_recs if r.get("name")]
     candidates_qs = with_like_meta(find_places_by_names(names), user)
-    candidates = list(candidates_qs)  # ← 한 번만 평가
+    candidates = list(candidates_qs)  
 
     name_index = {p.name: p for p in candidates}
     lower_index = [(p.name.lower(), p) for p in candidates]
@@ -102,7 +102,6 @@ def get_recommendation_context(prompt, followup, user):
         try:
             result = recommend.app.invoke({"user_input": user_input}) or {}
         except Exception as e:
-            # 로깅 권장: logger.exception("LLM invoke failed")
             result = {}
 
         # 키가 '보충_질문'일 수도 있고 'question'일 수도 있는 혼합 상황 방어
@@ -151,7 +150,7 @@ def main(request):
     if class_filter and class_filter.isdigit():
         qs = qs.filter(place_class=int(class_filter))
 
-    # ✅ 여기서 헬퍼로 일괄 annotate
+    # 헬퍼로 일괄 annotate
     qs = with_like_meta(qs, request.user)
 
     paginator = Paginator(qs, 20)
@@ -249,6 +248,4 @@ def toggle_place_like(request, pk):
     if is_ajax:
         return JsonResponse(data)
 
-    # 가능하면 안전한 고정 URL로 리다이렉트하거나,
-    # next 파라미터를 검증해서 사용하세요.
     return redirect('place_detail', pk=place.id)
