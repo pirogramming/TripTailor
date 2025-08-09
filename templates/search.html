@@ -30,6 +30,17 @@
             <li>#{{ tag.name }}</li>
             {% endfor %}
         </ul>
+        {% if user.is_authenticated %}
+            <form method="post" action="{% url 'places:place_like' rec.place.pk %}" style="display:inline;">
+                {% csrf_token %}
+                {% if rec.place.is_liked %}
+                    ❤️ 취소
+                {% else %}
+                    🤍 좋아요
+                {% endif %}
+            </form>
+        {% endif %}
+        <a href="{% url 'places:place_detail' rec.place.pk %}">자세히 보기</a>
     </li>
     {% endfor %}
 </ul>

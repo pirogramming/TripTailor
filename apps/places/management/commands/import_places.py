@@ -18,6 +18,7 @@ class Command(BaseCommand):
                 name = row.get('명칭')
                 address = row.get('주소')
                 region = address.split()[0] if address else ''
+                overview = row.get('개요')
                 lat = row.get('위도') or row.get('lat')
                 lng = row.get('경도') or row.get('lng')
                 external_id = row.get('external_id', None)
@@ -25,7 +26,7 @@ class Command(BaseCommand):
                 summary = row.get('summary', '')
                 place_class = int(row.get('class', '0'))
 
-                if not (name and address and region and lat and lng):
+                if not (name and address and overview and region and lat and lng):
                     continue
 
                 try:
@@ -43,6 +44,7 @@ class Command(BaseCommand):
                         'region': region,
                         'lat': lat,
                         'lng': lng,
+                        'overview': overview,
                         'external_id': external_id,
                         'is_unique': is_unique,
                         'summary': summary,
