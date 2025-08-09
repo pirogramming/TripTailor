@@ -3,17 +3,22 @@
 
 {% block content %}
 <article>
-  <h1>[{{ review.route }}] ★ {{ review.rating }} — {{ review.summary }}</h1>
+  <h1>{{ review.title }}</h1>
+  <div>[{{ review.route }}] ★ {{ review.rating }} — {{ review.summary }}</div>
   <div>by {{ review.user }} · {{ review.created_at|date:"Y-m-d H:i" }}</div>
   <p style="white-space:pre-line">{{ review.content }}</p>
 
   {% if review.photos.all %}
   <h3>사진</h3>
-  <ul>
+  <div>
     {% for p in review.photos.all %}
-      <li><a href="{{ p.url }}" target="_blank">{{ p.url }}</a></li>
+      <div>
+        <img src="{{ p.url }}" alt="리뷰 사진">
+        <br>
+        <a href="{{ p.url }}" target="_blank">원본 보기</a>
+      </div>
     {% endfor %}
-  </ul>
+  </div>
   {% endif %}
 </article>
 

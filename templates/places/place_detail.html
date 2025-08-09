@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ place.name }}</h2>
+{% if user.is_authenticated %}
+    <form method="post" action="{% url 'places:place_like' place.pk %}">
+        {% csrf_token %}
+        {% if place.is_liked %}
+            ❤️ 취소
+        {% else %}
+            🤍 좋아요
+        {% endif %}
+    </form>
+{% endif %}
+<p>{{ place.address }} ({{ place.region }})</p>
+<p>{{place.overview|default:"개요 없음"}}</p>
+<p>{{ place.summary|default:"설명 없음" }}</p>
+<ul>
+    {% for tag in place.tags.all %}
+    <li>#{{ tag.name }}</li>
+    {% endfor %}
+</ul>
+<a href="{% url 'places:main' %}">← 목록으로 돌아가기</a>
+{% endblock %}
