@@ -17,16 +17,16 @@ class Command(BaseCommand):
             for row in reader:
                 name = row.get('명칭')
                 address = row.get('주소')
-                region = address.split()[0] if address else ''  # 주소에서 지역 추출
+                region = address.split()[0] if address else ''
+                overview = row.get('개요')
                 lat = row.get('위도') or row.get('lat')
                 lng = row.get('경도') or row.get('lng')
                 external_id = row.get('external_id', None)
-                # 새로 추가된 필드
                 is_unique = row.get('is_unique', '0')
                 summary = row.get('summary', '')
+                place_class = int(row.get('class', '0'))
 
-                # 필수값 체크
-                if not (name and address and region and lat and lng):
+                if not (name and address and overview and region and lat and lng):
                     continue
 
                 try:
@@ -35,22 +35,23 @@ class Command(BaseCommand):
                 except Exception:
                     continue
 
-                # is_unique: '1' 또는 '0' → Boolean 변환
                 is_unique = str(is_unique).strip() in ['1', 'True', 'true']
 
-                if Place.objects.filter(name=name, address=address).exists():
-                    continue
-
-                place =Place.objects.create(
+                place, created = Place.objects.update_or_create(
                     name=name,
                     address=address,
-                    region=region,
-                    lat=lat,
-                    lng=lng,
-                    external_id=external_id,
-                    is_unique=is_unique,
-                    summary=summary,
+                    defaults={
+                        'region': region,
+                        'lat': lat,
+                        'lng': lng,
+                        'overview': overview,
+                        'external_id': external_id,
+                        'is_unique': is_unique,
+                        'summary': summary,
+                        'place_class': place_class,  # 항상 class 값 업데이트
+                    }
                 )
+
                 tag_str = row.get('tags', '')
                 tag_names = [t.strip().lstrip('#') for t in tag_str.split() if t.strip()]
                 for tag_name in tag_names:

@@ -1,0 +1,46 @@
+:root{
+    --border-color: #62B3B8;
+    --background-color: #EFFEFF;
+}
+
+body{
+    box-sizing: border-box;
+    background-color: var(--background-color);
+    padding: 0;
+    margin: 0;
+}
+
+a {
+    text-decoration: none;
+    color: black;
+}
+
+nav {
+    height: 75px;
+    display: flex;
+    flex-flow: row;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--border-color);
+    background-color: #fff;
+    padding: 0 10px;
+}
+
+.right_nav {
+    display: flex;
+    gap: 10px;
+    flex-flow: row;
+}
+
+.right_nav a {
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+}
+
+.main_div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-flow: column;
+}
