@@ -5,37 +5,47 @@
 {% load i18n %}
 
 {% block head %}
-  <link rel="stylesheet" href="{% static 'css/login.css' %}">
+  <link rel="stylesheet" href="{% static 'css/account/login.css' %}">
+  <link rel="stylesheet" href="{% static 'css/reset.css' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lemon&display=swap" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
-  <h2>로그인</h2>
-  <form method="post" action="{% url 'account_login' %}">
-    {% csrf_token %}
-    {% if form.errors %}
-      <p style="color: red;">입력한 정보가 올바르지 않아요 😢</p>
-    {% endif %}
-    <div>
-      <label for="id_login">이메일</label>
-      {{ form.login }}
-    </div>
-    <div>
-      <label for="id_password">비밀번호</label>
-      {{ form.password }}
-    </div>
-    <div>
-      <label>
-        {{ form.remember }} 로그인 상태 유지
-      </label>
-    </div>
-    <button type="submit">이메일로 로그인</button>
-  </form>
+  <main>
+    <h1>TripTailor</h1>
+    <div id="form-container">
+      <h2>로그인</h2>
+      <form method="post" action="{% url 'account_login' %}">
+        {% csrf_token %}
+        {% if form.errors %}
+          <p style="color: red;">입력한 정보가 올바르지 않아요 😢</p>
+        {% endif %}
+        <div>
+          <label for="id_login">이메일</label>
+          {{ form.login }}
+        </div>
+        <div>
+          <label for="id_password">비밀번호</label>
+          {{ form.password }}
+        </div>
+        <div>
+          <label>
+            {{ form.remember }} 로그인 상태 유지
+          </label>
+          <p><a href="{% url 'account_reset_password' %}">비밀번호를 잊으셨나요?</a></p>
+        </div>
 
-  <p><a href="{% url 'account_reset_password' %}">비밀번호를 잊으셨나요?</a></p>
-  <p><a href="{% url 'account_signup' %}">회원가입 하기</a></p>
-  <div class="social_login_box">
-    <a class="social_login3" href="{% provider_login_url 'google' %}">구글 로그인</a>
-    <a class="social_login3" href="{% provider_login_url 'kakao' %}">카카오 로그인</a>
-    <a class="social_login3" href="{% provider_login_url 'naver' %}">네이버 로그인</a>
+        <button type="submit">이메일로 로그인</button>
+      </form>
+
+      <p><a href="{% url 'account_signup' %}">회원가입 하기</a></p>
+      <div class="social_login_box">
+        <a class="social_login3" href="{% provider_login_url 'google' %}">구글 로그인</a>
+        <a class="social_login3" href="{% provider_login_url 'kakao' %}">카카오 로그인</a>
+        <a class="social_login3" href="{% provider_login_url 'naver' %}">네이버 로그인</a>
+      </div>    
   </div>
+  </main>
 {% endblock %}
