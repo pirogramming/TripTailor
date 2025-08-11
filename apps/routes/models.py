@@ -23,7 +23,7 @@ class RoutePlace(models.Model):
     tip = models.TextField(blank=True) 
 
     class Meta:
-        unique_together = ("route", "stop_order")
+        unique_together = (("route", "stop_order"), ("route", "place"))
         ordering = ["stop_order"]
 
 class SavedRoute(models.Model): # 찜한 루트

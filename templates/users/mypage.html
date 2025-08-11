@@ -4,5 +4,42 @@
 {% load i18n %}
 
 {% block content %}
+<section class="container">
+    <h2>내가 좋아요한 장소 ({{ total }})</h2>
 
+    {% if page_obj.object_list %}
+        <div>
+            {% for like in page_obj %}
+                {% with place=like.place %}
+                <article>
+                    <h3>
+                        <a href="{% url 'places:detail' place.pk %}">{{ place.name }}</a> <!--수정필요-->
+                    </h3>
+                    <p>{{ place.region }} {{ place.address }}</p> <!--수정필요-->
+
+                    {% if place.tags.all %}
+                    <ul>
+                        {% for tag in place.tags.all %}
+                            <li>#{{ tag.name }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </article>
+                {% endwith %}
+            {% endfor %}
+        </div>
+
+        <nav>
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}">이전</a>
+            {% endif %}
+            <span>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">다음</a>
+            {% endif %}
+        </nav>
+    {% else %}
+        <p>아직 좋아요한 장소가 없어요.</p>
+    {% endif %}
+</section>
 {% endblock %}
