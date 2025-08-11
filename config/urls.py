@@ -26,4 +26,5 @@ urlpatterns = [
     path('', include('apps.places.urls', namespace='places')),  # 루트 URL을 places 앱으로 연결!
     path('users/', include('apps.users.urls', namespace='users')), # users 앱 URL 추가
     path('login/', auth_views.LoginView.as_view(template_name='users/login.html'), name='login'),
+    path("routes/", include(("apps.routes.urls", "routes"), namespace="routes")),
 ]

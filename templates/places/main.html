@@ -84,6 +84,21 @@
                     🤍 좋아요
                 {% endif %}
             </form>
+
+            <button type="button" class="add-to-route-btn" data-place-id="{{ place.id }}">
+                ➕ 루트에 추가
+            </button>
+
+            <!-- 드롭다운 -->
+            <div class="route-dropdown" style="display:none; position:absolute; background:#fff; border:1px solid #ccc; padding:.5rem; z-index:10; min-width:200px;">
+                <div class="route-list">불러오는 중...</div>
+                <hr>
+                <div class="create-route-form">
+                    <input type="text" class="new-route-title" placeholder="새 루트 제목" style="width:100%; margin-bottom:.25rem;">
+                    <input type="text" class="new-route-summary" placeholder="루트 요약(선택, 200자 이내)" style="width:100%; margin-bottom:.25rem;">
+                    <button type="button" class="create-route-btn">＋ 새 루트 만들기</button>
+                </div>
+            </div>
         {% endif %}
         <ul>
             {% for tag in place.tags.all %}
@@ -93,5 +108,116 @@
     </li>
     {% endfor %}
 </ul>
+
+<script>
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+}
+const csrftoken = getCookie('csrftoken');
+
+// 버튼 클릭 시 드롭다운 표시 + 목록 불러오기
+document.querySelectorAll('.add-to-route-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const dropdown = btn.nextElementSibling;
+    const placeId = btn.dataset.placeId;
+
+    // 다른 드롭다운 닫기
+    document.querySelectorAll('.route-dropdown').forEach(d => {
+      if (d !== dropdown) d.style.display = 'none';
+    });
+
+    // 토글
+    dropdown.style.display = (dropdown.style.display === 'block') ? 'none' : 'block';
+    if (dropdown.style.display === 'block') {
+      const listBox = dropdown.querySelector('.route-list');
+      listBox.textContent = '불러오는 중...';
+      try {
+        const res = await fetch("{% url 'routes:my_routes_json' %}", { credentials: 'same-origin' });
+        const data = await res.json();
+        if (!data.routes.length) {
+          listBox.innerHTML = '<p>루트 없음</p>';
+        } else {
+          listBox.innerHTML = data.routes.map(r => `
+            <div>
+              <button type="button" class="select-route-btn" data-route-id="${r.id}" data-place-id="${placeId}">
+                ${r.title}
+              </button>
+            </div>
+          `).join('');
+        }
+      } catch (err) {
+        listBox.textContent = '불러오기 실패';
+      }
+    }
+  });
+});
+
+// 루트 선택 → 장소 추가
+document.addEventListener('click', async (e) => {
+  if (e.target.classList.contains('select-route-btn')) {
+    const routeId = e.target.dataset.routeId;
+    const placeId = e.target.dataset.placeId;
+    const endpoint = `{% url 'routes:add_place' 0 0 %}`.replace('/0/add/0/', `/${routeId}/add/${placeId}/`);
+
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrftoken, 'X-Requested-With': 'XMLHttpRequest'},
+        credentials: 'same-origin'
+      });
+      const data = await res.json();
+      alert(data.duplicated ? '이미 해당 루트에 있음' : '루트에 추가됨');
+    } catch (err) {
+      alert('추가 실패');
+    }
+  }
+});
+
+// 새 루트 생성 → 목록 갱신
+document.addEventListener('click', async (e) => {
+  if (e.target.classList.contains('create-route-btn')) {
+    const dropdown = e.target.closest('.route-dropdown');
+    const titleInput = dropdown.querySelector('.new-route-title');
+    const summaryInput = dropdown.querySelector('.new-route-summary'); // ✅
+
+    const title = titleInput.value.trim();
+    const summary = (summaryInput?.value || '').trim(); // ✅
+    if (!title) {
+      alert('제목을 입력하세요');
+      return;
+    }
+    try {
+      const fd = new FormData();
+      fd.append('title', title);
+      fd.append('location_summary', summary); // ✅ 서버로 전송
+
+      const res = await fetch("{% url 'routes:create_route' %}", {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrftoken, 'X-Requested-With': 'XMLHttpRequest'},
+        body: fd,
+        credentials: 'same-origin'
+      });
+      const data = await res.json();
+      if (data.ok) {
+        alert('루트 생성됨');
+        titleInput.value = '';
+        if (summaryInput) summaryInput.value = ''; // ✅ 초기화
+        const listBox = dropdown.querySelector('.route-list');
+        const placeId = dropdown.previousElementSibling.dataset.placeId;
+        const btnHtml = `<div><button type="button" class="select-route-btn" data-route-id="${data.route.id}" data-place-id="${placeId}">${data.route.title}</button></div>`;
+        listBox.insertAdjacentHTML('afterbegin', btnHtml);
+      } else {
+        alert('생성 실패');
+      }
+    } catch (err) {
+      alert('오류 발생');
+    }
+  }
+});
+
+</script>
+
 
 {% endblock %}
