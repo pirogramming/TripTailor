@@ -7,7 +7,7 @@ from apps.places.models import PlaceLike
 from django.db.models import Count, Prefetch
 from django.db.models import prefetch_related_objects
 from apps.routes.models import Route, RoutePlace
-
+from apps.reviews.models import Review
 
 def login_page(request):
     return render(request, 'users/login.html')
@@ -25,7 +25,7 @@ def my_page(request):
         .prefetch_related("place__tags")
         .order_by("-created_at")
     )
-    likes_paginator = Paginator(likes_qs, 12)
+    likes_paginator = Paginator(likes_qs, 5)
     likes_page = likes_paginator.get_page(request.GET.get("page"))  # 기존: page
     total_likes = likes_qs.count()
 
@@ -36,7 +36,7 @@ def my_page(request):
         .annotate(num_stops=Count("stops"))              # 스탑 개수
         .order_by("-created_at")
     )
-    routes_paginator = Paginator(routes_qs, 10)          # 루트는 10개씩
+    routes_paginator = Paginator(routes_qs, 5)          # 루트는 5개씩
     routes_page = routes_paginator.get_page(request.GET.get("page_routes"))  # 새 파라미터
     total_routes = routes_qs.count()
 
@@ -61,4 +61,21 @@ def my_page(request):
         # 루트 섹션(추가)
         "routes_page": routes_page,
         "routes_total": total_routes,
+    })
+
+@login_required
+def my_reviews(request):
+    reviews_qs = (
+        Review.objects
+        .filter(user=request.user)
+        .prefetch_related("photos")  # 리뷰 사진 미리 로드
+        .order_by("-created_at")
+    )
+
+    paginator = Paginator(reviews_qs, 5)  # 페이지당 5개
+    page_obj = paginator.get_page(request.GET.get("page"))
+
+    return render(request, "users/my_reviews.html", {
+        "page_obj": page_obj,
+        "total": reviews_qs.count(),
     })

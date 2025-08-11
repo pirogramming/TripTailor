@@ -95,5 +95,47 @@
         {% endif %}
     </div>
 
+    <h2>내가 작성한 리뷰 ({{ total }})</h2>
+    <ul>
+    {% for review in page_obj %}
+        <li>
+        <h3>{{ review.title }}</h3>
+        <p>별점: {{ review.rating }} / 5.0</p>
+        <p>{{ review.summary }}</p>
+        <p>{{ review.created_at|date:"Y-m-d H:i" }}</p>
+
+        {% if review.route %}
+            <p>관련 루트: <a href="{% url 'routes:detail' review.route.id %}">{{ review.route.title }}</a></p>
+        {% endif %}
+
+        {% if review.photos.all %}
+            <div>
+            {% for photo in review.photos.all %}
+                <img src="{{ photo.url }}" alt="리뷰 사진" width="150">
+            {% endfor %}
+            </div>
+        {% endif %}
+
+        <a href="{% url 'reviews:review_detail' review.pk %}">자세히 보기</a>
+        </li>
+    {% empty %}
+        <li>작성한 리뷰가 없습니다.</li>
+    {% endfor %}
+    </ul>
+
+    <div class="pagination">
+    {% if page_obj.has_previous %}
+        <a href="?page=1">처음</a>
+        <a href="?page={{ page_obj.previous_page_number }}">이전</a>
+    {% endif %}
+
+    <span>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}">다음</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}">마지막</a>
+    {% endif %}
+    </div>
+
 </section>
 {% endblock %}
