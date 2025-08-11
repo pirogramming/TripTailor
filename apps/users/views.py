@@ -2,8 +2,6 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from apps.places.models import PlaceLike
-
-# ⬇️ 추가 import
 from django.db.models import Count, Prefetch
 from django.db.models import prefetch_related_objects
 from apps.routes.models import Route, RoutePlace
@@ -17,7 +15,6 @@ def main_page(request):
 
 @login_required
 def my_page(request):
-    # --- 내가 좋아요한 장소 (네 기존 로직 유지)
     likes_qs = (
         PlaceLike.objects
         .filter(user=request.user)

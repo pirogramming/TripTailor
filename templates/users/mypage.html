@@ -13,9 +13,9 @@
                 {% with place=like.place %}
                 <article>
                     <h3>
-                        <a href="{% url 'places:detail' place.pk %}">{{ place.name }}</a> <!--수정필요-->
+                        <a href="{% url 'places:place_detail' place.pk %}">{{ place.name }}</a>
                     </h3>
-                    <p>{{ place.region }} {{ place.address }}</p> <!--수정필요-->
+                    <p>{{ place.region }} {{ place.address }}</p>
 
                     {% if place.tags.all %}
                     <ul>

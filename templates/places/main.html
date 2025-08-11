@@ -180,10 +180,10 @@ document.addEventListener('click', async (e) => {
   if (e.target.classList.contains('create-route-btn')) {
     const dropdown = e.target.closest('.route-dropdown');
     const titleInput = dropdown.querySelector('.new-route-title');
-    const summaryInput = dropdown.querySelector('.new-route-summary'); // ✅
+    const summaryInput = dropdown.querySelector('.new-route-summary');
 
     const title = titleInput.value.trim();
-    const summary = (summaryInput?.value || '').trim(); // ✅
+    const summary = (summaryInput?.value || '').trim();
     if (!title) {
       alert('제목을 입력하세요');
       return;
@@ -191,7 +191,7 @@ document.addEventListener('click', async (e) => {
     try {
       const fd = new FormData();
       fd.append('title', title);
-      fd.append('location_summary', summary); // ✅ 서버로 전송
+      fd.append('location_summary', summary);
 
       const res = await fetch("{% url 'routes:create_route' %}", {
         method: 'POST',
@@ -203,7 +203,7 @@ document.addEventListener('click', async (e) => {
       if (data.ok) {
         alert('루트 생성됨');
         titleInput.value = '';
-        if (summaryInput) summaryInput.value = ''; // ✅ 초기화
+        if (summaryInput) summaryInput.value = '';
         const listBox = dropdown.querySelector('.route-list');
         const placeId = dropdown.previousElementSibling.dataset.placeId;
         const btnHtml = `<div><button type="button" class="select-route-btn" data-route-id="${data.route.id}" data-place-id="${placeId}">${data.route.title}</button></div>`;
