@@ -3,6 +3,7 @@
     --background-color: #EFFEFF;
 }
 
+/* 검색 폼 */
 form {
     height: 60px;
     border: 2px solid var(--border-color);
@@ -35,4 +36,126 @@ button {
 
 button:hover {
     background-color: #4ca2a7;
+}
+
+/* 필터 바 */
+.filter-bar{
+  margin:16px 0;
+  display:flex;
+  flex-wrap:wrap;
+  gap:20px;
+}
+
+.filter-bar > a{
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    height: 30px;
+    padding: 5px;
+    width: 80px;
+    line-height: 30px;
+    text-align: center;
+    transition: 0.3s;
+}
+
+.filter-bar > a:hover{
+    background: var(--border-color); 
+    color:#fff; 
+    border-color: var(--border-color); 
+}
+
+.btn.active{ 
+    background: var(--border-color); 
+    color:#fff; 
+    border-color: var(--border-color); 
+}
+
+/* 제목 */
+.place-section__title{
+  margin:20px 0 12px;
+  font-size:20px;
+  font-weight:700;
+  color:#333;
+}
+
+/* 리스트 */
+.place-list{
+  list-style:none;
+  padding:0;
+  margin:0;
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto;
+  flex-direction:column;
+  gap:12px;
+}
+
+.place-item{
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+  padding:14px 16px;
+  background:#fff;
+  box-shadow:0 1px 2px rgba(0,0,0,0.04);
+}
+
+.place-item__head{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:8px 12px;
+}
+
+.place-item__name{
+  font-weight:700;
+  font-size:16px;
+  color:#111827;
+}
+
+.place-item__meta{
+  font-size:14px;
+  color:#6b7280;
+}
+
+.place-item__link{
+  margin-left:auto;
+  font-size:14px;
+  text-decoration:none;
+  border-bottom:1px solid transparent;
+  transition:border-color .2s;
+  color:#0f766e; /* 테마와 어울리는 틴트 */
+}
+.place-item__link:hover{ border-color:#0f766e; }
+
+/* 좋아요 버튼 */
+.like-form{ display:inline-block; }
+.like-button{
+  background:transparent;
+  border:1px solid #e5e7eb;
+  border-radius:999px;
+  padding:6px 10px;
+  font-size:14px;
+  cursor:pointer;
+  transition:background-color .2s, border-color .2s;
+  margin-left:8px;
+}
+.like-button:hover{
+  background:#f9fafb;
+  border-color:#d1d5db;
+}
+
+/* 태그 */
+.tag-list{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:10px;
+  padding:0;
+  list-style:none;
+}
+.tag{
+  font-size:12px;
+  color:#334155;
+  background:var(--background-color);
+  border:1px solid var(--border-color);
+  border-radius:999px;
+  padding:4px 8px;
 }
