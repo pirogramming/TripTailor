@@ -116,7 +116,7 @@
             </div>
         {% endif %}
 
-        <a href="{% url 'reviews:review_detail' review.pk %}">자세히 보기</a>
+        <a href="{% url 'reviews:detail' review.pk %}">자세히 보기</a>
         </li>
     {% empty %}
         <li>작성한 리뷰가 없습니다.</li>
