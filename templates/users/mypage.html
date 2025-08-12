@@ -4,5 +4,138 @@
 {% load i18n %}
 
 {% block content %}
+<section class="container">
+    <h2>내가 좋아요한 장소 ({{ total }})</h2>
 
+    {% if page_obj.object_list %}
+        <div>
+            {% for like in page_obj %}
+                {% with place=like.place %}
+                <article>
+                    <h3>
+                        <a href="{% url 'places:place_detail' place.pk %}">{{ place.name }}</a>
+                    </h3>
+                    <p>{{ place.region }} {{ place.address }}</p>
+
+                    {% if place.tags.all %}
+                    <ul>
+                        {% for tag in place.tags.all %}
+                            <li>#{{ tag.name }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </article>
+                {% endwith %}
+            {% endfor %}
+        </div>
+
+        <nav>
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}">이전</a>
+            {% endif %}
+            <span>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">다음</a>
+            {% endif %}
+        </nav>
+    {% else %}
+        <p>아직 좋아요한 장소가 없어요.</p>
+    {% endif %}
+
+
+    <h2>내 루트 ({{ routes_total }})</h2>
+    <ul>
+        {% for route in routes_page %}
+            <li style="margin-bottom:12px;">
+            <div>
+                <strong>{{ route.title }}</strong>
+                <small style="color:#666;"> · {{ route.created_at|date:"Y-m-d" }}</small>
+            </div>
+            {% if route.location_summary %}
+                <div style="margin:4px 0; color:#444;">{{ route.location_summary }}</div>
+            {% endif %}
+            <div style="font-size:14px; color:#666;">
+                스탑 {{ route.num_stops }}개
+            </div>
+
+            {# 미리보기: 현재 페이지에 prefetch된 stops 중 앞 3개 #}
+            {% if route.prefetched_stops %}
+                <ol style="margin:6px 0 0 20px; padding:0;">
+                {% for rp in route.prefetched_stops|slice:":3" %}
+                    <li>
+                    <a href="{% url 'places:place_detail' rp.place_id %}">{{ rp.place.name }}</a>
+                    <small style="color:#999;">#{{ rp.stop_order }}</small>
+                    </li>
+                {% endfor %}
+                {% if route.num_stops > 3 %}
+                    <li style="list-style:none; color:#999;">… 외 {{ route.num_stops|add:"-3" }}개</li>
+                {% endif %}
+                </ol>
+            {% else %}
+                <div style="color:#999;">아직 장소가 없어요.</div>
+            {% endif %}
+
+            {# 상세 진입(내 루트만 접근 가능하도록 서버에서 이미 잠금) #}
+            <div style="margin-top:4px;">
+                <a href="{% url 'routes:detail' route.id %}">루트 상세</a>
+            </div>
+            </li>
+        {% empty %}
+            <li>아직 만든 루트가 없어요. 여행지 목록에서 <em>“루트에 추가”</em> 버튼으로 만들어보세요!</li>
+        {% endfor %}
+    </ul>
+
+    <div style="margin:8px 0;">
+        {% if routes_page.has_previous %}
+            <a href="?page_routes={{ routes_page.previous_page_number }}">이전</a>
+        {% endif %}
+        <span>페이지 {{ routes_page.number }} / {{ routes_page.paginator.num_pages }}</span>
+        {% if routes_page.has_next %}
+            <a href="?page_routes={{ routes_page.next_page_number }}">다음</a>
+        {% endif %}
+    </div>
+
+    <h2>내가 작성한 리뷰 ({{ total }})</h2>
+    <ul>
+    {% for review in page_obj %}
+        <li>
+        <h3>{{ review.title }}</h3>
+        <p>별점: {{ review.rating }} / 5.0</p>
+        <p>{{ review.summary }}</p>
+        <p>{{ review.created_at|date:"Y-m-d H:i" }}</p>
+
+        {% if review.route %}
+            <p>관련 루트: <a href="{% url 'routes:detail' review.route.id %}">{{ review.route.title }}</a></p>
+        {% endif %}
+
+        {% if review.photos.all %}
+            <div>
+            {% for photo in review.photos.all %}
+                <img src="{{ photo.url }}" alt="리뷰 사진" width="150">
+            {% endfor %}
+            </div>
+        {% endif %}
+
+        <a href="{% url 'reviews:review_detail' review.pk %}">자세히 보기</a>
+        </li>
+    {% empty %}
+        <li>작성한 리뷰가 없습니다.</li>
+    {% endfor %}
+    </ul>
+
+    <div class="pagination">
+    {% if page_obj.has_previous %}
+        <a href="?page=1">처음</a>
+        <a href="?page={{ page_obj.previous_page_number }}">이전</a>
+    {% endif %}
+
+    <span>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}">다음</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}">마지막</a>
+    {% endif %}
+    </div>
+
+</section>
 {% endblock %}

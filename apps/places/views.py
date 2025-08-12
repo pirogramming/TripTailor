@@ -9,6 +9,17 @@ from django.core.paginator import Paginator
 from .models import Place, PlaceLike
 import re
 
+import csv
+from pathlib import Path
+from django.conf import settings
+from django.utils.text import slugify
+
+
+def _parse_selected_tags(request):
+    raw = (request.GET.get('tags') or '').strip()
+    selected = [t for t in raw.split(',') if t]
+    match = (request.GET.get('match') or 'any').lower()  # 'any' or 'all'
+    return selected, match, raw
 
 # 1) 더 튼튼한 파서
 def parse_recommendations(recommendations):
@@ -203,13 +214,32 @@ def main(request):
     followup = request.GET.get('followup', '')
     class_filter = request.GET.get('place_class', '')
 
+    # 기본 목록
     qs = Place.objects.all().order_by('-id')
+
+    # 대분류 필터
     if class_filter and class_filter.isdigit():
         qs = qs.filter(place_class=int(class_filter))
 
-    # 헬퍼로 일괄 annotate
+    # ✅ 태그 필터 (Place.tags 기준)
+    # URL 예: ?tags=레트로,야경&match=any
+    selected, match_mode, raw_tags = _parse_selected_tags(request)
+    if selected:
+        # name/slug 둘 다 대응 (CSV 칩에서 name을 보내도, slug를 보내도 OK)
+        cond = Q(tags__name__in=selected)
+        if match_mode == 'all':
+            # 모든 선택 태그를 다 가진 Place만
+            qs = (qs.filter(cond)
+                    .annotate(num_matched=Count('tags', filter=cond, distinct=True))
+                    .filter(num_matched=len(selected)))
+        else:
+            # 하나라도 포함하면 통과
+            qs = qs.filter(cond).distinct()
+
+    # 좋아요 메타 붙이기
     qs = with_like_meta(qs, request.user)
 
+    # 페이지네이션
     paginator = Paginator(qs, 20)
     page_obj = paginator.get_page(request.GET.get('page'))
 
@@ -224,9 +254,13 @@ def main(request):
         'recommendations': context.get('recommendations', []),
     }
 
+    # 컨텍스트 합치기 (+ 태그 상태 전달)
     context.update({
         'places': page_obj,
         'place_class': class_filter,
+        'tags': raw_tags,        # 예: "레트로,야경"
+        'match': match_mode,     # 'any' or 'all'
+        'selected_tags': selected,
     })
 
     if context.get('recommended_places') and not context.get('show_followup'):
@@ -306,3 +340,17 @@ def toggle_place_like(request, pk):
         return JsonResponse(data)
 
     return redirect('place_detail', pk=place.id)
+
+def tags_json(request):
+    csv_path = Path(settings.BASE_DIR) / "tags.csv"  # 방금 만든 CSV 경로
+    items, seen = [], set()
+    with csv_path.open(encoding="utf-8-sig", newline="") as f:
+        for row in csv.reader(f):
+            if not row:
+                continue
+            name = row[0].strip().lstrip("#").strip()
+            if not name or name in seen:
+                continue
+            seen.add(name)
+            items.append({"name": name, "slug": slugify(name, allow_unicode=True)})
+    return JsonResponse(items, safe=False)

@@ -1,0 +1,58 @@
+/* 전체 영역 */
+.tag-rail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 0;
+  align-items: center;
+}
+
+/* 태그 버튼들이 들어가는 영역 */
+.tag-rail .track {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex: 1 1 auto;
+}
+
+/* 태그 버튼 기본 스타일 */
+.chip {
+  padding: 6px 14px;
+  font-size: 14px;
+  line-height: 1.4;
+  border: 1px solid #ccc;
+  border-radius: 999px;
+  background-color: #fff;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+/* 호버/포커스 시 */
+.chip:hover,
+.chip:focus {
+  border-color: #888;
+  background-color: #f5f5f5;
+}
+
+/* 선택된 상태 */
+.chip.active {
+  background-color: #e6f3f5;
+  border-color: #39a0b8;
+  color: #117a8b;
+  font-weight: 500;
+}
+
+/* 더보기 버튼 */
+.chip.more {
+  background-color: #f6f8fa;
+  border-color: #ccc;
+  color: #555;
+  font-weight: 500;
+}
+
+/* 접힘 상태에서는 extra 숨기되, 선택된 건 계속 보이게 */
+.tag-rail[data-expanded="false"] .chip.extra:not(.active) {
+  display: none;
+}
