@@ -63,6 +63,8 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.kakao',
     'allauth.socialaccount.providers.naver',
+
+    "pgvector.django",
 ]
 
 SITE_ID = 1
@@ -101,24 +103,24 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-if os.getenv('DB_ENGINE') == 'django.db.backends.sqlite3':
-    DATABASES = {
-        'default': {
-            'ENGINE': os.getenv('DB_ENGINE'),
-            'NAME': BASE_DIR / os.getenv('DB_NAME'),
-        }
+DATABASES = {
+    'default': {
+        'ENGINE': os.getenv('DB_ENGINE'),
+        'NAME': BASE_DIR / os.getenv('DB_NAME'),
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': os.getenv('DB_ENGINE'),
-            'NAME': os.getenv('DB_NAME'),
-            'USER': os.getenv('DB_USER'),
-            'PASSWORD': os.getenv('DB_PASSWORD'),
-            'HOST': os.getenv('DB_HOST'),
-            'PORT': os.getenv('DB_PORT'),
-        }
-    }
+}
+
+# DATABASES = {
+#     'default': {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "NAME": os.getenv("DB_NAME", "triptailor"),
+#         "USER": os.getenv("DB_USER", "tripuser"),
+#         "PASSWORD": os.getenv("DB_PASSWORD", ""),   # .env에 넣어둔 비번
+#         "HOST": os.getenv("DB_HOST", "127.0.0.1"),  # 또는 내부/공인 IP
+#         "PORT": os.getenv("DB_PORT", "5432"),
+#         "CONN_MAX_AGE": 60,  # 커넥션 풀(초) — 운영에서 유용
+#     }
+# }
 
 
 # Password validation
