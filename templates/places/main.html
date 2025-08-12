@@ -2,6 +2,7 @@
 {% load static %}
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/main.css' %}">
+<link rel="stylesheet" href="{% static 'css/tag.css' %}">
 <form method="get" action="">
     <input
         type="text"
@@ -21,33 +22,47 @@
 </form>
 
 <!-- 대분류 클릭 버튼 -->
-<div style="margin: 16px 0">
-    <a
-        href="?{% if prompt %}prompt={{ prompt }}&{% endif %}{% if followup %}followup={{ followup }}&{% endif %}"
-        class="btn {% if not place_class %}active{% endif %}"
-        >전체</a
-    >
-    <a
-        href="?{% if prompt %}prompt={{ prompt }}&{% endif %}{% if followup %}followup={{ followup }}&{% endif %}place_class=1"
-        class="btn {% if place_class == '1' %}active{% endif %}"
-        >레포츠</a
-    >
-    <a
-        href="?{% if prompt %}prompt={{ prompt }}&{% endif %}{% if followup %}followup={{ followup }}&{% endif %}place_class=2"
-        class="btn {% if place_class == '2' %}active{% endif %}"
-        >쇼핑</a
-    >
-    <a
-        href="?{% if prompt %}prompt={{ prompt }}&{% endif %}{% if followup %}followup={{ followup }}&{% endif %}place_class=3"
-        class="btn {% if place_class == '3' %}active{% endif %}"
-        >관광지</a
-    >
-    <a
-        href="?{% if prompt %}prompt={{ prompt }}&{% endif %}{% if followup %}followup={{ followup }}&{% endif %}place_class=4"
-        class="btn {% if place_class == '4' %}active{% endif %}"
-        >문화시설</a
-    >
+<div style="margin:16px 0">
+  <a
+    href="{{ request.path }}?{% if prompt %}prompt={{ prompt|urlencode }}&{% endif %}
+                   {% if followup %}followup={{ followup|urlencode }}&{% endif %}
+                   {% if request.GET.tags %}tags={{ request.GET.tags|urlencode }}&match={{ request.GET.match|default:'any'|urlencode }}&{% endif %}"
+    class="btn {% if not place_class %}active{% endif %}">전체</a>
+
+  <a
+    href="{{ request.path }}?{% if prompt %}prompt={{ prompt|urlencode }}&{% endif %}
+                   {% if followup %}followup={{ followup|urlencode }}&{% endif %}
+                   {% if request.GET.tags %}tags={{ request.GET.tags|urlencode }}&match={{ request.GET.match|default:'any'|urlencode }}&{% endif %}
+                   place_class=1"
+    class="btn {% if place_class == '1' %}active{% endif %}">레포츠</a>
+
+  <a
+    href="{{ request.path }}?{% if prompt %}prompt={{ prompt|urlencode }}&{% endif %}
+                   {% if followup %}followup={{ followup|urlencode }}&{% endif %}
+                   {% if request.GET.tags %}tags={{ request.GET.tags|urlencode }}&match={{ request.GET.match|default:'any'|urlencode }}&{% endif %}
+                   place_class=2"
+    class="btn {% if place_class == '2' %}active{% endif %}">쇼핑</a>
+
+  <a
+    href="{{ request.path }}?{% if prompt %}prompt={{ prompt|urlencode }}&{% endif %}
+                   {% if followup %}followup={{ followup|urlencode }}&{% endif %}
+                   {% if request.GET.tags %}tags={{ request.GET.tags|urlencode }}&match={{ request.GET.match|default:'any'|urlencode }}&{% endif %}
+                   place_class=3"
+    class="btn {% if place_class == '3' %}active{% endif %}">관광지</a>
+
+  <a
+    href="{{ request.path }}?{% if prompt %}prompt={{ prompt|urlencode }}&{% endif %}
+                   {% if followup %}followup={{ followup|urlencode }}&{% endif %}
+                   {% if request.GET.tags %}tags={{ request.GET.tags|urlencode }}&match={{ request.GET.match|default:'any'|urlencode }}&{% endif %}
+                   place_class=4"
+    class="btn {% if place_class == '4' %}active{% endif %}">문화시설</a>
 </div>
+
+
+<section class="tag-rail" data-expanded="false">
+  <div class="track" id="tagTrack"></div>
+  <button type="button" class="chip more" aria-expanded="false">+ 더보기</button>
+</section>
 
 <style>
     .btn {
@@ -217,6 +232,70 @@ document.addEventListener('click', async (e) => {
   }
 });
 
+(async function () {
+  const res = await fetch("{% url 'places:tags_json' %}");
+  const tags = await res.json();
+
+  const initialCount = 5;
+  const rail = document.querySelector('.tag-rail');
+  const track = document.getElementById('tagTrack');
+  const moreBtn = rail.querySelector('.chip.more');
+
+  // 현재 URL에서 선택된 태그 복원
+  const params = new URLSearchParams(location.search);
+  const preselected = (params.get('tags') || "")
+                        .split(',').filter(Boolean);
+
+  // 칩 렌더
+  tags.forEach((t, i) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'chip' + (i >= initialCount ? ' extra' : '');
+    btn.dataset.tag = t.name;
+    btn.textContent = `#${t.name}`;
+    if (preselected.includes(t.slug)) {
+      btn.classList.add('active');
+      btn.setAttribute('aria-pressed', 'true');
+    } else {
+      btn.setAttribute('aria-pressed', 'false');
+    }
+    track.appendChild(btn);
+  });
+
+  // 더보기/접기
+  moreBtn.addEventListener('click', () => {
+    const expanded = rail.dataset.expanded === 'true';
+    rail.dataset.expanded = (!expanded).toString();
+    moreBtn.textContent = expanded ? '+ 더보기' : '접기';
+    moreBtn.setAttribute('aria-expanded', (!expanded).toString());
+  });
+  if (tags.length <= initialCount) moreBtn.style.display = 'none';
+
+  // ✅ 칩 클릭 → URL 파라미터 갱신 → 즉시 새로고침
+  track.addEventListener('click', (e) => {
+    const chip = e.target.closest('.chip');
+    if (!chip || chip.classList.contains('more')) return;
+
+    // --- 다중 선택(OR 매칭) ---
+    chip.classList.toggle('active');
+    chip.setAttribute('aria-pressed', chip.classList.contains('active') ? 'true' : 'false');
+
+    const selected = [...track.querySelectorAll('.chip.active')].map(b => b.dataset.tag);
+
+    const url = new URL(window.location.href);
+    if (selected.length) {
+      url.searchParams.set('tags', selected.join(','));  // 예: tags=a,b,c
+      url.searchParams.set('match', 'any');              // OR 매칭 (원하면 'all')
+    } else {
+      url.searchParams.delete('tags');
+      url.searchParams.delete('match');
+    }
+
+    // 다른 파라미터들(prompt, followup, place_class 등)은 그대로 유지됨
+    window.location.assign(url.toString());
+  });
+
+})();
 </script>
 
 
