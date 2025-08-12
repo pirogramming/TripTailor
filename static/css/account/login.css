@@ -1,3 +1,7 @@
+body {
+    background-color: #fff;
+}
+
 main {
     display: flex;
     flex-direction: column;
@@ -11,14 +15,102 @@ main > h1 {
     font-size: 2.5rem;
     font-weight: 400;
     line-height: 150%; 
+    padding: 19px;
 }
 
 #form-container {
-    width: 45%;
+    width: 700px;
     border-radius: 25px;
     border: 1px solid #62B3B8;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+}
+
+#form-container > h2 {
+    color: #62B3B8;
+    font-family: Lexend;
+    font-size: 38px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 150%;
+    padding: 10px;
+}
+
+#id_login {
+    width: 590px;
+    height: 72px;
+    border: 1px solid rgba(128, 128, 128, 0.50);
+    background-color: #FFF;
+    margin: 13px 0;
+}
+
+
+#id_password {
+    width: 590px;
+    height: 72px;
+    border: 1px solid rgba(128, 128, 128, 0.50);
+    background-color: #FFF;
+    margin: 0 0 13px;
+}
+
+#id_remember {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 1px solid rgba(0, 0, 0, 0.50);
+    border-radius: 9px;
+    cursor: pointer;
+}
+
+#id_remember:checked {
+  background-color: #62B3B8;
+  border-color: #62B3B8;
+}
+
+#remember-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.password {
+    color: #80808080
+}
+
+.submit {
+    /* appearance: none; */
+    width: 590px;
+    height: 72px;
+    border-radius: 40px;
+    border: none;
+    background-color: #62B3B8;
+    margin: 15px 0;
+    cursor: pointer;
+}
+
+.submit > span {
+    color: #fff;
+    font-size: 25px;
+}
+
+#social {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-top: 20px;
+}
+
+.social_login_box {
+    width: 100%;
+    display: flex;
+    justify-content: space-evenly;
+    padding: 20px;
+}
+
+.social_login_box > a > svg, .social_login_box > a > img{
+    width: 50px;
+    height: 50px;
 }
