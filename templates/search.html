@@ -1,4 +1,9 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/search.css' %}">
+
+<!-- 검색창 (기존 스타일 유지) -->
 <form method="get" action="">
     <input
         type="text"
@@ -18,32 +23,43 @@
 </form>
 
 {% if recommended_places and not show_followup %}
-<h2>추천 여행지</h2>
-<ul>
-    {% for rec in recommended_places %}
-    <li>
-        <strong>{{ rec.place.name }}</strong> - {{ rec.place.region }}<br />
-        <em>{{ rec.reason }}</em><br />
-        {{ rec.place.summary|default:"설명 없음" }}
-        <ul>
-            {% for tag in rec.place.tags.all %}
-            <li>#{{ tag.name }}</li>
-            {% endfor %}
-        </ul>
-        {% if user.is_authenticated %}
-            <form method="post" action="{% url 'places:place_like' rec.place.pk %}" style="display:inline;">
-                {% csrf_token %}
-                {% if rec.place.is_liked %}
-                    ❤️ 취소
-                {% else %}
-                    🤍 좋아요
+<h2 class="section-title">추천 여행지</h2>
+
+<div class="recommend-grid">
+    <div class="recommend-list">
+        {% for rec in recommended_places %}
+        <div class="place-card">
+            <div class="place-card__map">
+            </div>
+            <div class="place-card__body">
+                <h3 class="place-card__title">{{ rec.place.name }}</h3>
+                <p class="place-card__region">{{ rec.place.region }}</p>
+                <p class="place-card__reason">{{ rec.reason }}</p>
+                <p class="place-card__summary">{{ rec.place.summary|truncatechars:200|default:"설명 없음" }}</p>
+                <ul class="tag-list">
+                    {% for tag in rec.place.tags.all %}
+                    <li class="tag">#{{ tag.name }}</li>
+                    {% endfor %}
+                </ul>
+                {% if user.is_authenticated %}
+                <form method="post" action="{% url 'places:place_like' rec.place.pk %}" class="like-form">
+                    {% csrf_token %}
+                    <button type="submit" class="like-button">
+                        {% if rec.place.is_liked %}
+                            ❤️ 취소
+                        {% else %}
+                            🤍 좋아요
+                        {% endif %}
+                    </button>
+                </form>
                 {% endif %}
-            </form>
-        {% endif %}
-        <a href="{% url 'places:place_detail' rec.place.pk %}">자세히 보기</a>
-    </li>
-    {% endfor %}
-</ul>
+                <a href="{% url 'places:place_detail' rec.place.pk %}" class="link">자세히 보기</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
 {% endif %}
-<a href="{% url 'places:main' %}">← 메인으로 돌아가기</a>
+
+<a href="{% url 'places:main' %}" class="back-link">← 메인으로 돌아가기</a>
 {% endblock %}
