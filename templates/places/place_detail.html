@@ -20,4 +20,43 @@
     {% endfor %}
 </ul>
 <a href="{% url 'places:main' %}">← 목록으로 돌아가기</a>
+<!-- 블로그 후기 섹션 -->
+<section class="mt-6">
+    <h3>블로그 후기</h3>
+    <button id="load-blog-reviews" data-place-id="{{ place.id }}">블로그 후기 불러오기</button>
+    <ul id="blog-review-list" style="margin-top:10px;"></ul>
+</section>
+
+<script>
+(function(){
+const btn = document.getElementById("load-blog-reviews");
+const ul = document.getElementById("blog-review-list");
+const clean = (s='') => s.replace(/<[^>]+>/g, '');
+
+btn.addEventListener("click", async () => {
+    ul.innerHTML = "<li>로딩 중...</li>";
+    try {
+    const pid = btn.dataset.placeId;
+    const res = await fetch(`/reviews/blogs/${pid}/`);
+    const data = await res.json();
+    ul.innerHTML = "";
+    (data.items || []).forEach(it => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+        <a href="${it.link}" target="_blank" rel="noopener">${clean(it.title)}</a>
+        <div>${clean(it.summary)}</div>
+        <small>${it.blogger} · ${it.postdate}</small>
+        `;
+        ul.appendChild(li);
+    });
+    if ((data.items || []).length === 0) {
+        ul.innerHTML = "<li>관련 블로그 후기가 없어요.</li>";
+    }
+    } catch (e) {
+    console.error(e);
+    ul.innerHTML = "<li>불러오는 중 오류가 발생했어요.</li>";
+    }
+});
+})();
+</script>
 {% endblock %}
