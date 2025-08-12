@@ -53,7 +53,8 @@ extraction_prompt = PromptTemplate.from_template(
 # 추천 프롬프트
 recommendation_prompt = PromptTemplate.from_template(
     """
-    다음 여행지 리스트를 참고해서 사용자에게 맞는 여행지 3곳을 추천해줘.
+    다음 여행지 리스트 중에서만 선택하여 사용자에게 맞는 여행지 **정확히 3곳**을 추천해줘.
+    리스트에 없는 장소명은 절대 쓰지 마.
 
     여행지 리스트:
     {trip_spot_list}
@@ -64,14 +65,15 @@ recommendation_prompt = PromptTemplate.from_template(
     - 활동: {activity}
     - 태그: {tags}
 
-    출력 형식:
+    출력 형식(이 형식 외 아무 말도 쓰지 마):
     1. **[여행지명]**
-    - 이유: 간단한 이유
+    - 이유: 한 문장
 
     2. **[여행지명]**
-    - 이유: 간단한 이유
+    - 이유: 한 문장
 
-    최대 3개까지만 추천해줘.
+    3. **[여행지명]**
+    - 이유: 한 문장
     """
 )
 
@@ -129,7 +131,7 @@ def extract_info(state: GraphState) -> GraphState:
 def recommend_places(state: GraphState) -> GraphState:
     embedding = get_clova_embedding(state["user_input"], os.getenv("CLOVASTUDIO_API_KEY"))
     embedding = np.ascontiguousarray([embedding], dtype=np.float32)
-    D, I = index.search(embedding, k=5)
+    D, I = index.search(embedding, k=10)
     top_k = metadata.iloc[I[0]]
 
     trip_spot_list = "\n".join(
