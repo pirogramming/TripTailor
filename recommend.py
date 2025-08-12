@@ -14,8 +14,49 @@ from langchain_naver import ChatClovaX
 from langgraph.graph import StateGraph
 
 # FAISS 인덱스 및 메타데이터 로드
-index = faiss.read_index("triptailor_cosine_v2.index")
-metadata = pd.read_csv("triptailor_full_metadata.csv").fillna("")  # NaN 제거
+_index = None
+_metadata = None
+
+def _load_faiss_and_meta():
+    global _index, _metadata
+    if _index is not None and _metadata is not None:
+        return _index, _metadata
+    try:
+        import faiss, pandas as pd
+        _index = faiss.read_index(os.getenv("FAISS_INDEX_PATH", "triptailor_cosine_v2.index"))
+        _metadata = pd.read_csv(os.getenv("FAISS_META_PATH", "triptailor_full_metadata.csv")).fillna("")
+        return _index, _metadata
+    except Exception as e:
+        print(f"[warn] FAISS/CSV load failed: {e}")
+        return None, None
+
+# DB 검색 도우미
+def search_top_k_from_db(qvec, k=10):
+    # ← 함수 내부로 옮기기 (Django가 준비된 뒤 임포트)
+    from apps.places.models import Place
+    from apps.tags.models import Tag
+    from pgvector.django import L2Distance, CosineDistance, MaxInnerProduct
+
+    metric = os.getenv("PGVECTOR_METRIC", "l2")
+    if metric == "cosine":
+        distance = CosineDistance("embedding", qvec)
+    elif metric == "ip":
+        distance = MaxInnerProduct("embedding", qvec)
+    else:
+        distance = L2Distance("embedding", qvec)
+
+    qs = (Place.objects.exclude(embedding=None)
+        .annotate(dist=distance)
+        .order_by("dist")
+        .prefetch_related("tags")[:k])
+
+    return [{
+        "명칭": p.name,
+        "주소": p.address or "",
+        "개요": p.overview or "",
+        "tags": [t.name for t in p.tags.all()],
+    } for p in qs]
+
 
 # 환경 변수 로드
 load_dotenv()
@@ -53,7 +94,8 @@ extraction_prompt = PromptTemplate.from_template(
 # 추천 프롬프트
 recommendation_prompt = PromptTemplate.from_template(
     """
-    다음 여행지 리스트를 참고해서 사용자에게 맞는 여행지 3곳을 추천해줘.
+    다음 여행지 리스트 중에서만 선택하여 사용자에게 맞는 여행지 **정확히 3곳**을 추천해줘.
+    리스트에 없는 장소명은 절대 쓰지 마.
 
     여행지 리스트:
     {trip_spot_list}
@@ -64,14 +106,15 @@ recommendation_prompt = PromptTemplate.from_template(
     - 활동: {activity}
     - 태그: {tags}
 
-    출력 형식:
+    출력 형식(이 형식 외 아무 말도 쓰지 마):
     1. **[여행지명]**
-    - 이유: 간단한 이유
+    - 이유: 한 문장
 
     2. **[여행지명]**
-    - 이유: 간단한 이유
+    - 이유: 한 문장
 
-    최대 3개까지만 추천해줘.
+    3. **[여행지명]**
+    - 이유: 한 문장
     """
 )
 
@@ -127,24 +170,38 @@ def extract_info(state: GraphState) -> GraphState:
     }
 
 def recommend_places(state: GraphState) -> GraphState:
+    # 1) 쿼리 임베딩
     embedding = get_clova_embedding(state["user_input"], os.getenv("CLOVASTUDIO_API_KEY"))
-    embedding = np.ascontiguousarray([embedding], dtype=np.float32)
-    D, I = index.search(embedding, k=5)
-    top_k = metadata.iloc[I[0]]
+    qvec = list(map(float, embedding))  # list[float]
 
+    # 2) DB에서 top-k 시도
+    try:
+        rows = search_top_k_from_db(qvec, k=10)
+    except Exception as e:
+        print(f"[warn] DB retrieval failed, fallback to FAISS: {e}")
+        rows = None
+
+    if rows is None:
+        index, metadata = _load_faiss_and_meta()
+        if index is None or metadata is None:
+            raise RuntimeError("DB 검색 실패했고 FAISS 리소스도 없습니다.")
+        emb_np = np.ascontiguousarray([qvec], dtype=np.float32)
+        D, I = index.search(emb_np, k=10)
+        top_k = metadata.iloc[I[0]]
+        rows = [{
+            "명칭": str(row["명칭"]),
+            "주소": str(row["주소"]),
+            "개요": str(row["개요"]),
+            "tags": [str(row.get(c, "")).strip() for c in ["tag1","tag2","tag3","tag4","tag5"] if str(row.get(c, "")).strip()],
+        } for _, row in top_k.iterrows()]
+
+    # 4) LLM 입력 리스트 구성
     trip_spot_list = "\n".join(
-        f"- {row['명칭']} ({row['주소']}): {row['개요']} [태그: {', '.join(str(row.get(col, '')).strip() for col in ['tag1','tag2','tag3','tag4','tag5'])}]"
-        for _, row in top_k.iterrows()
+        f"- {r['명칭']} ({r['주소']}): {r['개요']} [태그: {', '.join(r['tags'])}]"
+        for r in rows
     )
 
-    combined_tags = ", ".join(
-        sorted(set(
-            tag
-            for _, row in top_k.iterrows()
-            for tag in [row.get('tag1'), row.get('tag2'), row.get('tag3'), row.get('tag4'), row.get('tag5')]
-            if isinstance(tag, str) and tag.strip()
-        ))
-    )
+    combined_tags = ", ".join(sorted({t for r in rows for t in r["tags"] if t}))
 
     rec = recommendation_chain.invoke({
         "trip_spot_list": trip_spot_list,
@@ -166,12 +223,8 @@ def recommend_places(state: GraphState) -> GraphState:
             if place_name:
                 recommended_places.append(place_name)
 
-    place_info_map = {}
-    for _, row in top_k.iterrows():
-        name = str(row['명칭']).strip()
-        tags = [str(row.get(col, '')).strip() for col in ['tag1','tag2','tag3','tag4','tag5']]
-        tags = [f"{tag}" for tag in tags if tag]
-        place_info_map[name] = tags
+    # 5) 태그 맵 (DB/FAISS 공통)
+    place_info_map = {r["명칭"]: r["tags"] for r in rows}
 
     return {
         **state,
@@ -180,6 +233,7 @@ def recommend_places(state: GraphState) -> GraphState:
         "추천_장소명": recommended_places,
         "장소_태그맵": place_info_map
     }
+
 
 # StateGraph에서 조건 분기 추가
 builder = StateGraph(GraphState)
