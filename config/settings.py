@@ -250,3 +250,13 @@ SOCIALACCOUNT_PROVIDERS ={
 "access_type": "online", #추가
 'prompt': 'select_account',#추가 간편로그인을 지원해줌
 }}}
+
+# 벡터 인덱스/메타 경로
+VECTOR_INDEX_PATH = BASE_DIR / "triptailor_cosine_v2.index"
+VECTOR_META_PATH  = BASE_DIR / "triptailor_full_metadata.csv"
+
+# 재랭킹 가중치 (cosine, tag, popularity=like_count)
+SEARCH_RERANK_WEIGHTS = (0.7, 0.25, 0.05)
+SEARCH_TOPK_BUFFER = 200  # 페이지별 버퍼
+SEARCH_TOPK_MAX = 1000
+RELATED_TOPK_MAX = 400

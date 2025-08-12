@@ -11,18 +11,24 @@
   <a href="{% url 'reviews:list' %}">초기화</a>
 </form>
 
-<p><a href="{% url 'reviews:create' %}">+ 리뷰 작성</a></p>
+{% if user.is_authenticated %}
+  <p><a href="{% url 'reviews:create' %}" class="btn btn-primary">+ 리뷰 작성</a></p>
+{% endif %}
 
 <ul>
   {% for r in reviews %}
   <li>
-    <a href="{% url 'reviews:detail' r.pk %}">
-      {{ r.title }}
-    </a>
+    <a href="{% url 'reviews:detail' r.pk %}">{{ r.title }}</a>
     <div>[{{ r.route }}] ★ {{ r.rating }} — {{ r.summary }}</div>
     <div>by {{ r.user }} · {{ r.created_at|date:"Y-m-d H:i" }}</div>
-    {% if user.is_authenticated and user == r.user %}
+
+    {# 🔹 작성자만 수정/삭제 버튼 노출 #}
+    {% if user.is_authenticated and user.id == r.user_id %}
       <a href="{% url 'reviews:edit' r.pk %}" class="btn btn-sm btn-outline-primary">✏️ 수정</a>
+      <form action="{% url 'reviews:delete' r.pk %}" method="post" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-sm btn-outline-danger">🗑 삭제</button>
+      </form>
     {% endif %}
   </li>
   {% empty %}

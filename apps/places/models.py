@@ -3,6 +3,13 @@ from apps.tags.models import Tag
 from apps.users.models import User
 
 class Place(models.Model):
+    PLACE_CLASS_CHOICES = [
+        (1, '레포츠'),
+        (2, '쇼핑'),
+        (3, '관광지'),
+        (4, '문화시설'),
+    ]
+    
     name = models.CharField(max_length=200)
     address = models.CharField(max_length=300)
     region = models.CharField(max_length=100) # 필터링 주소(ex. 서울, 부산)
@@ -13,7 +20,7 @@ class Place(models.Model):
     is_unique = models.BooleanField(default=False)
     summary = models.TextField(blank=True, null=True)
     tags = models.ManyToManyField(Tag, blank=True, related_name='places')
-    place_class = models.IntegerField(default=0)  # class 필드 추가 (1: 레포츠, 2: 쇼핑, 3: 관광지, 4: 문화시설)
+    place_class = models.IntegerField(choices=PLACE_CLASS_CHOICES, default=0)  # class 필드 추가 (1: 레포츠, 2: 쇼핑, 3: 관광지, 4: 문화시설)
 
     def __str__(self):
         return self.name

@@ -93,7 +93,95 @@ def build_context_from_cached(prompt, followup, cached, user):
         'show_followup': show_followup,
     }
 
-def get_recommendation_context(prompt, followup, user):
+def get_recommendation_context(prompt, followup, user, page=1, page_size=20):
+    """새로운 추천 엔진을 사용한 컨텍스트 생성"""
+    if not prompt:
+        return {
+            'prompt': prompt,
+            'followup': followup,
+            'recommended_places': [],
+            'recommendations': [],
+            'question': '',
+            'show_followup': False,
+            'total_results': 0,
+            'current_page': 1,
+            'has_next': False,
+            'total_pages': 0,
+            'user_tags': [],
+            'extracted_region': ''
+        }
+
+    user_input = f"{prompt} {followup}" if followup else prompt
+    print(f"Processing recommendation for: '{user_input}'")
+    
+    try:
+        # 새로운 추천 엔진 사용
+        results = recommend.recommendation_engine.search_and_rerank(
+            user_input, 
+            page=page, 
+            page_size=page_size
+        )
+        
+        print(f"Recommendation results: {results.get('total', 0)} total, {len(results.get('results', []))} on page {page}")
+        
+        # 추천 결과를 Place 모델과 매칭
+        recommended_places = []
+        for result in results.get("results", []):
+            # 이름으로 Place 찾기 (더 정확한 매칭)
+            place = None
+            
+            # 1. 정확한 이름 매칭
+            place = Place.objects.filter(name__iexact=result.name).first()
+            
+            # 2. 이름 포함 매칭
+            if not place:
+                place = Place.objects.filter(
+                    Q(name__icontains=result.name) | 
+                    Q(summary__icontains=result.name)
+                ).first()
+            
+            # 3. 주소 포함 매칭
+            if not place:
+                place = Place.objects.filter(
+                    address__icontains=result.name
+                ).first()
+            
+            if place:
+                # 좋아요 정보 추가
+                place_with_meta = with_like_meta(Place.objects.filter(pk=place.pk), user).first()
+                if place_with_meta:
+                    recommended_places.append({
+                        "place": place_with_meta,
+                        "reason": result.reason or result.overview[:100],
+                        "vector_score": result.vector_score,
+                        "tag_score": result.tag_score,
+                        "final_score": result.final_score
+                    })
+        
+        print(f"Matched places: {len(recommended_places)} out of {len(results.get('results', []))}")
+        
+        return {
+            'prompt': prompt,
+            'followup': followup,
+            'recommended_places': recommended_places,
+            'recommendations': [],  # 기존 형식과 호환
+            'question': '',  # 보충 질문 없음
+            'show_followup': False,
+            'total_results': results.get("total", 0),
+            'current_page': results.get("page", 1),
+            'has_next': results.get("has_next", False),
+            'total_pages': results.get("total_pages", 0),
+            'user_tags': results.get("user_tags", []),
+            'extracted_region': results.get("extracted_region", "")
+        }
+        
+    except Exception as e:
+        print(f"Recommendation failed: {e}")
+        # 기존 방식으로 폴백
+        return get_recommendation_context_fallback(prompt, followup, user)
+
+def get_recommendation_context_fallback(prompt, followup, user):
+    """기존 추천 방식으로 폴백"""
     recommended_places, recommendations, question = [], [], ""
     show_followup = False
 
@@ -137,9 +225,13 @@ def get_recommendation_context(prompt, followup, user):
         'recommendations': recommendations,
         'question': question,
         'show_followup': show_followup,
+        'total_results': len(recommended_places),
+        'current_page': 1,
+        'has_next': False,
+        'total_pages': 1,
+        'user_tags': [],
+        'extracted_region': ''
     }
-
-
 
 def main(request):
     prompt = request.GET.get('prompt', '')
@@ -184,12 +276,23 @@ def main(request):
 def search(request):
     prompt = request.GET.get('prompt', '')
     followup = request.GET.get('followup', '')
+    page = int(request.GET.get('page', 1))
+    page_size = 20
 
-    sess = request.session.get('last_reco')
-    if sess and sess.get('prompt') == prompt and sess.get('followup') == followup:
-        context = build_context_from_cached(prompt, followup, sess, request.user)
-    else:
-        context = get_recommendation_context(prompt, followup, request.user)
+    print(f"Search request - prompt: {prompt}, followup: {followup}, page: {page}")
+
+    # 페이지네이션을 위한 추천 컨텍스트 생성
+    context = get_recommendation_context(prompt, followup, request.user, page, page_size)
+    
+    print(f"Context - total_results: {context.get('total_results')}, current_page: {context.get('current_page')}, total_pages: {context.get('total_pages')}, has_next: {context.get('has_next')}")
+    
+    # 세션 업데이트
+    request.session['last_reco'] = {
+        'prompt': prompt,
+        'followup': followup,
+        'question': context.get('question', ''),
+        'recommendations': context.get('recommendations', []),
+    }
 
     return render(request, 'search.html', context)
 
@@ -248,4 +351,4 @@ def toggle_place_like(request, pk):
     if is_ajax:
         return JsonResponse(data)
 
-    return redirect('place_detail', pk=place.id)
+    return redirect('places:place_detail', pk=place.id)
