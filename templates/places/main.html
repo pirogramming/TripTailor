@@ -23,7 +23,17 @@
 </form>
 
 <section class="tag-rail" data-expanded="false">
-  <div class="track" id="tagTrack"></div>
+  <div class="track" id="tagTrack">
+    {% for t in tags %}
+      <button
+        type="button"
+        class="chip{% if t.name in selected_tags %} active{% endif %}{% if forloop.counter0 >= 5 %} extra{% endif %}"
+        data-tag="{{ t.name }}"
+        aria-pressed="{% if t.name in selected_tags %}true{% else %}false{% endif %}">
+        #{{ t.name }}
+      </button>
+    {% endfor %}
+  </div>
   <button type="button" class="chip more" aria-expanded="false">+ 더보기</button>
 </section>
 
@@ -109,11 +119,89 @@ function getCookie(name) {
 }
 const csrftoken = getCookie('csrftoken');
 
-// 버튼 클릭 시 드롭다운 표시 + 목록 불러오기
-document.querySelectorAll('.add-to-route-btn').forEach(btn => {
-  btn.addEventListener('click', async () => {
-    const dropdown = btn.nextElementSibling;
-    const placeId = btn.dataset.placeId;
+/* =========================
+   태그: 더보기/접기 & Ajax 필터
+   ========================= */
+const rail = document.querySelector('.tag-rail');
+const track = document.getElementById('tagTrack');
+const moreBtn = rail.querySelector('.chip.more');
+
+/* 더보기/접기 초기화 */
+(function initMore(){
+  const hidden = track.querySelectorAll('.chip.extra').length;
+  if (!hidden) moreBtn.style.display = 'none';
+  moreBtn.addEventListener('click', () => {
+    const expanded = rail.dataset.expanded === 'true';
+    rail.dataset.expanded = (!expanded).toString();
+    moreBtn.textContent = expanded ? '+ 더보기' : '접기';
+    moreBtn.setAttribute('aria-expanded', (!expanded).toString());
+  });
+})();
+
+/* 현재 페이지를 다시 GET해서 .place-list만 교체 (대분류 등 기존 파라미터 그대로 유지) */
+async function fetchAndSwapList(nextParams) {
+  const url = new URL(window.location.href);
+
+  // 기존 쿼리 초기화
+  for (const k of Array.from(url.searchParams.keys())) url.searchParams.delete(k);
+  // 새 파라미터 채우기
+  nextParams.forEach((v, k) => url.searchParams.set(k, v));
+
+  // 로딩 표시 (선택)
+  const listEl = document.querySelector('.place-list');
+  if (listEl) listEl.insertAdjacentHTML('beforebegin', '<div id="list-loading" style="padding:1rem">불러오는 중...</div>');
+
+  try {
+    const res = await fetch(url.toString(), { credentials: 'same-origin' });
+    const html = await res.text();
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+
+    const fetchedList = doc.querySelector('.place-list');
+    const currentList = document.querySelector('.place-list');
+
+    if (fetchedList && currentList) {
+      currentList.outerHTML = fetchedList.outerHTML; // 리스트만 교체
+    }
+
+    // 주소창 갱신 (뒤로가기 지원)
+    history.pushState(null, '', url.toString());
+  } finally {
+    const ld = document.getElementById('list-loading');
+    if (ld) ld.remove();
+  }
+}
+
+/* 칩 클릭 → URL 파라미터 갱신 → Ajax로 목록만 갱신 */
+track.addEventListener('click', async (e) => {
+  const chip = e.target.closest('.chip');
+  if (!chip || chip.classList.contains('more')) return;
+
+  chip.classList.toggle('active');
+  chip.setAttribute('aria-pressed', chip.classList.contains('active') ? 'true' : 'false');
+
+  const selected = [...track.querySelectorAll('.chip.active')].map(b => b.dataset.tag);
+
+  // 현 URL 기반으로 새 파라미터 생성 (대분류 place_class, prompt 등 기존 파라미터 유지)
+  const next = new URLSearchParams(window.location.search);
+  if (selected.length) {
+    next.set('tags', selected.join(','));
+  } else {
+    next.delete('tags');
+  }
+
+  await fetchAndSwapList(next);
+});
+
+/* ===========================================
+   루트: '추가' 버튼 클릭 시 드롭다운 열고 목록 불러오기
+   (위임 방식이라 Ajax 뒤에도 계속 동작)
+   =========================================== */
+document.addEventListener('click', async (e) => {
+  // 드롭다운 열기/불러오기
+  const addBtn = e.target.closest('.add-to-route-btn');
+  if (addBtn) {
+    const dropdown = addBtn.nextElementSibling;
+    const placeId = addBtn.dataset.placeId;
 
     // 다른 드롭다운 닫기
     document.querySelectorAll('.route-dropdown').forEach(d => {
@@ -122,6 +210,7 @@ document.querySelectorAll('.add-to-route-btn').forEach(btn => {
 
     // 토글
     dropdown.style.display = (dropdown.style.display === 'block') ? 'none' : 'block';
+
     if (dropdown.style.display === 'block') {
       const listBox = dropdown.querySelector('.route-list');
       listBox.textContent = '불러오는 중...';
@@ -143,7 +232,7 @@ document.querySelectorAll('.add-to-route-btn').forEach(btn => {
         listBox.textContent = '불러오기 실패';
       }
     }
-  });
+  }
 });
 
 // 루트 선택 → 장소 추가
@@ -209,82 +298,16 @@ document.addEventListener('click', async (e) => {
   }
 });
 
-(async function () {
-  const res = await fetch("{% url 'places:tags_json' %}");
-  const tags = await res.json();
+window.addEventListener('popstate', async () => {
+  const next = new URLSearchParams(window.location.search);
+  await fetchAndSwapList(next);
 
-  const initialCount = 5;
-  const rail = document.querySelector('.tag-rail');
-  const track = document.getElementById('tagTrack');
-  const moreBtn = rail.querySelector('.chip.more');
-
-  // 현재 URL에서 선택된 태그 복원
-  const params = new URLSearchParams(location.search);
-  const preselected = (params.get('tags') || "")
-                        .split(',').filter(Boolean);
-
-  // 칩 렌더
-  tags.forEach((t, i) => {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'chip' + (i >= initialCount ? ' extra' : '');
-    btn.dataset.tag = t.name;
-    btn.textContent = `#${t.name}`;
-    if (preselected.includes(t.name)) {
-      btn.classList.add('active');
-      btn.setAttribute('aria-pressed', 'true');
-    } else {
-      btn.setAttribute('aria-pressed', 'false');
-    }
-    track.appendChild(btn);
-  });
-
-  // 더보기/접기
-  moreBtn.addEventListener('click', () => {
-    const expanded = rail.dataset.expanded === 'true';
-    rail.dataset.expanded = (!expanded).toString();
-    moreBtn.textContent = expanded ? '+ 더보기' : '접기';
-    moreBtn.setAttribute('aria-expanded', (!expanded).toString());
-  });
-  if (tags.length <= initialCount) moreBtn.style.display = 'none';
-
-  // ✅ 칩 클릭 → URL 파라미터 갱신 → 즉시 새로고침
-  track.addEventListener('click', (e) => {
-    const chip = e.target.closest('.chip');
-    if (!chip || chip.classList.contains('more')) return;
-
-    // --- 다중 선택(OR 매칭) ---
-    chip.classList.toggle('active');
-    chip.setAttribute('aria-pressed', chip.classList.contains('active') ? 'true' : 'false');
-
-    const selected = [...track.querySelectorAll('.chip.active')].map(b => b.dataset.tag);
-
-    const url = new URL(window.location.href);
-    if (selected.length) {
-      url.searchParams.set('tags', selected.join(','));  // 예: tags=a,b,c
-      url.searchParams.set('match', 'any');              // OR 매칭 (원하면 'all')
-    } else {
-      url.searchParams.delete('tags');
-      url.searchParams.delete('match');
-    }
-
-    // 다른 파라미터들(prompt, followup, place_class 등)은 그대로 유지됨
-    window.location.assign(url.toString());
-  });
-
-})();
-
-document.querySelectorAll('.btn.cat').forEach(a => {
-  a.addEventListener('click', (e) => {
-    e.preventDefault();
-    const url = new URL(window.location.href);
-    const cls = a.dataset.class;
-
-    if (cls) url.searchParams.set('place_class', cls);
-    else url.searchParams.delete('place_class'); // 전체
-
-    // 기존 파라미터(prompt, followup, tags, match)는 그대로 보존됨
-    window.location.assign(url.toString());
+  // 태그 칩 UI 상태도 URL에 맞춰 동기화
+  const selected = (next.get('tags') || '').split(',').filter(Boolean);
+  document.querySelectorAll('#tagTrack .chip').forEach(chip => {
+    const on = selected.includes(chip.dataset.tag);
+    chip.classList.toggle('active', on);
+    chip.setAttribute('aria-pressed', on ? 'true' : 'false');
   });
 });
 

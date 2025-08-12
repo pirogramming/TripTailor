@@ -1,18 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.db.models import Exists, OuterRef, BooleanField, Value, Count
+from django.db.models import Exists, OuterRef, BooleanField, Value, Count, Q
 from django.http import JsonResponse
-from django.db.models import Q
 
 import recommend 
 from django.core.paginator import Paginator
-from .models import Place, PlaceLike
+from .models import Place, PlaceLike, Tag
 import re
-
-import csv
-from pathlib import Path
-from django.conf import settings
-from django.utils.text import slugify
 
 
 def _parse_selected_tags(request):
@@ -59,7 +53,6 @@ def parse_recommendations(recommendations):
 
 # 2) DB 매칭을 조금 더 느슨하게 (공백/괄호 제거 후 비교)
 def find_places_by_names(names):
-    from .models import Place
     def norm(s):
         import re
         s = s or ""
@@ -223,20 +216,27 @@ def main(request):
 
     # ✅ 태그 필터 (Place.tags 기준)
     # URL 예: ?tags=레트로,야경&match=any
-    selected, match_mode, raw_tags = _parse_selected_tags(request)
+    selected, match_mode, _ = _parse_selected_tags(request)
+
     if selected:
-        # name/slug 둘 다 대응 (CSV 칩에서 name을 보내도, slug를 보내도 OK)
-        cond = Q(tags__name__in=selected)
-        if match_mode == 'all':
-            # 모든 선택 태그를 다 가진 Place만
-            qs = (qs.filter(cond)
-                    .annotate(num_matched=Count('tags', filter=cond, distinct=True))
-                    .filter(num_matched=len(selected)))
+        # 1차: 교집합
+        qs_all = qs
+        for tag in selected:
+            qs_all = qs_all.filter(tags__name=tag)
+        qs_all = qs_all.distinct()
+
+        if qs_all.exists():
+            qs = qs_all
         else:
-            # 하나라도 포함하면 통과
-            qs = qs.filter(cond).distinct()
+            # 2차: 합집합
+            qs = qs.filter(tags__name__in=selected).distinct()
+
+    qs = qs.prefetch_related('tags') 
+    tags_qs = Tag.objects.order_by('name')
+
 
     # 좋아요 메타 붙이기
+    qs = qs.prefetch_related('tags')
     qs = with_like_meta(qs, request.user)
 
     # 페이지네이션
@@ -258,7 +258,7 @@ def main(request):
     context.update({
         'places': page_obj,
         'place_class': class_filter,
-        'tags': raw_tags,        # 예: "레트로,야경"
+        'tags': tags_qs,
         'match': match_mode,     # 'any' or 'all'
         'selected_tags': selected,
     })
@@ -339,18 +339,33 @@ def toggle_place_like(request, pk):
     if is_ajax:
         return JsonResponse(data)
 
-    return redirect('place_detail', pk=place.id)
+    return redirect('places:place_detail', pk=place.id)
 
-def tags_json(request):
-    csv_path = Path(settings.BASE_DIR) / "tags.csv"  # 방금 만든 CSV 경로
-    items, seen = [], set()
-    with csv_path.open(encoding="utf-8-sig", newline="") as f:
-        for row in csv.reader(f):
-            if not row:
-                continue
-            name = row[0].strip().lstrip("#").strip()
-            if not name or name in seen:
-                continue
-            seen.add(name)
-            items.append({"name": name, "slug": slugify(name, allow_unicode=True)})
-    return JsonResponse(items, safe=False)
+def place_list_fragment(request):
+    # 원래 main()의 필터 부분 거의 그대로 복사
+    class_filter = request.GET.get('place_class', '')
+    qs = Place.objects.all().order_by('-id')
+
+    if class_filter and class_filter.isdigit():
+        qs = qs.filter(place_class=int(class_filter))
+
+    selected, _match_mode, _raw_tags = _parse_selected_tags(request)
+    if selected:
+        qs_all = qs
+        for tag in selected:
+            qs_all = qs_all.filter(tags__name=tag)
+        qs_all = qs_all.distinct()
+
+        if qs_all.exists():
+            qs = qs_all
+        else:
+            qs = qs.filter(tags__name__in=selected).distinct()
+
+    qs = with_like_meta(qs, request.user)
+
+    paginator = Paginator(qs, 20)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
+    return render(request, 'places/_place_items.html', {
+        'places': page_obj,
+    })
