@@ -10,26 +10,78 @@ from .models import Place, PlaceLike
 import re
 
 
+# 1) 더 튼튼한 파서
 def parse_recommendations(recommendations):
     parsed = []
+    name_pat = re.compile(r"\*\*\s*\[?([^\]\*]+?)\]?\s*\*\*")  # **[이름]** 또는 **이름**
+    numline_pat = re.compile(r"^\s*\d+\.\s*(.+?)\s*$")         # "1. 장소" 같은 라인 보강
+
     i = 0
-    pat = re.compile(r"\*\*(?:\[)?(.+?)(?:\])?\*\*")
     while i < len(recommendations):
-        rec = recommendations[i]
-        m = pat.search(rec)
+        line = recommendations[i]
+        name = None
+
+        m = name_pat.search(line)
         if m:
-            place_name = m.group(1).strip()
-            reason = ""
+            name = m.group(1).strip()
+        else:
+            # 굵게가 없을 때 숫자라인에서 이름 추출
+            m2 = numline_pat.match(line)
+            if m2:
+                name = m2.group(1).strip()
+                # 뒤에 ** **가 없는 케이스 보정: 괄호/양끝 기호 제거
+                name = re.sub(r"^[\-\*\s\[]+|[\]\s]+$", "", name)
+
+        reason = ""
+        if name:
             if i + 1 < len(recommendations):
                 nxt = recommendations[i + 1].strip()
                 if nxt.startswith("- 이유:") or "이유:" in nxt:
                     reason = nxt.split("이유:", 1)[-1].strip()
-                    parsed.append({"name": place_name, "reason": reason})
+                    parsed.append({"name": name, "reason": reason})
                     i += 2
                     continue
-            parsed.append({"name": place_name, "reason": reason})
+            parsed.append({"name": name, "reason": reason})
         i += 1
     return parsed
+
+
+# 2) DB 매칭을 조금 더 느슨하게 (공백/괄호 제거 후 비교)
+def find_places_by_names(names):
+    from .models import Place
+    def norm(s):
+        import re
+        s = s or ""
+        s = re.sub(r"[\s\(\)\[\]「」『』\-_/·•~!@#$%^&*=+|:;\"'<>?,.]+", "", s)
+        return s.lower()
+
+    # 1차: 넓게 필터링 (QuerySet)
+    q = Q()
+    for raw in names:
+        n = (raw or "").strip()
+        if not n:
+            continue
+        q |= (Q(name__iexact=n) | Q(name__icontains=n) | Q(summary__icontains=n) | Q(address__icontains=n))
+    if not q:
+        return Place.objects.none()
+
+    candidates = list(Place.objects.filter(q).distinct())
+
+    # 2차: 정규화 유사 매칭으로 추림 → 최종 id 목록 만들기
+    idx = {p.id: norm(p.name) for p in candidates}
+    pick_ids = []
+    for raw in names:
+        key_n = norm(raw)
+        hit = next((pid for pid, n2 in idx.items() if key_n == n2), None)
+        if not hit:
+            hit = next((pid for pid, n2 in idx.items() if key_n and key_n in n2), None)
+        if hit and hit not in pick_ids:
+            pick_ids.append(hit)
+
+    # ✅ 항상 QuerySet 반환
+    return Place.objects.filter(id__in=pick_ids)
+
+
 
 def with_like_meta(qs, user):
     """
@@ -49,17 +101,6 @@ def with_like_meta(qs, user):
         )
     return qs
 
-def find_places_by_names(names):
-    # 간단 배치 매칭 (icontains OR)
-    q = Q()
-    for n in names:
-        n = n.strip()
-        if not n: 
-            continue
-        q |= Q(name__iexact=n) | Q(name__icontains=n) | Q(summary__icontains=n) | Q(address__icontains=n)
-    if not q:
-        return Place.objects.none()
-    return Place.objects.filter(q).distinct()
 
 def build_context_from_cached(prompt, followup, cached, user):
     recommended_places = []
@@ -97,47 +138,63 @@ def get_recommendation_context(prompt, followup, user):
     recommended_places, recommendations, question = [], [], ""
     show_followup = False
 
-    if prompt:
-        user_input = f"{prompt} {followup}" if followup else prompt
-        try:
-            result = recommend.app.invoke({"user_input": user_input}) or {}
-        except Exception as e:
-            result = {}
+    if not prompt:
+        return {'prompt': prompt, 'followup': followup, 'recommended_places': [], 'recommendations': [], 'question': "", 'show_followup': False}
 
-        # 키가 '보충_질문'일 수도 있고 'question'일 수도 있는 혼합 상황 방어
-        question = (result.get("보충_질문")
-                    or result.get("question")
-                    or "")
-        recommendations = result.get("recommendations") or []
+    user_input = f"{prompt} {followup}" if followup else prompt
+    try:
+        result = recommend.app.invoke({"user_input": user_input}) or {}
+    except Exception:
+        result = {}
 
-        parsed_recs = parse_recommendations(recommendations)
-        wanted_names = [r.get("name", "").strip() for r in parsed_recs if r.get("name")]
-        if wanted_names:
-            candidates = list(with_like_meta(find_places_by_names(wanted_names), user))
-            by_name = {p.name: p for p in candidates}
-            lower_index = [(p.name.lower(), p) for p in candidates]
+    question = (result.get("보충_질문") or result.get("question") or "")
+    recommendations = result.get("recommendations") or []
 
-            for rec in parsed_recs:
-                key = (rec.get("name") or "").strip()
-                if not key:
-                    continue
-                place = by_name.get(key)
-                if not place:
-                    key_l = key.lower()
-                    place = next((p for name_l, p in lower_index if key_l in name_l), None)
-                if place:
-                    recommended_places.append({"place": place, "reason": rec.get("reason", "")})
+    # 1) 파싱으로 이름 가져오기
+    parsed_recs = parse_recommendations(recommendations)
+    names = [r.get("name","").strip() for r in parsed_recs if r.get("name")]
 
-        show_followup = bool(question)
+    # 2) 모델이 함께 돌려주는 '추천_장소명'도 합치기
+    model_names = result.get("추천_장소명") or []
+    for n in model_names:
+        if n and n not in names:
+            names.append(n)
 
+    # 3) 이름 -> DB 매칭
+    candidates = find_places_by_names(names)
+    like_annotated = list(with_like_meta(Place.objects.filter(id__in=[p.id for p in candidates]), user))
+    by_id = {p.id: p for p in like_annotated}
+
+    # 추천 순서 보존해서 붙이기
+    used = set()
+    for nm in names:
+        hit = next((p for p in candidates if p.name == nm), None)
+        hit = by_id.get(hit.id) if hit else None
+        if hit and hit.id not in used:
+            reason = next((r["reason"] for r in parsed_recs if r["name"] == nm and r.get("reason")), "")
+            recommended_places.append({"place": hit, "reason": reason})
+            used.add(hit.id)
+
+    # 4) 3개가 안되면 채우기: 남은 후보들(좋아요 많은 순)로 보충
+    if len(recommended_places) < 3:
+        remain = [p for p in like_annotated if p.id not in used]
+        remain.sort(key=lambda x: getattr(x, "like_count", 0), reverse=True)
+        for p in remain:
+            recommended_places.append({"place": p, "reason": ""})
+            used.add(p.id)
+            if len(recommended_places) >= 3:
+                break
+
+    show_followup = bool(question)
     return {
         'prompt': prompt,
         'followup': followup,
-        'recommended_places': recommended_places,
+        'recommended_places': recommended_places[:3],  # 최종 3개 보장
         'recommendations': recommendations,
         'question': question,
         'show_followup': show_followup,
     }
+
 
 
 

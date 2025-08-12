@@ -10,6 +10,6 @@ urlpatterns = [
     path('create/', views.ReviewCreateView.as_view(), name='create'),
     path('<int:pk>/edit/', views.ReviewUpdateView.as_view(), name='edit'),
     path('<int:pk>/delete/', views.ReviewDeleteView.as_view(), name='delete'),
-
+    path("blogs/<int:place_id>/", views.blog_reviews, name="blog_reviews"),
 
 ]
