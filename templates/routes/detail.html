@@ -21,11 +21,6 @@
           <div style="color:#555; margin-top:4px;">팁: {{ rp.tip }}</div>
         {% endif %}
 
-        <form method="post" action="{% url 'routes:remove_place' route.id rp.place_id %}" style="display:inline-block; margin-left:8px;">
-          {% csrf_token %}
-          <button type="submit">삭제</button>
-        </form>
-
       </li>
     {% endfor %}
   </ol>
