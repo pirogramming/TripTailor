@@ -63,6 +63,8 @@
 
   <div class="place-detail__footer">
     <a class="back-link" href="{% url 'places:main' %}">← 목록으로 돌아가기</a>
+    <br>
+    <a class="route-link" href="{% url 'routes:place_routes' place.id %}">이 장소가 포함된 루트 보기</a>
   </div>
 </div>
 <!-- 블로그 후기 섹션 -->
