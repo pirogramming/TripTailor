@@ -132,7 +132,7 @@
                 const routeId = e.target.dataset.routeId;
                 const placeId = e.target.dataset.placeId;
                 // ⚠️ 정적 .js 파일이면 템플릿 태그 대신 `/routes/${routeId}/add/${placeId}/` 로 직접 구성
-                const endpoint = `{% url '/routes/${routeId}/add/${placeId}/' % }`
+                const endpoint = `/routes/${routeId}/add/${placeId}/`
                 try {
                     const res = await fetch(endpoint, {
                         method: 'POST',
