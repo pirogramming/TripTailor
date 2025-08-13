@@ -205,7 +205,26 @@ AUTHENTICATION_BACKENDS = (
     'allauth.account.auth_backends.AuthenticationBackend',
 )
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+#EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+# === NAVER SMTP (애플리케이션 비밀번호 사용) ===
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.naver.com"
+
+# 네이버: 465/SSL 또는 587/TLS 중 하나만 사용 가능
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
+EMAIL_USE_TLS = False  # 둘 다 True 금지
+
+# 반드시 전체 이메일 주소(@naver.com 포함)
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")            # 예: piro_triptailor@naver.com
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")    # ← 애플리케이션 비밀번호!
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
+EMAIL_TIMEOUT = 10
+
+# allauth 관련 (이메일 기반 로그인일 때 권장)
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_UNIQUE_EMAIL = True
 
 #추가
 SOCIALACCOUNT_PROVIDERS ={

@@ -3,7 +3,7 @@
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/search.css' %}">
 
-<!-- 검색창 (기존 스타일 유지) -->
+
 <form method="get" action="">
     <input
         type="text"
@@ -25,8 +25,9 @@
 {% if recommended_places and not show_followup %}
 <h2 class="section-title">추천 여행지</h2>
 
+<!-- 초기 3개 카드 (가로 배치 유지) -->
 <div class="recommend-grid">
-    <div class="recommend-list">
+    <div class="recommend-list" id="places-container">
         {% for rec in recommended_places %}
         <div class="place-card">
             <div class="place-card__map">
@@ -62,4 +63,8 @@
 {% endif %}
 
 <a href="{% url 'places:main' %}" class="back-link">← 메인으로 돌아가기</a>
+
+
+
+
 {% endblock %}

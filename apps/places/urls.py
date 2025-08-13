@@ -8,5 +8,5 @@ urlpatterns = [
     path('search/', views.search, name='search'), 
     path('<int:pk>/', views.place_detail, name='place_detail'),
     path('<int:pk>/like/', views.toggle_place_like, name='place_like'),
-    path("tags-json/", views.tags_json, name="tags_json"),
+    path('fragment/', views.place_list_fragment, name='place_list_fragment'),
 ]
