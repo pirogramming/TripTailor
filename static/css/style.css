@@ -23,6 +23,11 @@ nav{
     border-bottom:2px solid var(--border-color);
     background:#fff;
     padding:0 10px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 99999;
 }
 
 .logo_div {
