@@ -33,8 +33,16 @@
   <p style="color:#777;">아직 추가된 장소가 없어요. 여행지 목록에서 <em>“루트에 추가”</em>로 채워보세요!</p>
 {% endif %}
 
+<a href="{% url 'routes:edit_route_page' route.id %}?from={{ from_page }}">✏️ 수정</a>
+
 <p style="margin-top:16px;">
-  <a href="javascript:history.back()">← 이전 페이지로</a>
+  {% if from_page == "mypage" %}
+    <a href="{% url 'users:my_page' %}">← 마이페이지로</a>
+  {% elif from_page == "public_list" %}
+    <a href="{% url 'routes:route_list' %}">← 공개 루트 목록으로</a>
+  {% else %}
+    <a href="javascript:history.back()">← 이전 페이지로</a>
+  {% endif %}
 </p>
 
 {% endblock %}

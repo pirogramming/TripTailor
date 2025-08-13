@@ -4,8 +4,8 @@
 <ul>
   {% for route in routes %}
     <li>
-      <a href="{% url 'routes:detail' route.pk %}">{{ route.title }}</a>
-      <span>{{ route.summary }}</span>
+      <a href="{% url 'routes:detail' route.pk %}?from=public_list">{{ route.title }}</a>
+      <span>{{ route.location_summary }}</span>
       <span>by {{ route.user.username }}</span>
     </li>
   {% endfor %}

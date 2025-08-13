@@ -76,7 +76,7 @@
 
             {# 상세 진입(내 루트만 접근 가능하도록 서버에서 이미 잠금) #}
             <div style="margin-top:4px;">
-                <a href="{% url 'routes:detail' route.id %}">루트 상세</a>
+                <a href="{% url 'routes:detail' route.id %}?from=mypage">루트 상세</a>
             </div>
             </li>
         {% empty %}

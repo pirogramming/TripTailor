@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.db import transaction
 from django.db.models import Max
 from django.core.paginator import Paginator
+from django.urls import reverse
 
 from .models import Route, RoutePlace
 from apps.places.models import Place
@@ -28,11 +29,14 @@ def route_detail(request, route_id: int):
         .prefetch_related("place__tags")
         .order_by("stop_order")
     )
+
     stops = list(stops_qs)
+    from_page = request.GET.get("from", "")
 
     return render(request, "routes/detail.html", {
         "route": route,
         "stops": stops,
+        "from_page": from_page,    
     })
 
 @login_required
@@ -131,3 +135,27 @@ def place_routes(request, place_id):
 @login_required
 def create_route_page(request):
     return render(request, "routes/create_route.html")
+
+@login_required
+def edit_route_page(request, route_id):
+    route = get_object_or_404(Route, pk=route_id, creator=request.user)
+    from_page = request.GET.get("from", "")
+    return render(request, "routes/edit_route.html", {
+        "route": route,
+        "from_page": from_page,
+    })
+
+@login_required
+@require_POST
+def update_route(request, route_id):
+    route = get_object_or_404(Route, pk=route_id, creator=request.user)
+
+    route.title = request.POST.get("title", "").strip()
+    route.location_summary = request.POST.get("location_summary", "").strip()
+    route.description = request.POST.get("description", "").strip()
+    route.cover_photo_url = request.POST.get("cover_photo_url", "").strip()
+    route.is_public = request.POST.get("is_public") == "true"
+    route.save()
+
+    return redirect(f"{reverse('routes:detail', args=[route.id])}?from={request.POST.get('from', '')}")
+

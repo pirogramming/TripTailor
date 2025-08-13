@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>루트 수정</h2>
+
+<form method="post" action="{% url 'routes:update_route' route.id %}">
+  {% csrf_token %}
+  <input type="hidden" name="from" value="{{ from_page }}">
+  <div>
+    <label>제목</label><br>
+    <input type="text" name="title" value="{{ route.title }}" required>
+  </div>
+
+  <div>
+    <label>지역 요약</label><br>
+    <input type="text" name="location_summary" value="{{ route.location_summary }}">
+  </div>
+
+  <div>
+    <label>설명</label><br>
+    <textarea name="description">{{ route.description }}</textarea>
+  </div>
+
+  <div>
+    <label>대표 이미지 URL</label><br>
+    <input type="url" name="cover_photo_url" value="{{ route.cover_photo_url }}">
+  </div>
+
+  <div>
+    <label>
+      <input type="checkbox" name="is_public" value="true" {% if route.is_public %}checked{% endif %}>
+      공개 루트로 설정
+    </label>
+  </div>
+
+  <button type="submit">저장</button>
+  <a href="{% url 'routes:detail' route.id %}?from={{ from_page }}">← 돌아가기</a>
+</form>
+
+{% endblock %}

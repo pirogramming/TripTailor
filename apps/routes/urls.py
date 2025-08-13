@@ -17,4 +17,7 @@ urlpatterns = [
     path("<int:route_id>/remove/<int:place_id>/", views.remove_place, name="remove_place"),
     path('', views.route_list, name='route_list'),
     path('place/<int:place_id>/', views.place_routes, name='place_routes'),
+
+    path("<int:route_id>/edit/", views.edit_route_page, name="edit_route_page"),  # 수정 폼
+    path("<int:route_id>/update/", views.update_route, name="update_route"),      # 수정 처리
 ]
