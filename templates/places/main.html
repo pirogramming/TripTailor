@@ -87,18 +87,21 @@
         </button>
       </form>
       <button type="button" class="add-to-route-btn" data-place-id="{{ place.id }}">
-                ➕ 루트에 추가
-            </button>
-            <!-- 드롭다운 -->
-            <div class="route-dropdown" style="display:none; position:absolute; background:#fff; border:1px solid #ccc; padding:.5rem; z-index:10; min-width:200px;">
-                <div class="route-list">불러오는 중...</div>
-                <hr>
-                <div class="create-route-form">
-                    <input type="text" class="new-route-title" placeholder="새 루트 제목" style="width:100%; margin-bottom:.25rem;">
-                    <input type="text" class="new-route-summary" placeholder="루트 요약(선택, 200자 이내)" style="width:100%; margin-bottom:.25rem;">
-                    <button type="button" class="create-route-btn">＋ 새 루트 만들기</button>
-                </div>
-            </div>
+        ➕ 루트에 추가
+      </button>
+      <!-- 드롭다운 -->
+      <div class="route-dropdown" style="display:none; position:absolute; background:#fff; border:1px solid #ccc; padding:.5rem; z-index:10; min-width:200px;">
+        <div class="route-list">불러오는 중...</div>
+        <hr>
+        <div class="create-route-form">
+          <input type="text" class="new-route-title" placeholder="새 루트 제목" style="width:100%; margin-bottom:.25rem;">
+          <input type="text" class="new-route-summary" placeholder="루트 요약(선택, 200자 이내)" style="width:100%; margin-bottom:.25rem;">
+          <label style="display:block; margin-bottom:.25rem;">
+            <input type="checkbox" class="new-route-public" checked>공개 루트로 만들기
+          </label>
+          <button type="button" class="create-route-btn">＋ 새 루트 만들기</button>
+        </div>
+      </div>
       {% endif %}
     </div>
     <ul class="tag-list">

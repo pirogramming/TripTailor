@@ -153,6 +153,8 @@
                 const summaryInput = dropdown.querySelector('.new-route-summary');
                 const title = (titleInput.value || '').trim();
                 const summary = (summaryInput?.value || '').trim();
+                const isPublic = dropdown.querySelector('.new-route-public').checked;
+                
                 if (!title) {
                     alert('제목을 입력하세요');
                     return;
@@ -161,6 +163,7 @@
                     const fd = new FormData();
                     fd.append('title', title);
                     fd.append('location_summary', summary);
+                    fd.append('is_public', isPublic ? 'true' : 'false');
                     // ⚠️ 정적 .js 파일이면 템플릿 태그 대신 '/routes/create/' 등으로 변경
                     const res = await fetch('/routes/create/', {
                         method: 'POST',

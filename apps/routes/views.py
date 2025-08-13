@@ -1,26 +1,24 @@
 # apps/routes/views.py
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.http import require_GET, require_POST, require_http_methods
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.db import transaction
-from django.db.models import Max
+from django.db.models import Max, Q
 from django.core.paginator import Paginator
+from django.urls import reverse
 
 from .models import Route, RoutePlace
 from apps.places.models import Place
 
-@login_required
 def route_detail(request, route_id: int):
-    """내 루트 상세: 스탑을 순서대로 나열"""
-    from django.db.models import Q
+    """루트 상세: 내가 만든 루트거나 공개 루트면 볼 수 있도록"""
 
-    route = get_object_or_404(
-    Route,
-    Q(pk=route_id) & (Q(creator=request.user) | Q(is_public=True))  # ← 이렇게 전체 조건을 Q()로 묶어줘야 해!
-    )
+    # 로그인했을 때는 creator거나 공개된 루트면 허용
+    # 로그인 안했으면 공개 루트만 허용
+    q = Q(pk=route_id) & (Q(is_public=True) | Q(creator=request.user if request.user.is_authenticated else None))
+    route = get_object_or_404(Route, q)
 
-    # 태그까지 보여주려면 prefetch
     stops_qs = (
         RoutePlace.objects
         .filter(route=route)
@@ -28,11 +26,14 @@ def route_detail(request, route_id: int):
         .prefetch_related("place__tags")
         .order_by("stop_order")
     )
+
     stops = list(stops_qs)
+    from_page = request.GET.get("from", "")
 
     return render(request, "routes/detail.html", {
         "route": route,
         "stops": stops,
+        "from_page": from_page,
     })
 
 @login_required
@@ -60,12 +61,15 @@ def create_route(request):
     if len(location_summary) > 200:
         return JsonResponse({"ok": False, "error": "summary_too_long"}, status=400)
 
+    is_public = request.POST.get("is_public") == "true"
+
     route = Route.objects.create(
         creator=request.user,
         title=title,
         description=request.POST.get("description", "").strip(),
         cover_photo_url=request.POST.get("cover_photo_url", "").strip(),
-        location_summary=location_summary,  # ✅ 저장
+        location_summary=location_summary,
+        is_public=is_public,  # ✅ 저장
     )
     return JsonResponse({"ok": True, "route": {"id": route.id, "title": route.title}})
 
@@ -110,7 +114,7 @@ def remove_place(request, route_id: int, place_id: int):
     return redirect("routes:detail", route_id=route.id)
 
 def route_list(request):
-    routes = Route.objects.all().order_by('-created_at')
+    routes = Route.objects.filter(is_public=True).order_by('-created_at')
     paginator = Paginator(routes, 10)  # 한 페이지에 10개씩
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -124,3 +128,79 @@ def place_routes(request, place_id):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     return render(request, 'routes/place_routes.html', {'routes': page_obj, 'place': place})
+
+@login_required
+def create_route_page(request):
+    return render(request, "routes/create_route.html")
+
+@login_required
+def edit_route_page(request, route_id):
+    route = get_object_or_404(Route, pk=route_id, creator=request.user)
+
+    stops = (
+        RoutePlace.objects
+        .filter(route=route)
+        .select_related("place")
+        .order_by("stop_order")
+    )
+
+    from_page = request.GET.get("from", "")
+    return render(request, "routes/edit_route.html", {
+        "route": route,
+        "from_page": from_page,
+        "stops": stops,
+    })
+
+@login_required
+@require_POST
+def update_route(request, route_id):
+    route = get_object_or_404(Route, pk=route_id, creator=request.user)
+
+    # 1️⃣ 루트 정보 저장
+    route.title = request.POST.get("title", "").strip()
+    route.location_summary = request.POST.get("location_summary", "").strip()
+    route.description = request.POST.get("description", "").strip()
+    route.cover_photo_url = request.POST.get("cover_photo_url", "").strip()
+    route.is_public = request.POST.get("is_public") == "true"
+    route.save()
+
+    # 2️⃣ 장소 순서 처리 (place_ids_json이 존재할 경우)
+    place_ids_json = request.POST.get("place_ids_json")
+    if place_ids_json:
+        try:
+            import json
+            place_ids = json.loads(place_ids_json)
+
+            with transaction.atomic():
+                # 중복 방지를 위해 임시로 큰 수로 업데이트
+                for i, place_id in enumerate(place_ids):
+                    RoutePlace.objects.filter(route=route, place_id=place_id).update(stop_order=10000 + i)
+
+                # 실제 순서대로 저장
+                for i, place_id in enumerate(place_ids, start=1):
+                    RoutePlace.objects.filter(route=route, place_id=place_id).update(stop_order=i)
+
+        except Exception as e:
+            return JsonResponse({"ok": False, "error": f"장소 순서 저장 실패: {str(e)}"}, status=400)
+
+    # 3️⃣ 저장 후 리디렉션
+    return redirect(f"{reverse('routes:detail', args=[route.id])}?from={request.POST.get('from', '')}")
+
+
+@login_required
+@require_POST
+def delete_route(request, route_id):
+    route = get_object_or_404(Route, pk=route_id, creator=request.user)
+    route.delete()
+
+    # 어디서 왔는지 확인
+    from_page = request.GET.get("from", "")
+
+    if from_page == "mypage":
+        redirect_url = reverse("users:my_page")
+    elif from_page == "public_list":
+        redirect_url = reverse("routes:route_list")
+    else:
+        redirect_url = "/"
+
+    return JsonResponse({"ok": True, "redirect_url": redirect_url})

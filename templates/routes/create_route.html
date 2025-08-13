@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<h2>🗺️ 새 루트 만들기</h2>
+
+<form id="create-route-form">
+  {% csrf_token %}
+
+  <div>
+    <label>루트 제목</label><br />
+    <input type="text" name="title" required />
+  </div>
+
+  <div>
+    <label>지역 요약</label><br />
+    <input type="text" name="location_summary" maxlength="200" />
+  </div>
+
+  <div>
+    <label>설명</label><br />
+    <textarea name="description"></textarea>
+  </div>
+
+  <div>
+    <label>대표 이미지 URL</label><br />
+    <input type="url" name="cover_photo_url" />
+  </div>
+
+  <div>
+    <label>
+      <input type="checkbox" name="is_public" value="true" checked />
+      공개 루트로 설정
+    </label>
+  </div>
+
+  <button type="submit">루트 생성</button>
+</form>
+
+<script>
+  document.getElementById("create-route-form").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const form = e.target;
+    const formData = new FormData(form);
+
+    // 체크 안 돼 있으면 아예 안 보내지니까 false로 수동 지정
+    if (!form.querySelector('input[name="is_public"]').checked) {
+      formData.set("is_public", "false");
+    }
+
+    const response = await fetch("{% url 'routes:create_route' %}", {
+      method: "POST",
+      body: formData,
+      credentials: "same-origin",
+      headers: {
+        "X-CSRFToken": form.querySelector('[name=csrfmiddlewaretoken]').value,
+      },
+    });
+
+    const data = await response.json();
+    if (data.ok) {
+      alert("루트가 생성되었어요!");
+      window.location.href = `/routes/${data.route.id}/`;  // detail로 이동
+    } else {
+      alert("오류: " + data.error);
+    }
+  });
+</script>
+{% endblock %}
