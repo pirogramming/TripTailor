@@ -14,10 +14,11 @@ urlpatterns = [
     path("<int:route_id>/", views.route_detail, name="detail"),
 
     # (선택) 스탑 삭제 — 원하면 템플릿에서 버튼 활성화
-    path("<int:route_id>/remove/<int:place_id>/", views.remove_place, name="remove_place"),
+    path("<int:route_id>/remove_place/<int:place_id>/", views.remove_place, name="remove_place"),
     path('', views.route_list, name='route_list'),
     path('place/<int:place_id>/', views.place_routes, name='place_routes'),
 
     path("<int:route_id>/edit/", views.edit_route_page, name="edit_route_page"),  # 수정 폼
     path("<int:route_id>/update/", views.update_route, name="update_route"),      # 수정 처리
+    path("<int:route_id>/update_order/", views.update_place_order, name="update_place_order"), #장소 순서 처리
 ]

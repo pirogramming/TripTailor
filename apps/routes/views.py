@@ -139,10 +139,19 @@ def create_route_page(request):
 @login_required
 def edit_route_page(request, route_id):
     route = get_object_or_404(Route, pk=route_id, creator=request.user)
+
+    stops = (
+        RoutePlace.objects
+        .filter(route=route)
+        .select_related("place")
+        .order_by("stop_order")
+    )
+
     from_page = request.GET.get("from", "")
     return render(request, "routes/edit_route.html", {
         "route": route,
         "from_page": from_page,
+        "stops": stops,
     })
 
 @login_required
@@ -159,3 +168,25 @@ def update_route(request, route_id):
 
     return redirect(f"{reverse('routes:detail', args=[route.id])}?from={request.POST.get('from', '')}")
 
+@login_required
+@require_POST
+def update_place_order(request, route_id):
+    route = get_object_or_404(Route, pk=route_id, creator=request.user)
+
+    try:
+        import json
+        data = json.loads(request.body)
+        place_ids = data.get("place_ids", [])
+
+        with transaction.atomic():
+            # 1단계: 일단 겹치지 않는 큰 값으로 임시 설정
+            for i, place_id in enumerate(place_ids):
+                RoutePlace.objects.filter(route=route, place_id=place_id).update(stop_order=10000 + i)
+
+            # 2단계: 진짜 순서로 다시 저장
+            for i, place_id in enumerate(place_ids, start=1):
+                RoutePlace.objects.filter(route=route, place_id=place_id).update(stop_order=i)
+
+        return JsonResponse({"ok": True})
+    except Exception as e:
+        return JsonResponse({"ok": False, "error": str(e)}, status=400)
