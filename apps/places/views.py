@@ -206,6 +206,79 @@ def get_recommendation_context(prompt, followup, user):
         'show_followup': show_followup,
     }
 
+def get_more_recommendations_context(prompt, followup, user):
+    """더 많은 추천 결과를 가져오는 함수 (페이지네이션용, 최대 100개)"""
+    recommended_places, recommendations, question = [], [], ""
+    
+    if not prompt:
+        return {'prompt': prompt, 'followup': followup, 'recommended_places': [], 'recommendations': [], 'question': "", 'show_followup': False}
+
+    user_input = f"{prompt} {followup}" if followup else prompt
+    try:
+        result = recommend.app.invoke({"user_input": user_input}) or {}
+    except Exception:
+        result = {}
+
+    question = (result.get("보충_질문") or result.get("question") or "")
+    recommendations = result.get("recommendations") or []
+
+    # 1) 파싱으로 이름 가져오기
+    parsed_recs = parse_recommendations(recommendations)
+    names = [r.get("name","").strip() for r in parsed_recs if r.get("name")]
+
+    # 2) 모델이 함께 돌려주는 '추천_장소명'도 합치기
+    model_names = result.get("추천_장소명") or []
+    for n in model_names:
+        if n and n not in names:
+            names.append(n)
+
+    # 3) 이름 -> DB 매칭
+    candidates = find_places_by_names(names)
+    like_annotated = list(with_like_meta(Place.objects.filter(id__in=[p.id for p in candidates]), user))
+    by_id = {p.id: p for p in like_annotated}
+
+    # 추천 순서 보존해서 붙이기
+    used = set()
+    for nm in names:
+        hit = next((p for p in candidates if p.name == nm), None)
+        hit = by_id.get(hit.id) if hit else None
+        if hit and hit.id not in used:
+            reason = next((r["reason"] for r in parsed_recs if r["name"] == nm and r.get("reason")), "")
+            recommended_places.append({"place": hit, "reason": reason})
+            used.add(hit.id)
+
+    # 4) 더 많은 결과를 위해 유사한 장소들도 추가
+    if len(recommended_places) < 100:
+        # 태그 기반으로 유사한 장소 찾기
+        if recommended_places:
+            # 추천된 장소들의 태그들을 수집
+            all_tags = set()
+            for rec in recommended_places:
+                all_tags.update(rec['place'].tags.values_list('name', flat=True))
+            
+            # 유사한 태그를 가진 장소들 찾기
+            similar_places = Place.objects.filter(tags__name__in=all_tags).exclude(
+                id__in=[rec['place'].id for rec in recommended_places]
+            ).distinct()
+            
+            # 좋아요 메타 추가
+            similar_places = with_like_meta(similar_places, user)
+            
+            # 좋아요 순으로 정렬하여 추가
+            for place in similar_places.order_by('-like_count')[:100-len(recommended_places)]:
+                recommended_places.append({"place": place, "reason": "유사한 장소"})
+                if len(recommended_places) >= 100:
+                    break
+
+    return {
+        'prompt': prompt,
+        'followup': followup,
+        'recommended_places': recommended_places,
+        'recommendations': recommendations,
+        'question': question,
+        'show_followup': False,
+    }
+
 
 
 
@@ -283,6 +356,90 @@ def search(request):
         context = get_recommendation_context(prompt, followup, request.user)
 
     return render(request, 'search.html', context)
+
+def more_recommendations(request):
+    prompt = request.GET.get('prompt', '')
+    followup = request.GET.get('followup', '')
+    
+    if not prompt:
+        return redirect('places:search')
+    
+    # 더 많은 추천 결과 가져오기 (최대 100개)
+    context = get_more_recommendations_context(prompt, followup, request.user)
+    
+    # 디버깅: 데이터 확인
+    print(f"DEBUG: recommended_places count: {len(context.get('recommended_places', []))}")
+    if context.get('recommended_places'):
+        print(f"DEBUG: First place: {context['recommended_places'][0]}")
+    
+    # 페이지네이션 추가
+    recommended_places = context['recommended_places']
+    paginator = Paginator(recommended_places, 20)  # 페이지당 20개씩
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context['page_obj'] = page_obj
+    context['recommended_places'] = page_obj.object_list
+    
+    print(f"DEBUG: Final context keys: {list(context.keys())}")
+    print(f"DEBUG: Final recommended_places count: {len(context.get('recommended_places', []))}")
+    
+    return render(request, 'places/more_recommendations.html', context)
+
+def more_recommendations_ajax(request):
+    """AJAX 요청으로 더 많은 추천 결과를 반환하는 뷰"""
+    from django.http import JsonResponse
+    
+    prompt = request.GET.get('prompt', '')
+    followup = request.GET.get('followup', '')
+    page = int(request.GET.get('page', 1))
+    
+    print(f"AJAX DEBUG: prompt='{prompt}', followup='{followup}', page={page}")
+    
+    if not prompt:
+        print("AJAX DEBUG: No prompt provided")
+        return JsonResponse({'error': '검색어가 필요합니다.'}, status=400)
+    
+    # 더 많은 추천 결과 가져오기
+    context = get_more_recommendations_context(prompt, followup, request.user)
+    recommended_places = context['recommended_places']
+    
+    print(f"AJAX DEBUG: Got {len(recommended_places)} recommended places")
+    
+    # 페이지네이션 - 한 번에 3개씩
+    paginator = Paginator(recommended_places, 3)
+    page_obj = paginator.get_page(page)
+    
+    print(f"AJAX DEBUG: Page {page} has {len(page_obj.object_list)} items")
+    
+    # JSON 응답용 데이터 준비
+    places_data = []
+    for rec in page_obj.object_list:
+        place_data = {
+            'place': {
+                'id': rec['place'].id,
+                'name': rec['place'].name,
+                'region': rec['place'].region,
+                'summary': rec['place'].summary,
+                'tags': [{'name': tag.name} for tag in rec['place'].tags.all()],
+                'is_liked': getattr(rec['place'], 'is_liked', False),
+                'is_authenticated': request.user.is_authenticated
+            },
+            'reason': rec.get('reason', '')
+        }
+        places_data.append(place_data)
+    
+    response_data = {
+        'places': places_data,
+        'has_more': page_obj.has_next(),
+        'current_page': page,
+        'total_pages': paginator.num_pages,
+        'total_count': paginator.count
+    }
+    
+    print(f"AJAX DEBUG: Returning {len(places_data)} places, has_more={page_obj.has_next()}")
+    
+    return JsonResponse(response_data)
 
 def place_detail(request, pk):
     base = Place.objects.filter(pk=pk)
