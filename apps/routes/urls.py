@@ -6,7 +6,8 @@ app_name = "routes"
 
 urlpatterns = [
     path("mine/json/", views.my_routes_json, name="my_routes_json"),
-    path("create/", views.create_route, name="create_route"),
+    path("create/", views.create_route, name="create_route"), #ajax관련 create
+    path("create/page/", views.create_route_page, name="create_route_page"), #루트 생성 페이지
     path("<int:route_id>/add/<int:place_id>/", views.add_place, name="add_place"),
 
     # ✅ 루트 상세

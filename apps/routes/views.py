@@ -60,12 +60,15 @@ def create_route(request):
     if len(location_summary) > 200:
         return JsonResponse({"ok": False, "error": "summary_too_long"}, status=400)
 
+    is_public = request.POST.get("is_public") == "true"
+
     route = Route.objects.create(
         creator=request.user,
         title=title,
         description=request.POST.get("description", "").strip(),
         cover_photo_url=request.POST.get("cover_photo_url", "").strip(),
-        location_summary=location_summary,  # ✅ 저장
+        location_summary=location_summary,
+        is_public=is_public,  # ✅ 저장
     )
     return JsonResponse({"ok": True, "route": {"id": route.id, "title": route.title}})
 
@@ -110,7 +113,7 @@ def remove_place(request, route_id: int, place_id: int):
     return redirect("routes:detail", route_id=route.id)
 
 def route_list(request):
-    routes = Route.objects.all().order_by('-created_at')
+    routes = Route.objects.filter(is_public=True).order_by('-created_at')
     paginator = Paginator(routes, 10)  # 한 페이지에 10개씩
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -124,3 +127,7 @@ def place_routes(request, place_id):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     return render(request, 'routes/place_routes.html', {'routes': page_obj, 'place': place})
+
+@login_required
+def create_route_page(request):
+    return render(request, "routes/create_route.html")
