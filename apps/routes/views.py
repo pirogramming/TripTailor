@@ -13,7 +13,12 @@ from apps.places.models import Place
 @login_required
 def route_detail(request, route_id: int):
     """내 루트 상세: 스탑을 순서대로 나열"""
-    route = get_object_or_404(Route, pk=route_id, creator=request.user)
+    from django.db.models import Q
+
+    route = get_object_or_404(
+    Route,
+    Q(pk=route_id) & (Q(creator=request.user) | Q(is_public=True))  # ← 이렇게 전체 조건을 Q()로 묶어줘야 해!
+    )
 
     # 태그까지 보여주려면 prefetch
     stops_qs = (
