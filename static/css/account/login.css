@@ -7,6 +7,7 @@ main {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    padding-bottom: 10vh;
 }
 
 main > h1 {
@@ -19,7 +20,7 @@ main > h1 {
 }
 
 #form-container {
-    width: 700px;
+    width: 500px;
     border-radius: 25px;
     border: 1px solid #62B3B8;
     display: flex;
@@ -31,57 +32,100 @@ main > h1 {
 #form-container > h2 {
     color: #62B3B8;
     font-family: Lexend;
-    font-size: 38px;
+    font-size: 2rem;
     font-style: normal;
     font-weight: 600;
     line-height: 150%;
     padding: 10px;
 }
 
+#login-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
 #id_login {
-    width: 590px;
-    height: 72px;
+    width: 400px;
+    height: 55px;
     border: 1px solid rgba(128, 128, 128, 0.50);
+    border-radius: 15px;;
     background-color: #FFF;
     margin: 13px 0;
 }
 
-
 #id_password {
-    width: 590px;
-    height: 72px;
+    width: 400px;
+    height: 55px;
     border: 1px solid rgba(128, 128, 128, 0.50);
+    border-radius: 15px;
     background-color: #FFF;
     margin: 0 0 13px;
 }
 
+#id_login::placeholder, #id_password::placeholder {
+    color: #80808080;
+    padding-left: 10px;
+    font-size: 1rem;
+}
+
 #id_remember {
     appearance: none;
-    width: 18px;
-    height: 18px;
-    border: 1px solid rgba(0, 0, 0, 0.50);
-    border-radius: 9px;
+    width: 16px;
+    height: 16px;
+    border: 1.5px solid #4e4e4e80;
+    border-radius: 8px;
     cursor: pointer;
+    padding: 4px;
 }
 
 #id_remember:checked {
-  background-color: #62B3B8;
-  border-color: #62B3B8;
+    background-color: black;
+    border-color: black;
+    background-clip: content-box;
+}
+
+#id_remember:checked +label {
+    color: black;
+    font-weight: 500;
 }
 
 #remember-container {
+    width: 400px;
     display: flex;
     justify-content: space-between;
 }
 
-.password {
-    color: #80808080
+.remember {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.remember > label {
+    padding-left: 0.3rem;
+    color: #4e4e4e80;
+    cursor: pointer;
+}
+
+
+.error {
+    display: flex;
+    gap: 0.5rem;
+}
+
+
+.password > a, .signup > a {
+    font-size: 0.9rem;
+    color: #29292980;
+    text-decoration: underline;
 }
 
 .submit {
     /* appearance: none; */
-    width: 590px;
-    height: 72px;
+    width: 400px;
+    height: 60px;
     border-radius: 40px;
     border: none;
     background-color: #62B3B8;
@@ -91,7 +135,7 @@ main > h1 {
 
 .submit > span {
     color: #fff;
-    font-size: 25px;
+    font-size: 1.5rem;
 }
 
 #social {
@@ -103,14 +147,57 @@ main > h1 {
     padding-top: 20px;
 }
 
+.line {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    padding: 10px 0;
+}
+
+.left-line, .right-line {
+    width: 120px;
+    height: 1.5px;
+    background-color: #80808080;
+}
+
+.line > p {
+    color: #80808080;
+    font-size: 15px;
+    font-weight: 500;
+    font-family: 'Lemon', sans-serif;
+}
+
 .social_login_box {
     width: 100%;
     display: flex;
-    justify-content: space-evenly;
-    padding: 20px;
+    justify-content: center;
+    align-items: center;
+    gap: 80px;
+    padding: 10px 0 20px;
 }
 
 .social_login_box > a > svg, .social_login_box > a > img{
-    width: 50px;
-    height: 50px;
+    width: 45px;
+    height: 45px;
+}
+
+.social-google {
+    background-color: #f0f2f5;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.social-kakao {
+    background-color: #ffe812;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
