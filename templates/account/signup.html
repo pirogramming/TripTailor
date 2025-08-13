@@ -1,37 +1,53 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'css/account/signup.css' %}?v={% now 'U' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lemon&display=swap" rel="stylesheet">
+{% endblock %}
 
 {% block content %}
-  <h2>회원가입</h2>
-  <form method="post" action="{% url 'account_signup' %}">
-    {% csrf_token %}
-    {% if form.errors %}
-      <p style="color: red;">입력한 정보를 다시 확인해주세요 😥</p>
-      <ul>
-        {% for field in form %}
-          {% for error in field.errors %}
-            <li style="color:red">{{ field.label }}: {{ error }}</li>
-          {% endfor %}
-        {% endfor %}
-      </ul>
-    {% endif %}
-    <div>
-      <label for="id_username">사용자 이름</label>
-      {{ form.username }}
+  <main>
+    <h1>TripTailor</h1>
+    <div id="form-container">
+      <h2>회원가입</h2>
+      <form method="post" action="{% url 'account_signup' %}">
+        {% csrf_token %}
+        {% if form.errors %}
+          <p style="color: red;">입력한 정보를 다시 확인해주세요 😥</p>
+          <ul>
+            {% for field in form %}
+              {% for error in field.errors %}
+                <li style="color:red">{{ field.label }}: {{ error }}</li>
+              {% endfor %}
+            {% endfor %}
+          </ul>
+        {% endif %}
+        <div>
+          {{ form.username }}
+        </div>
+        <div>
+          {{ form.email }}
+        </div>
+        <div>
+          {{ form.password1 }}
+        </div>
+        <div>
+          {{ form.password2 }}
+        </div>
+        <button type="submit"><span>가입</span></button>
+      </form>   
+      <div id="login-container">
+        <div class="line">
+          <i class="left-line"></i>
+          <p>이미 계정이 있으신가요?</p>
+          <i class="right-line"></i>
+        </div>
+        <div class="login"><a href="{% url 'account_login' %}">로그인</a></d>         
+      </div> 
+ 
     </div>
-    <div>
-      <label for="id_email">이메일</label>
-      {{ form.email }}
-    </div>
-    <div>
-      <label for="id_password1">비밀번호</label>
-      {{ form.password1 }}
-    </div>
-    <div>
-      <label for="id_password2">비밀번호 확인</label>
-      {{ form.password2 }}
-    </div>
-    <button type="submit">회원가입</button>
-  </form>
-
-  <p><a href="{% url 'account_login' %}">이미 계정이 있으신가요? 로그인</a></p>
+  </main>
 {% endblock %}
