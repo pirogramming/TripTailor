@@ -94,29 +94,42 @@ extraction_prompt = PromptTemplate.from_template(
 # 추천 프롬프트
 recommendation_prompt = PromptTemplate.from_template(
     """
-    다음 여행지 리스트 중에서만 선택하여 사용자에게 맞는 여행지 **정확히 3곳**을 추천해줘.
-    리스트에 없는 장소명은 절대 쓰지 마.
+    아래 '여행지 리스트' 중에서만 고르고, 사용자 조건에 맞는 여행지 **정확히 3곳**을 추천하라.
+    리스트에 없는 장소명은 절대 쓰지 마라.
 
-    여행지 리스트:
-    {trip_spot_list}
+    # 출력 형식(반드시 준수)
+    1. **[여행지명]**
+    - 이유: 두 문장, 80~150자. 첫 문장은 사용자 조건과의 적합성(지역/감정/활동 연결), 
+            두 번째 문장은 해당 장소의 주요 특징과 매력을 설명.
+    - 구체적인 팁: 방문 시간대, 동선, 준비물, 계절별 추천 활동 등 실질적으로 도움이 되는 팁을 1~2문장으로 제공.
 
-    사용자 정보:
+    2. **[여행지명]**
+    - 이유: 두 문장, 80~150자.
+    - 구체적인 팁: 1~2문장.
+
+    3. **[여행지명]**
+    - 이유: 두 문장, 80~150자.
+    - 구체적인 팁: 1~2문장.
+
+    # 작성 규칙
+    - 태그(예: #힐링, #야경 등)는 절대 언급하지 말 것.
+    - 해시태그, 불필요한 마크다운, 이모지, 장식 문자를 사용하지 말 것.
+    - 장소명은 반드시 여행지 리스트에 있는 것만 사용.
+    - 설명은 자연스럽고 구체적으로 작성하되, 불필요한 수식어나 반복은 피할 것.
+
+    # 사용자 정보
     - 지역: {location}
     - 감정: {emotion}
     - 활동: {activity}
-    - 태그: {tags}
+    - 태그 조건: {tags} (참고용이며, 결과 문장에 직접 쓰지 말 것)
 
-    출력 형식(이 형식 외 아무 말도 쓰지 마):
-    1. **[여행지명]**
-    - 이유: 한 문장
-
-    2. **[여행지명]**
-    - 이유: 한 문장
-
-    3. **[여행지명]**
-    - 이유: 한 문장
+    # 여행지 리스트
+    {trip_spot_list}
     """
 )
+
+
+
 
 extraction_chain = extraction_prompt | llm
 recommendation_chain = recommendation_prompt | llm
@@ -212,7 +225,7 @@ def recommend_places(state: GraphState) -> GraphState:
     })
 
     response_text = getattr(rec, "content", str(rec))
-    raw_lines = response_text.strip().split("\n")
+    raw_lines = [ln.strip() for ln in response_text.splitlines() if ln.strip()]
 
     recommended_places = []
     for line in raw_lines:
