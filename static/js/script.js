@@ -289,3 +289,28 @@
         })();
     });
 })();
+
+document.addEventListener('DOMContentLoaded', () => {
+    const sidebar = document.getElementById('sidebar');
+    const menuToggle = document.getElementById('menu-toggle');
+
+    if (menuToggle && sidebar) {
+        // 체크 상태 변화에 따라 사이드바 열고 닫기
+        menuToggle.addEventListener('change', () => {
+            if (menuToggle.checked) {
+                sidebar.classList.add('open');
+            } else {
+                sidebar.classList.remove('open');
+            }
+        });
+
+        // 사이드바 바깥 클릭 시 닫기
+        document.addEventListener('click', (e) => {
+            const isClickInside = sidebar.contains(e.target) || menuToggle.parentElement.contains(e.target);
+            if (!isClickInside) {
+                sidebar.classList.remove('open');
+                menuToggle.checked = false; // 버튼 상태 복원
+            }
+        });
+    }
+});

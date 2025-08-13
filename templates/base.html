@@ -4,39 +4,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <link rel="stylesheet" href="{% static 'css/reset.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Lemon&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    {% block head %}
-    {% endblock %}
-    <title>Document</title>
+    {% block head %}{% endblock %}
+    <title>TripTailor</title>
 </head>
 <body>
     <nav>
         <div class="left_nav">
             <a href="{% url 'places:main' %}">
-                <img src="" alt="logo">
+                <div class="logo_div">
+                    <img src="{% static 'images/logo.png' %}" alt="">
+                </div>
             </a>
         </div>
+
         <div class="right_nav">
             {% if user.is_authenticated %}
-                <a href="{% url 'routes:route_list' %}" class="btn">전체 루트 보기</a>
-                <form action="{% url 'account_logout' %}" method="post" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="logout_button">
-                        로그아웃
-                    </button>
-                </form>
+            <label id="hamburger-icon">
+                <input type="checkbox" id="menu-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </label>
             {% else %}
-                <a href="{% url 'routes:route_list' %}" class="btn">전체 루트 보기</a>
+                <a href="{% url 'routes:route_list' %}" class="btn">전체 루트</a>
                 <a href="{% url 'account_login' %}">로그인</a>
                 <a href="{% url 'account_signup' %}">회원가입</a>
             {% endif %}
         </div>
     </nav>
-    <div class="main_div">
-        {% block content %}
-        {% endblock %}
+
+    {% if user.is_authenticated %}
+    <!-- 토글로 나타나는 사이드바 -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar__header">
+            <img src="{% static 'img/profile-default.png' %}" alt="프로필" class="sidebar__avatar">
+            <div class="sidebar__user-info">
+                <span class="sidebar__username">{{ user.username }}</span>
+                <span class="sidebar__email">{{ user.email }}</span>
+            </div>
+        </div>
+
+        <hr class="sidebar__divider">
+
+        <div class="sidebar__nav">
+            <a href="{% url 'routes:route_list' %}" class="sidebar__item">
+                <span class="sidebar__icon">📍</span>
+                전체 루트 보기
+            </a>
+            <a href="{% url 'routes:route_list' %}" class="sidebar__item">
+                <span class="sidebar__icon">👨‍💼</span>
+                마이 페이지
+            </a>
+            <form action="{% url 'account_logout' %}" method="post" class="sidebar__item sidebar__form">
+                {% csrf_token %}
+                <button type="submit" class="sidebar__logout">
+                    <span class="sidebar__icon">🚪</span>
+                    로그아웃
+                </button>
+            </form>
+        </div>
+    </aside>
+    {% endif %}
+
+    <div class="main_div {% if user.is_authenticated %}with-sidebar{% endif %}">
+        {% block content %}{% endblock %}
     </div>
+
+    <footer>
+        <span>ⓒ 2025 Trip Tailor</span>
+    </footer>
+
     <script src="{% static 'js/script.js' %}"></script>
 </body>
 </html>
