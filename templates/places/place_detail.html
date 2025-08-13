@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/place_detail.css' %}">
+
+<div class="place-detail container">
+  <div class="place-detail__header">
+    <h2 class="place-detail__title">{{ place.name }}</h2>
+
+    {% if user.is_authenticated %}
+    <form method="post" action="{% url 'places:place_like' place.pk %}" class="like-form">
+      {% csrf_token %}
+      <button type="submit" class="like-button">
+        {% if place.is_liked %}❤️ 취소{% else %}🤍 좋아요{% endif %}
+      </button>
+    </form>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <div class="map-section-detail"></div>
+  </div>
+
+  <div class="card">
+    <div class="meta-grid">
+      <div class="meta-item meta-item-right">
+        <div class="meta-label">주소</div>
+        <div class="meta-value">{{ place.address }}</div>
+      </div>
+      <div class="meta-item meta-item-right">
+        <div class="meta-label">지역</div>
+        <div class="meta-value">{{ place.region }}</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">분류</div>
+        <div class="meta-value">
+          {% if place.place_class == 1 %}레포츠{% elif place.place_class == 2 %}쇼핑{% elif place.place_class == 3 %}관광지{% elif place.place_class == 4 %}문화시설{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="card">
+    <h3 class="section-title">개요</h3>
+    <p class="section-text">{{ place.overview|default:"개요 없음" }}</p>
+  </section>
+
+  <section class="card">
+    <h3 class="section-title">설명</h3>
+    <p class="section-text">{{ place.summary|default:"설명 없음" }}</p>
+  </section>
+
+  <section class="card">
+    <h3 class="section-title">태그</h3>
+    <ul class="tag-list">
+      {% for tag in place.tags.all %}
+      <li class="tag">#{{ tag.name }}</li>
+      {% empty %}
+      <li class="tag tag--empty">#태그없음</li>
+      {% endfor %}
+    </ul>
+  </section>
+  <!-- 블로그 후기 섹션 -->
+  <section class="card">
+      <h3 class="section-title"">블로그 후기</h3>
+      <button id="load-blog-reviews" data-place-id="{{ place.id }}" class="tag">블로그 후기 불러오기</button>
+      <ul id="blog-review-list" style="margin-top:10px;">
+
+      </ul>
+  </section>
+
+  <div class="place-detail__footer">
+    <a class="back-link" href="{% url 'places:main' %}">← 목록으로 돌아가기</a>
+    <br>
+    <a class="route-link" href="{% url 'routes:place_routes' place.id %}">이 장소가 포함된 루트 보기</a>
+  </div>
+</div>
+
+{% endblock %}

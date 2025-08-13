@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>전체 루트</h2>
+<ul>
+  {% for route in routes %}
+    <li>
+      <a href="{% url 'routes:detail' route.pk %}">{{ route.title }}</a>
+      <span>{{ route.summary }}</span>
+      <span>by {{ route.user.username }}</span>
+    </li>
+  {% endfor %}
+</ul>
+<div class="pagination">
+  {% if routes.has_previous %}
+    <a href="?page={{ routes.previous_page_number }}">이전</a>
+  {% endif %}
+  <span>{{ routes.number }} / {{ routes.paginator.num_pages }}</span>
+  {% if routes.has_next %}
+    <a href="?page={{ routes.next_page_number }}">다음</a>
+  {% endif %}
+</div>
+{% endblock %}

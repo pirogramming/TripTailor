@@ -1,0 +1,309 @@
+:root {
+    --border-color: #62B3B8;
+    --primary_send: #95f9fe;
+    --primary_send-hover: #63f1f9;
+    --primary: #62B3B8;
+    --primary-hover: #4e9fa4;
+    --background: #EFFEFF;
+    --white: #fff;
+    --text: #111;
+    --muted: #6b7280;
+    --chip-bg: #f3f4f6;
+    --chip-active-bg: #e0f7f8;
+    --shadow: 0 4px 12px rgba(0,0,0,.08);
+}
+
+/* 공통 초기화 */
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    font-family: 'Noto Sans KR', sans-serif;
+    background-color: var(--background);
+    color: var(--text);
+}
+a { text-decoration: none; color: inherit; }
+button { font: inherit; cursor: pointer; }
+
+/* ===== 검색 폼 (카톡 직사각형 스타일) ===== */
+form[method="get"] {
+    width: 900px;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .75rem .9rem;
+    border: 1px solid var(--border-color);
+    border-radius: 12px; /* 직사각형 */
+    background: #fff;
+    box-shadow: none;
+    transition: box-shadow .15s ease, border-color .15s ease;
+    margin: 6rem auto 1.5rem; /* 상단 여백 */
+}
+
+form[method="get"]:hover,
+form[method="get"]:focus-within {
+    box-shadow: var(--shadow);
+    border-color: transparent;
+}
+
+/* 입력창 */
+form[method="get"] input[type="text"] {
+    flex: 1;
+    height: 44px;
+    font-size: 16px;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    padding: 0 .6rem;
+}
+
+/* 플레이스홀더 색상 */
+form[method="get"] input::placeholder {
+    color: #80868b;
+}
+
+/* 제출 버튼 */
+form[method="get"] > button {
+    border: 0;
+    background: transparent;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px; /* 둥근 버튼 */
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: background-color .15s ease;
+}
+form[method="get"] > button:hover {
+    background: #f1f3f4;
+}
+form[method="get"] > button:active {
+    background: #e8eaed;
+}
+form[method="get"] > button svg {
+    width: 24px;
+    height: 24px;
+    fill: #5f6368;
+}
+
+/* 보충 질문 (카톡 말풍선) */
+form[method="get"] > div {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+form[method="get"] > div strong {
+    align-self: flex-start;
+    background: #f1f1f1;
+    color: #333;
+    padding: 10px 14px;
+    border-radius: 14px;
+    max-width: 80%;
+    line-height: 1.45;
+    position: relative;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
+}
+form[method="get"] > div strong::after {
+    content: "";
+    position: absolute;
+    left: -6px;
+    bottom: 6px;
+    border: 8px solid transparent;
+    border-right-color: #f1f1f1;
+}
+form[method="get"] > div input[type="text"] {
+    align-self: flex-end;
+    background: var(--background);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 10px 14px;
+    font-size: 15px;
+    max-width: 100%;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
+}
+form[method="get"] > div button[type="submit"] {
+    align-self: flex-end;
+    background: var(--primary_send);
+    color: #fff;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 14px;
+    margin-top: 4px;
+    transition: background .2s ease;
+}
+form[method="get"] > div button[type="submit"]:hover {
+    background: var(--primary_send-hover);
+}
+
+/* ===== 태그 레일 ===== */
+.tag-rail {
+    max-width: 980px;
+    margin: 0 auto 16px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.tag-rail .track {
+    flex: 1;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.tag-rail .track::-webkit-scrollbar { display: none; }
+.chip {
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: var(--chip-bg);
+    border: 1px solid #e5e7eb;
+    white-space: nowrap;
+    transition: background 0.2s;
+}
+.chip:hover { background: #f0f0f0; }
+.chip.active {
+    background: var(--chip-active-bg);
+    border-color: var(--border-color);
+    color: var(--primary-hover);
+    font-weight: bold;
+}
+.chip.more {
+    border: 1px dashed var(--border-color);
+    background: var(--white);
+}
+
+/* 5개 이상 숨기기 */
+.tag-rail[data-expanded="false"] .extra { display: none; }
+.tag-rail[data-expanded="true"] .extra { display: inline-flex; }
+
+/* ===== 필터 바 ===== */
+.filter-bar {
+    max-width: 980px;
+    margin: 0 auto 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.filter-bar .btn {
+    display: inline-block;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--white);
+    transition: background 0.2s;
+}
+.filter-bar .btn:hover { background: var(--chip-active-bg); }
+.filter-bar .btn.active {
+    background: var(--primary);
+    color: var(--white);
+    border-color: var(--primary);
+}
+
+/* ===== 여행지 리스트 ===== */
+.place-section__title {
+    max-width: 980px;
+    margin: 20px auto 10px;
+    font-size: 20px;
+    font-weight: bold;
+}
+.place-list {
+    max-width: 980px;
+    list-style: none;
+    margin: 0 auto;
+    padding: 0;
+    display: grid;
+    gap: 12px;
+}
+.place-item {
+    background: var(--white);
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 14px;
+    box-shadow: var(--shadow);
+}
+.place-item__head {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    position: relative;
+}
+.place-item__name { font-weight: bold; font-size: 18px; }
+.place-item__meta { font-size: 14px; color: var(--muted); }
+.place-item__link {
+    margin-left: auto;
+    padding: 6px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--white);
+}
+.place-item__link:hover { background: var(--chip-active-bg); }
+
+/* ===== 좋아요 버튼 ===== */
+.like-form { margin: 0; }
+.like-button {
+    padding: 6px 10px;
+    border: 1px solid #f43f5e;
+    border-radius: 6px;
+    background: var(--white);
+    color: #e11d48;
+}
+.like-button:hover {
+    background: #fff0f3;
+}
+
+/* ===== 루트 추가 버튼 & 드롭다운 ===== */
+.add-to-route-btn {
+    padding: 6px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--white);
+}
+.add-to-route-btn:hover {
+    background: var(--chip-active-bg);
+}
+.route-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 10;
+    background: var(--white);
+    border: 1px solid #ccc;
+    padding: .5rem;
+    border-radius: 8px;
+    min-width: 200px;
+    box-shadow: var(--shadow);
+}
+.route-dropdown input {
+    width: 100%;
+    margin-bottom: .25rem;
+    padding: .4rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+.create-route-btn {
+    width: 100%;
+    padding: .4rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--white);
+}
+.create-route-btn:hover { background: var(--chip-active-bg); }
+
+/* ===== 장소 태그 ===== */
+.tag-list {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    padding: 0;
+}
+.tag {
+    list-style: none;
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    color: #334155;
+}

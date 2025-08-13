@@ -3,27 +3,35 @@
 
 {% block content %}
 <article>
-  <h1>[{{ review.route }}] ★ {{ review.rating }} — {{ review.summary }}</h1>
+  <h1>{{ review.title }}</h1>
+  <div>[{{ review.route }}] ★ {{ review.rating }} — {{ review.summary }}</div>
   <div>by {{ review.user }} · {{ review.created_at|date:"Y-m-d H:i" }}</div>
   <p style="white-space:pre-line">{{ review.content }}</p>
 
   {% if review.photos.all %}
   <h3>사진</h3>
-  <ul>
+  <div>
     {% for p in review.photos.all %}
-      <li><a href="{{ p.url }}" target="_blank">{{ p.url }}</a></li>
+      <div>
+        <img src="{{ p.url }}" alt="리뷰 사진">
+        <br>
+        <a href="{{ p.url }}" target="_blank">원본 보기</a>
+      </div>
     {% endfor %}
-  </ul>
+  </div>
   {% endif %}
 </article>
 
 <hr>
 
-<p>
-  <a href="{% url 'reviews:list' %}">← 목록</a>
-  {% if user.is_authenticated and user.pk == review.user_id %}
-    | <a href="{% url 'reviews:edit' review.pk %}">수정</a>
-    | <a href="{% url 'reviews:delete' review.pk %}">삭제</a>
+<div class="review-actions">
+  <a href="{% url 'reviews:list' %}" class="btn btn-outline-secondary">← 목록으로</a>
+  
+  {% if user.pk == review.user_id or user.is_staff or user.is_superuser %}
+    <div class="author-actions">
+      <a href="{% url 'reviews:edit' review.pk %}" class="btn btn-outline-primary">✏️ 수정</a>
+      <a href="{% url 'reviews:delete' review.pk %}" class="btn btn-outline-danger" onclick="return confirm('정말 삭제하시겠습니까?')">🗑️ 삭제</a>
+    </div>
   {% endif %}
-</p>
+</div>
 {% endblock %}

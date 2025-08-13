@@ -9,6 +9,7 @@ class Route(models.Model):
     location_summary = models.CharField(max_length=200)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    is_public = models.BooleanField(default=True)
 
     def __str__(self):
         return self.title
@@ -23,7 +24,7 @@ class RoutePlace(models.Model):
     tip = models.TextField(blank=True) 
 
     class Meta:
-        unique_together = ("route", "stop_order")
+        unique_together = (("route", "stop_order"), ("route", "place"))
         ordering = ["stop_order"]
 
 class SavedRoute(models.Model): # 찜한 루트

@@ -10,6 +10,10 @@
     <legend>리뷰</legend>
     {{ form.non_field_errors }}
     <div>
+      {{ form.title.label_tag }} {{ form.title }}
+      {{ form.title.errors }}
+    </div>
+    <div>
       {{ form.route.label_tag }} {{ form.route }}
       {{ form.route.errors }}
     </div>
@@ -33,11 +37,20 @@
     {{ photo_formset.non_field_errors }}
     <div id="photos">
       {% for f in photo_formset %}
-        <div class="photo-form">
+        <div class="photo-form" data-form-index="{{ forloop.counter0 }}">
           {{ f.id }}
-          {{ f.url.label_tag }} {{ f.url }}
-          {% if f.instance.pk %} {{ f.DELETE }} 삭제 {% endif %}
-          {{ f.url.errors }}
+          <div>
+            {{ f.url.label_tag }} {{ f.url }}
+            {% if f.instance.pk %}
+              <label>
+                {{ f.DELETE }} 삭제
+              </label>
+            {% endif %}
+            {{ f.url.errors }}
+          </div>
+          <div id="preview-{{ forloop.counter0 }}" style="display: none;">
+            <img src="" alt="사진 미리보기">
+          </div>
         </div>
       {% endfor %}
     </div>
@@ -49,4 +62,6 @@
     <a href="{% if view.object %}{% url 'reviews:detail' view.object.pk %}{% else %}{% url 'reviews:list' %}{% endif %}">취소</a>
   </p>
 </form>
+
+
 {% endblock %}

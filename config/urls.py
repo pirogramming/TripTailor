@@ -15,9 +15,16 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path , include
+from django.urls import path, include
+from django.contrib.auth import views as auth_views
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('accounts/', include('allauth.urls')),
     path('reviews/', include('apps.reviews.urls', namespace='reviews')),
+    path("", include(("apps.places.urls", "places"), namespace="places")),  # 루트 URL을 places 앱으로 연결!
+    path('users/', include('apps.users.urls', namespace='users')), # users 앱 URL 추가
+    path('login/', auth_views.LoginView.as_view(template_name='users/login.html'), name='login'),
+    path("routes/", include(("apps.routes.urls", "routes"), namespace="routes")),
 ]
