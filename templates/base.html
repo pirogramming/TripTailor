@@ -19,6 +19,7 @@
         </div>
         <div class="right_nav">
             {% if user.is_authenticated %}
+                <a href="{% url 'routes:route_list' %}" class="btn">전체 루트 보기</a>
                 <form action="{% url 'account_logout' %}" method="post" style="display:inline;">
                     {% csrf_token %}
                     <button type="submit" class="logout_button">
@@ -26,6 +27,7 @@
                     </button>
                 </form>
             {% else %}
+                <a href="{% url 'routes:route_list' %}" class="btn">전체 루트 보기</a>
                 <a href="{% url 'account_login' %}">로그인</a>
                 <a href="{% url 'account_signup' %}">회원가입</a>
             {% endif %}

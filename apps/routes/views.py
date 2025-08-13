@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.db import transaction
 from django.db.models import Max
+from django.core.paginator import Paginator
 
 from .models import Route, RoutePlace
 from apps.places.models import Place
@@ -76,8 +77,7 @@ def add_place(request, route_id: int, place_id: int):
         return JsonResponse({"ok": True, "duplicated": True})
 
     with transaction.atomic():
-        next_order = (RoutePlace.objects.filter(route=route)
-                      .aggregate(m=Max("stop_order"))["m"] or 0) + 1
+        next_order = (RoutePlace.objects.filter(route=route).aggregate(m=Max("stop_order"))["m"] or 0) + 1
         RoutePlace.objects.create(route=route, place=place, stop_order=next_order)
 
     return JsonResponse({"ok": True, "duplicated": False, "order": next_order})
@@ -103,3 +103,19 @@ def remove_place(request, route_id: int, place_id: int):
     if request.headers.get("X-Requested-With") == "XMLHttpRequest":
         return JsonResponse({"ok": True})
     return redirect("routes:detail", route_id=route.id)
+
+def route_list(request):
+    routes = Route.objects.all().order_by('-created_at')
+    paginator = Paginator(routes, 10)  # 한 페이지에 10개씩
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'routes/route_list.html', {'routes': page_obj})
+
+def place_routes(request, place_id):
+    from apps.places.models import Place
+    place = get_object_or_404(Place, pk=place_id)
+    routes = Route.objects.filter(stops__place_id=place.id).distinct().order_by('-created_at')
+    paginator = Paginator(routes, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'routes/place_routes.html', {'routes': page_obj, 'place': place})
