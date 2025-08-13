@@ -31,7 +31,7 @@ def _load_faiss_and_meta():
         return None, None
 
 # DB 검색 도우미
-def search_top_k_from_db(qvec, k=10):
+def search_top_k_from_db(qvec, k=20):
     # ← 함수 내부로 옮기기 (Django가 준비된 뒤 임포트)
     from apps.places.models import Place
     from apps.tags.models import Tag
@@ -92,9 +92,10 @@ extraction_prompt = PromptTemplate.from_template(
 )
 
 # 추천 프롬프트
+# 추천 프롬프트
 recommendation_prompt = PromptTemplate.from_template(
     """
-    아래 '여행지 리스트' 중에서만 고르고, 사용자 조건에 맞는 여행지 **정확히 3곳**을 추천하라.
+    아래 '여행지 리스트' 중에서만 고르고, 사용자 조건에 맞는 여행지 **정확히 6곳**을 추천하라.
     리스트에 없는 장소명은 절대 쓰지 마라.
 
     # 출력 형식(반드시 준수)
@@ -108,6 +109,18 @@ recommendation_prompt = PromptTemplate.from_template(
     - 구체적인 팁: 1~2문장.
 
     3. **[여행지명]**
+    - 이유: 두 문장, 80~150자.
+    - 구체적인 팁: 1~2문장.
+
+    4. **[여행지명]**
+    - 이유: 두 문장, 80~150자.
+    - 구체적인 팁: 1~2문장.
+
+    5. **[여행지명]**
+    - 이유: 두 문장, 80~150자.
+    - 구체적인 팁: 1~2문장.
+
+    6. **[여행지명]**
     - 이유: 두 문장, 80~150자.
     - 구체적인 팁: 1~2문장.
 
@@ -127,6 +140,7 @@ recommendation_prompt = PromptTemplate.from_template(
     {trip_spot_list}
     """
 )
+
 
 
 
@@ -229,12 +243,21 @@ def recommend_places(state: GraphState) -> GraphState:
 
     recommended_places = []
     for line in raw_lines:
-        if line.strip().startswith(("1.", "2.", "3.")):
-            start = line.find("**[") + 3
-            end = line.find("]**")
-            place_name = line[start:end] if start != -1 and end != -1 else ""
-            if place_name:
-                recommended_places.append(place_name)
+    # 1~6 번까지 모두 허용
+        if any(line.startswith(f"{i}.") for i in range(1, 7)):
+            # **[이름]** or **이름** 모두 대응
+            name = ""
+            if "**[" in line and "]**" in line:
+                start = line.find("**[") + 3
+                end = line.find("]**")
+                name = line[start:end].strip()
+            elif "**" in line:
+                # 대괄호 없는 **이름** 포맷 대응
+                s = line.find("**") + 2
+                e = line.find("**", s)
+                name = line[s:e].strip()
+            if name:
+                recommended_places.append(name)
 
     # 5) 태그 맵 (DB/FAISS 공통)
     place_info_map = {r["명칭"]: r["tags"] for r in rows}

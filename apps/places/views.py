@@ -8,6 +8,7 @@ from django.core.paginator import Paginator
 from .models import Place, PlaceLike, Tag
 import re
 
+RECO_TARGET = 6
 
 def _norm_name(s: str) -> str:
     import re
@@ -261,20 +262,20 @@ def get_recommendation_context(prompt, followup, user):
             used.add(hit.id)
 
     # 부족하면 채우기(이유는 빈 문자열 그대로)
-    if len(recommended_places) < 3:
+    if len(recommended_places) < RECO_TARGET:
         remain = [p for p in like_annotated if p.id not in used]
         remain.sort(key=lambda x: getattr(x, "like_count", 0), reverse=True)
         for p in remain:
-            recommended_places.append({"place": p, "reason": ""})
+            recommended_places.append({"place": p, "reason": "", "tip": ""})
             used.add(p.id)
-            if len(recommended_places) >= 3:
+            if len(recommended_places) >= RECO_TARGET:
                 break
 
     show_followup = bool(question)
     return {
         'prompt': prompt,
         'followup': followup,
-        'recommended_places': recommended_places[:3],  # 최종 3개 보장
+        'recommended_places': recommended_places[:RECO_TARGET],  # 최종 RECO_TARGET개 보장
         'recommendations': recommendations,
         'question': question,
         'show_followup': show_followup,
