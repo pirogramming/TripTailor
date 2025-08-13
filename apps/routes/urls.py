@@ -21,4 +21,5 @@ urlpatterns = [
     path("<int:route_id>/edit/", views.edit_route_page, name="edit_route_page"),  # 수정 폼
     path("<int:route_id>/update/", views.update_route, name="update_route"),      # 수정 처리
     path("<int:route_id>/update_order/", views.update_place_order, name="update_place_order"), #장소 순서 처리
+    path("<int:route_id>/delete/", views.delete_route, name="delete_route"), #루트 삭제
 ]

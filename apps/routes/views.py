@@ -1,27 +1,24 @@
 # apps/routes/views.py
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.http import require_GET, require_POST, require_http_methods
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.db import transaction
-from django.db.models import Max
+from django.db.models import Max, Q
 from django.core.paginator import Paginator
 from django.urls import reverse
 
 from .models import Route, RoutePlace
 from apps.places.models import Place
 
-@login_required
 def route_detail(request, route_id: int):
-    """내 루트 상세: 스탑을 순서대로 나열"""
-    from django.db.models import Q
+    """루트 상세: 내가 만든 루트거나 공개 루트면 볼 수 있도록"""
 
-    route = get_object_or_404(
-    Route,
-    Q(pk=route_id) & (Q(creator=request.user) | Q(is_public=True))  # ← 이렇게 전체 조건을 Q()로 묶어줘야 해!
-    )
+    # 로그인했을 때는 creator거나 공개된 루트면 허용
+    # 로그인 안했으면 공개 루트만 허용
+    q = Q(pk=route_id) & (Q(is_public=True) | Q(creator=request.user if request.user.is_authenticated else None))
+    route = get_object_or_404(Route, q)
 
-    # 태그까지 보여주려면 prefetch
     stops_qs = (
         RoutePlace.objects
         .filter(route=route)
@@ -36,7 +33,7 @@ def route_detail(request, route_id: int):
     return render(request, "routes/detail.html", {
         "route": route,
         "stops": stops,
-        "from_page": from_page,    
+        "from_page": from_page,
     })
 
 @login_required
@@ -190,3 +187,21 @@ def update_place_order(request, route_id):
         return JsonResponse({"ok": True})
     except Exception as e:
         return JsonResponse({"ok": False, "error": str(e)}, status=400)
+
+@login_required
+@require_POST
+def delete_route(request, route_id):
+    route = get_object_or_404(Route, pk=route_id, creator=request.user)
+    route.delete()
+
+    # 어디서 왔는지 확인
+    from_page = request.GET.get("from", "")
+
+    if from_page == "mypage":
+        redirect_url = reverse("users:my_page")
+    elif from_page == "public_list":
+        redirect_url = reverse("routes:route_list")
+    else:
+        redirect_url = "/"
+
+    return JsonResponse({"ok": True, "redirect_url": redirect_url})
