@@ -38,6 +38,7 @@
                 <h3 class="place-card__title">{{ rec.place.name }}</h3>
                 <p class="place-card__region">{{ rec.place.region }}</p>
                 <p class="place-card__reason">{{ rec.reason }}</p>
+                <p class="place-card__tip">{{ rec.tip }}</p>
                 <p class="place-card__summary">{{ rec.place.summary|truncatechars:200|default:"설명 없음" }}</p>
                 <ul class="tag-list">
                     {% for tag in rec.place.tags.all %}
