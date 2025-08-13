@@ -7,6 +7,7 @@ main {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    padding-bottom: 10vh;
 }
 
 main > h1 {
@@ -19,7 +20,7 @@ main > h1 {
 }
 
 #form-container {
-    width: 700px;
+    width: 500px;
     border-radius: 25px;
     border: 1px solid #62B3B8;
     display: flex;
@@ -31,10 +32,12 @@ main > h1 {
 #form-container > h2 {
     color: #62B3B8;
     font-family: Lexend;
-    font-size: 38px;
+    font-size: 2rem;
     font-style: normal;
     font-weight: 600;
     line-height: 150%;
     padding: 10px;
 }
+
+
 
