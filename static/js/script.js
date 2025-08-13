@@ -13,101 +13,6 @@
 
     // ---------- After DOM Ready ----------
     document.addEventListener('DOMContentLoaded', function () {
-        // ===== SEARCH PAGE: Load more =====
-        (function initLoadMore() {
-            const loadMoreBtn = document.getElementById('load-more-btn');
-            const additionalContainer = document.getElementById('additional-places-container');
-            const loadingDiv = document.getElementById('loading');
-
-            if (!loadMoreBtn || !additionalContainer || !loadingDiv) return;
-
-            loadMoreBtn.addEventListener('click', function () {
-                const prompt = this.dataset.prompt || '';
-                const followup = this.dataset.followup || '';
-                const currentPage = parseInt(this.dataset.page || '1', 10);
-
-                loadingDiv.style.display = 'block';
-                loadMoreBtn.style.display = 'none';
-
-                const params = new URLSearchParams();
-                params.append('prompt', prompt);
-                if (followup) params.append('followup', followup);
-                params.append('page', String(currentPage + 1));
-
-                fetch(`/more-recommendations-ajax/?${params.toString()}`)
-                    .then((res) => {
-                        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                        return res.json();
-                    })
-                    .then((data) => {
-                        if (data.places && data.places.length) {
-                            for (let i = 0; i < data.places.length; i += 3) {
-                                const row = document.createElement('div');
-                                row.className = 'additional-places-row';
-                                const rowPlaces = data.places.slice(i, i + 3);
-                                rowPlaces.forEach((placeData) => {
-                                    row.appendChild(createPlaceCard(placeData));
-                                });
-                                additionalContainer.appendChild(row);
-                            }
-                            this.dataset.page = String(currentPage + 1);
-
-                            const totalLoaded = 3 + (parseInt(this.dataset.page, 10) - 1) * 3;
-                            if (data.has_more) {
-                                loadMoreBtn.style.display = 'block';
-                                loadMoreBtn.textContent = `🔍 더 많은 장소 보기 (현재 ${totalLoaded}개)`;
-                            } else {
-                                this.textContent = `더 이상 로드할 장소가 없습니다 (총 ${totalLoaded}개)`;
-                                this.disabled = true;
-                                this.style.display = 'inline-block';
-                            }
-                        } else {
-                            const totalLoaded = 3 + (parseInt(this.dataset.page || '1', 10) - 1) * 3;
-                            this.textContent = `더 이상 로드할 장소가 없습니다 (총 ${totalLoaded}개)`;
-                            this.disabled = true;
-                            this.style.display = 'inline-block';
-                        }
-                    })
-                    .catch((err) => {
-                        console.error(err);
-                        this.textContent = '오류가 발생했습니다. 다시 시도해주세요.';
-                        this.style.display = 'inline-block';
-                    })
-                    .finally(() => {
-                        loadingDiv.style.display = 'none';
-                    });
-            });
-
-            function createPlaceCard(placeData) {
-                const card = document.createElement('div');
-                card.className = 'place-card';
-                const isAuth = !!placeData.place.is_authenticated;
-
-                card.innerHTML = `
-          <div class="place-card__map"></div>
-          <div class="place-card__body">
-            <h3 class="place-card__title">${placeData.place.name}</h3>
-            <p class="place-card__region">${placeData.place.region || ''}</p>
-            ${placeData.reason ? `<p class="place-card__reason">${placeData.reason}</p>` : ''}
-            <p class="place-card__summary">${placeData.place.summary || '설명 없음'}</p>
-            <ul class="tag-list">
-              ${(placeData.place.tags || []).map(t => `<li class="tag">#${t.name}</li>`).join('')}
-            </ul>
-            ${isAuth ? `
-              <form method="post" action="/${placeData.place.id}/like/" class="like-form">
-                <input type="hidden" name="csrfmiddlewaretoken" value="${csrftoken || ''}">
-                <button type="submit" class="like-button">
-                  ${placeData.place.is_liked ? '❤️ 취소' : '🤍 좋아요'}
-                </button>
-              </form>
-            ` : ''}
-            <a href="/${placeData.place.id}/" class="link">자세히 보기</a>
-          </div>
-        `;
-                return card;
-            }
-        })();
-
         // ===== TAGS: “더보기/접기 & Ajax 필터” (교체된 부분) =====
         (function initTagChipsAjax() {
             const rail = document.querySelector('.tag-rail');
@@ -203,7 +108,7 @@
                     listBox.textContent = '불러오는 중...';
                     try {
                         // ⚠️ 정적 .js 파일이면 아래 템플릿 태그를 문자열 URL로 바꾸세요.
-                        const res = await fetch("{% url 'routes:my_routes_json' %}", { credentials: 'same-origin' });
+                        const res = await fetch('/routes/mine/json/', { credentials: 'same-origin' });
                         const data = await res.json();
                         if (!data.routes.length) {
                             listBox.innerHTML = '<p>루트 없음</p>';
@@ -227,7 +132,7 @@
                 const routeId = e.target.dataset.routeId;
                 const placeId = e.target.dataset.placeId;
                 // ⚠️ 정적 .js 파일이면 템플릿 태그 대신 `/routes/${routeId}/add/${placeId}/` 로 직접 구성
-                const endpoint = `{% url 'routes:add_place' 0 0 %}`.replace('/0/add/0/', `/${routeId}/add/${placeId}/`);
+                const endpoint = `{% url '/routes/${routeId}/add/${placeId}/' % }`
                 try {
                     const res = await fetch(endpoint, {
                         method: 'POST',
@@ -257,7 +162,7 @@
                     fd.append('title', title);
                     fd.append('location_summary', summary);
                     // ⚠️ 정적 .js 파일이면 템플릿 태그 대신 '/routes/create/' 등으로 변경
-                    const res = await fetch("{% url 'routes:create_route' %}", {
+                    const res = await fetch('/routes/create/', {
                         method: 'POST',
                         headers: { 'X-CSRFToken': csrftoken, 'X-Requested-With': 'XMLHttpRequest' },
                         body: fd,

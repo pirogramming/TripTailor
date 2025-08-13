@@ -4,7 +4,7 @@
 <ul>
   {% for route in routes %}
     <li>
-      <a href="{% url 'routes:route_detail' route.pk %}">{{ route.title }}</a>
+      <a href="{% url 'routes:detail' route.pk %}">{{ route.title }}</a>
       <span>{{ route.summary }}</span>
       <span>by {{ route.user.username }}</span>
     </li>

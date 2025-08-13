@@ -60,19 +60,6 @@
         {% endfor %}
     </div>
 </div>
-
-<!-- 추가될 카드들을 위한 세로 컨테이너 -->
-<div id="additional-places-container" class="additional-places-container"></div>
-
-<!-- 더보기 버튼 -->
-<div class="more-places-section" id="more-section">
-    <button id="load-more-btn" class="more-places-button" data-prompt="{{ prompt }}" data-followup="{{ followup|default:'' }}">
-        🔍 더 많은 장소 보기
-    </button>
-    <div id="loading" style="display: none; text-align: center; padding: 20px;">
-        <p>장소를 불러오는 중...</p>
-    </div>
-</div>
 {% endif %}
 
 <a href="{% url 'places:main' %}" class="back-link">← 메인으로 돌아가기</a>
