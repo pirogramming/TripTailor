@@ -8,13 +8,12 @@ from apps.routes.models import Route
 class Review(models.Model):
     user = models.ForeignKey(User, related_name="reviews", on_delete=models.CASCADE)
 
-    # Route가 없어도 리뷰 작성 가능하도록
+    # Route는 필수 입력 항목
     route = models.ForeignKey(
         Route,
         related_name="reviews",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+        on_delete=models.CASCADE,
+        verbose_name="여행 경로",
     )
 
     title = models.CharField(max_length=200, verbose_name="게시물 제목")
@@ -43,7 +42,7 @@ class Review(models.Model):
 
 class ReviewPhoto(models.Model):
     review = models.ForeignKey(Review, related_name="photos", on_delete=models.CASCADE)
-    url = models.URLField()
+    url = models.URLField(blank=True, null=True, verbose_name="사진 URL")
 
     def __str__(self):
         return f"Photo of {self.review_id}"

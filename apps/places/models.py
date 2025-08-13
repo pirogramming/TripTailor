@@ -15,8 +15,7 @@ class Place(models.Model):
     summary = models.TextField(blank=True, null=True)
     tags = models.ManyToManyField(Tag, blank=True, related_name='places')
     place_class = models.IntegerField(default=0)  # class 필드 추가 (1: 레포츠, 2: 쇼핑, 3: 관광지, 4: 문화시설)
-    #서버 DB로 바꿀때 주석 처리 지우기
-    #embedding = VectorField(dimensions=1024, null=True, blank=True) 
+    embedding = VectorField(dimensions=1024, null=True, blank=True)
 
     def __str__(self):
         return self.name
