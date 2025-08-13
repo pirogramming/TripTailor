@@ -24,11 +24,14 @@
 
 <hr>
 
-<p>
-  <a href="{% url 'reviews:list' %}">← 목록</a>
-  {% if user.is_authenticated and user.pk == review.user_id %}
-    | <a href="{% url 'reviews:edit' review.pk %}">수정</a>
-    | <a href="{% url 'reviews:delete' review.pk %}">삭제</a>
+<div class="review-actions">
+  <a href="{% url 'reviews:list' %}" class="btn btn-outline-secondary">← 목록으로</a>
+  
+  {% if user.pk == review.user_id or user.is_staff or user.is_superuser %}
+    <div class="author-actions">
+      <a href="{% url 'reviews:edit' review.pk %}" class="btn btn-outline-primary">✏️ 수정</a>
+      <a href="{% url 'reviews:delete' review.pk %}" class="btn btn-outline-danger" onclick="return confirm('정말 삭제하시겠습니까?')">🗑️ 삭제</a>
+    </div>
   {% endif %}
-</p>
+</div>
 {% endblock %}

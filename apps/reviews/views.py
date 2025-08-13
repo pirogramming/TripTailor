@@ -108,11 +108,13 @@ def blog_reviews(request, place_id: int):
 
     return JsonResponse({"items": dedup[:10]})
 
-class ReviewListView(ListView):
+class ReviewListView(LoginRequiredMixin, ListView):
     model = Review
     template_name = 'reviews/review_list.html'
     context_object_name = 'reviews'
     paginate_by = 10
+    login_url = '/login/'  # 로그인 페이지 URL
+    # 로그인이 필요한 상태로 변경
 
     def get_queryset(self):
         qs = super().get_queryset().select_related('user', 'route').prefetch_related('photos')
@@ -125,16 +127,19 @@ class ReviewListView(ListView):
         return qs
 
 
-class ReviewDetailView(DetailView):
+class ReviewDetailView(LoginRequiredMixin, DetailView):
     model = Review
     template_name = 'reviews/review_detail.html'
     context_object_name = 'review'
+    login_url = '/login/'  # 로그인 페이지 URL
+    # 로그인이 필요한 상태로 변경
 
 
 class ReviewCreateView(LoginRequiredMixin, CreateView):
     model = Review
     form_class = ReviewForm
     template_name = 'reviews/review_form.html'
+    login_url = '/login/'  # 로그인 페이지 URL
 
     def get_initial(self):
         initial = super().get_initial()
@@ -211,6 +216,7 @@ class ReviewUpdateView(LoginRequiredMixin, AuthorRequiredMixin, UpdateView):
     model = Review
     form_class = ReviewForm
     template_name = 'reviews/review_form.html'
+    login_url = '/login/'  # 로그인 페이지 URL
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -279,6 +285,7 @@ class ReviewDeleteView(LoginRequiredMixin, AuthorRequiredMixin, DeleteView):
     model = Review
     template_name = 'reviews/review_delete.html'
     success_url = reverse_lazy('reviews:list')
+    login_url = '/login/'  # 로그인 페이지 URL
 
     def delete(self, request, *args, **kwargs):
         messages.success(self.request, "리뷰가 삭제되었습니다.")

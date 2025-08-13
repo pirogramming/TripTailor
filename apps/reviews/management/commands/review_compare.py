@@ -3,7 +3,6 @@ import json
 import uuid
 import numpy as np
 from typing import Dict
-import faiss
 from datetime import datetime
 import requests
 from decouple import config
@@ -19,28 +18,15 @@ def _get_base_dir() -> str:
 class ReviewPipelineService:
     def __init__(self):
         base_dir = _get_base_dir()
-        self.faiss_index_path = os.path.join(base_dir, "triptailor_cosine_v2.index")
         self.metadata_path = os.path.join(base_dir, "triptailor_full_metadata.csv")
         self.training_data_path = os.path.join(base_dir, "training_data")
 
-        # FAISS 인덱스 / 메타데이터 로드
-        self.faiss_index = self._load_faiss_index()
+        # 메타데이터 로드
         self.metadata = self._load_metadata()
 
     # ---------------------------
     # Loaders & Utilities
     # ---------------------------
-    def _load_faiss_index(self):
-        try:
-            if os.path.exists(self.faiss_index_path):
-                return faiss.read_index(self.faiss_index_path)
-            else:
-                print(f"FAISS 인덱스 파일이 없습니다: {self.faiss_index_path}")
-                return None
-        except Exception as e:
-            print(f"FAISS 인덱스 로드 실패: {e}")
-            return None
-
     def _load_metadata(self):
         try:
             if os.path.exists(self.metadata_path):
@@ -52,12 +38,6 @@ class ReviewPipelineService:
         except Exception as e:
             print(f"메타데이터 로드 실패: {e}")
             return None
-
-    def _index_dim(self) -> int:
-        # 인덱스가 있으면 그 차원, 없으면 프로젝트 기본 1024(Clova v2 가정)
-        if self.faiss_index is not None:
-            return int(self.faiss_index.d)
-        return 1024
 
     # ---------------------------
     # Clova: Summarize
@@ -91,49 +71,7 @@ class ReviewPipelineService:
     def _fallback_summarize(self, content: str) -> str:
         return (content[:100] + "...") if len(content) > 100 else content
 
-    # ---------------------------
-    # Clova: Embedding
-    # ---------------------------
-    def clova_embed(self, content: str) -> np.ndarray:
-        """
-        Clova Embedding v2 호출. 실패 시 인덱스 차원에 맞춘 난수 더미.
-        """
-        try:
-            api_key = config("CLOVASTUDIO_API_KEY", default=None)
-            url = config(
-                "CLOVA_EMBED_API_URL",
-                default="https://clovastudio.stream.ntruss.com/v1/api-tools/embedding/v2",
-            )
-            if not api_key:
-                print("CLOVASTUDIO_API_KEY 미설정 → 더미 임베딩")
-                return self._fallback_embed(content)
 
-            headers = {
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json",
-                "X-NCP-CLOVASTUDIO-REQUEST-ID": str(uuid.uuid4()),
-            }
-            payload = {"text": content}
-            r = requests.post(url, headers=headers, json=payload, timeout=30)
-            r.raise_for_status()
-            vec = r.json()["result"]["embedding"]
-            emb = np.array(vec, dtype="float32")
-
-            # 인덱스 차원과 불일치 시 패딩/절단
-            dim = self._index_dim()
-            if emb.shape[0] != dim:
-                if emb.shape[0] > dim:
-                    emb = emb[:dim]
-                else:
-                    emb = np.pad(emb, (0, dim - emb.shape[0]))
-            return emb
-        except Exception as e:
-            print(f"Clova Embedding 실패: {e}")
-            return self._fallback_embed(content)
-
-    def _fallback_embed(self, content: str) -> np.ndarray:
-        dim = self._index_dim()
-        return np.random.randn(dim).astype("float32")
 
     # ---------------------------
     # Update Decision
@@ -201,39 +139,42 @@ class ReviewPipelineService:
             return set()
 
     # ---------------------------
-    # FAISS / Metadata / Training
+    # Database Update
     # ---------------------------
-    def update_faiss_db(self, review, embedding: np.ndarray, summary: str):
+    def update_review_db(self, review, summary: str):
+        """
+        리뷰의 summary 필드를 DB에 업데이트
+        """
         try:
-            # 인덱스 없으면 새로 생성 (코사인용 Inner Product + L2 정규화)
-            if self.faiss_index is None:
-                dim = embedding.shape[0]
-                self.faiss_index = faiss.IndexFlatIP(dim)
-
-            # 코사인 검색을 위해 L2 정규화
-            norm = np.linalg.norm(embedding)
-            if norm > 0:
-                embedding = (embedding / norm).astype("float32")
-
-            self.faiss_index.add(embedding.reshape(1, -1))
-
-            new_metadata = {
-                "id": getattr(review, "id", None),
-                "user_id": getattr(getattr(review, "user", None), "id", None),
-                "route_id": getattr(getattr(review, "route", None), "id", None),
-                "rating": float(getattr(review, "rating", 0.0) or 0.0),
-                "summary": summary,
-                "content": getattr(review, "content", ""),
-                "created_at": getattr(review, "created_at", datetime.now()).isoformat(),
-                "updated_at": datetime.now().isoformat(),
-            }
-            self._save_metadata(new_metadata)
-            faiss.write_index(self.faiss_index, self.faiss_index_path)
-            print(f"FAISS DB 업데이트 완료: 리뷰 ID {new_metadata['id']}")
+            # Django 모델 import
+            from apps.reviews.models import Review as ReviewModel
+            
+            # 리뷰 객체가 이미 Django 모델인 경우
+            if hasattr(review, '_meta') and review._meta.model_name == 'review':
+                review.summary = summary
+                review.save(update_fields=['summary'])
+                print(f"DB 업데이트 완료: 리뷰 ID {review.id}")
+            else:
+                # 리뷰 ID로 DB에서 조회하여 업데이트
+                review_id = getattr(review, "id", None)
+                if review_id:
+                    try:
+                        db_review = ReviewModel.objects.get(id=review_id)
+                        db_review.summary = summary
+                        db_review.save(update_fields=['summary'])
+                        print(f"DB 업데이트 완료: 리뷰 ID {review_id}")
+                    except ReviewModel.DoesNotExist:
+                        print(f"DB에서 리뷰를 찾을 수 없음: ID {review_id}")
+                else:
+                    print("리뷰 ID가 없어 DB 업데이트 불가")
+                    
         except Exception as e:
-            print(f"FAISS DB 업데이트 실패: {e}")
+            print(f"DB 업데이트 실패: {e}")
 
     def _save_metadata(self, metadata: Dict):
+        """
+        메타데이터 저장 (기존 호환성을 위해 유지)
+        """
         try:
             import pandas as pd
             if self.metadata is not None:
@@ -321,8 +262,8 @@ class ReviewPipelineService:
     # ---------------------------
     def process_review(self, review) -> bool:
         """
-        1) 요약 → 2) 기존 summary/태그와 비교 → 3) 필요 시 임베딩 생성 →
-        4) FAISS & 메타데이터 저장 → 5) 학습데이터 저장
+        1) 요약 → 2) 기존 summary/태그와 비교 → 3) 필요 시 DB 업데이트 →
+        4) 학습데이터 저장
         """
         try:
             print(f"\n🤖 리뷰 파이프라인 시작: 리뷰 ID {getattr(review, 'id', None)}")
@@ -337,12 +278,8 @@ class ReviewPipelineService:
             if self.should_update(review, new_summary):
                 print("업데이트 필요 - 파이프라인 진행")
 
-                print("\n3단계: Clova Embedding 생성 중...")
-                embedding = self.clova_embed(getattr(review, "content", "") or "")
-                print(f"임베딩 생성 완료 (차원: {len(embedding)})")
-
-                print("\n4단계: FAISS DB 업데이트 중...")
-                self.update_faiss_db(review, embedding, new_summary)
+                print("\n3단계: DB 업데이트 중...")
+                self.update_review_db(review, new_summary)
 
                 print("\n5단계: 학습 데이터 저장 중...")
                 self.save_training_data(review, new_summary)
@@ -361,7 +298,7 @@ class ReviewPipelineService:
 # Django Management Command
 # ============================
 class Command(BaseCommand):
-    help = "TripTailor 리뷰 비교/임베딩 파이프라인 실행"
+    help = "TripTailor 리뷰 비교/DB 업데이트 파이프라인 실행"
 
     def add_arguments(self, parser):
         parser.add_argument("--review-id", type=int, help="특정 Review.id만 처리")

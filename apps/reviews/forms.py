@@ -8,17 +8,17 @@ class ReviewForm(forms.ModelForm):
         model = Review
         fields = ['title', 'route', 'rating', 'summary', 'content']
         widgets = {
-            # Route가 없어도 리뷰가 작성될 수 있도록 required=False 처리
-            'route': forms.Select(attrs={'required': False}),
-            'title': forms.TextInput(attrs={'placeholder': '게시물 제목을 입력하세요'}),
+            'route': forms.Select(attrs={'required': True, 'placeholder': '여행 경로를 선택하세요'}),
+            'title': forms.TextInput(attrs={'placeholder': '게시물 제목을 입력하세요', 'required': True}),
             'rating': forms.NumberInput(attrs={
                 'step': '0.1', 
                 'min': '0.0', 
                 'max': '5.0',
-                'placeholder': '0.0 ~ 5.0'
+                'placeholder': '0.0 ~ 5.0',
+                'required': True
             }),
-            'summary': forms.TextInput(attrs={'placeholder': '한 줄 요약(최대 255자)'}),
-            'content': forms.Textarea(attrs={'rows': 6, 'placeholder': '리뷰 내용을 작성하세요.'}),
+            'summary': forms.TextInput(attrs={'placeholder': '한 줄 요약(최대 255자)', 'required': True}),
+            'content': forms.Textarea(attrs={'rows': 6, 'placeholder': '리뷰 내용을 작성하세요.', 'required': True}),
         }
 
     def clean_rating(self):
@@ -37,9 +37,11 @@ class ReviewForm(forms.ModelForm):
             return 5.0  # 기본값 반환
 
     def clean_route(self):
-        # Route는 선택사항이므로 None이어도 OK
+        # Route는 필수 입력 항목
         route = self.cleaned_data.get('route')
-        return route  # None이어도 유효
+        if not route:
+            raise forms.ValidationError("여행 경로를 선택해주세요.")
+        return route
 
 ReviewPhotoFormSet = inlineformset_factory(
     Review,
@@ -48,5 +50,11 @@ ReviewPhotoFormSet = inlineformset_factory(
     extra=3,           # 기본 3칸 노출
     can_delete=True,
     max_num=5,         # 최대 5장
-    validate_max=True
+    validate_max=True,
+    widgets={
+        'url': forms.URLInput(attrs={
+            'placeholder': '사진 URL (선택사항)',
+            'required': False
+        })
+    }
 )
