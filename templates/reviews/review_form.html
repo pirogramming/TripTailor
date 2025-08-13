@@ -63,51 +63,5 @@
   </p>
 </form>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const photoForms = document.querySelectorAll('.photo-form');
-  
-  photoForms.forEach(function(form) {
-    const urlInput = form.querySelector('input[type="url"]');
-    const deleteCheckbox = form.querySelector('input[type="checkbox"]');
-    const previewDiv = form.querySelector('div[id^="preview-"]');
-    const previewImg = previewDiv ? previewDiv.querySelector('img') : null;
-    
-    if (urlInput && previewImg) {
-      urlInput.addEventListener('input', function() {
-        const url = this.value.trim();
-        if (url && isValidImageUrl(url)) {
-          previewImg.src = url;
-          previewDiv.style.display = 'block';
-        } else {
-          previewDiv.style.display = 'none';
-        }
-      });
-      
-      if (urlInput.value.trim()) {
-        urlInput.dispatchEvent(new Event('input'));
-      }
-    }
-    
-    if (deleteCheckbox && urlInput) {
-      deleteCheckbox.addEventListener('change', function() {
-        if (this.checked) {
-          urlInput.value = '';
-          if (previewDiv) {
-            previewDiv.style.display = 'none';
-          }
-        }
-      });
-    }
-  });
-  
-  function isValidImageUrl(url) {
-    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'];
-    const lowerUrl = url.toLowerCase();
-    return imageExtensions.some(ext => lowerUrl.includes(ext)) || 
-           lowerUrl.includes('http') || 
-           lowerUrl.includes('data:image');
-  }
-});
-</script>
+
 {% endblock %}
