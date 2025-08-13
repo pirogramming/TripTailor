@@ -4,29 +4,36 @@
 
 <h2>루트 수정</h2>
 
-<form method="post" action="{% url 'routes:update_route' route.id %}">
+<!-- form 시작 -->
+<form method="post" action="{% url 'routes:update_route' route.id %}" id="update-route-form">
   {% csrf_token %}
   <input type="hidden" name="from" value="{{ from_page }}">
+
+  <!-- 루트 제목 -->
   <div>
     <label>제목</label><br>
     <input type="text" name="title" value="{{ route.title }}" required>
   </div>
 
+  <!-- 요약 -->
   <div>
     <label>지역 요약</label><br>
     <input type="text" name="location_summary" value="{{ route.location_summary }}">
   </div>
 
+  <!-- 설명 -->
   <div>
     <label>설명</label><br>
     <textarea name="description">{{ route.description }}</textarea>
   </div>
 
+  <!-- 대표 이미지 URL -->
   <div>
     <label>대표 이미지 URL</label><br>
     <input type="url" name="cover_photo_url" value="{{ route.cover_photo_url }}">
   </div>
 
+  <!-- 공개 여부 -->
   <div>
     <label>
       <input type="checkbox" name="is_public" value="true" {% if route.is_public %}checked{% endif %}>
@@ -34,12 +41,17 @@
     </label>
   </div>
 
-  <button type="submit">저장</button>
-  <a href="{% url 'routes:detail' route.id %}?from={{ from_page }}">← 돌아가기</a>
+  <!-- ✅ 장소 순서를 담을 hidden input -->
+    <input type="hidden" name="place_ids_json" id="place-ids-input">
+
+  <!-- 저장 버튼 -->
+  
 </form>
 
+<!-- 장소 리스트 -->
 <h3 style="margin-top:32px;">🗺️ 포함된 장소</h3>
 
+<!-- ✅ form 밖이지만 submit할 때 순서 반영됨 -->
 <ol id="sortable-list" style="padding-left: 20px;">
   {% for rp in stops %}
     <li data-place-id="{{ rp.place.id }}" style="margin: 8px 0; cursor: move;">
@@ -49,9 +61,14 @@
   {% endfor %}
 </ol>
 
-<button id="save-order-btn">순서 저장</button>
+<div>
+    <button type="submit">💾 저장</button>
+    <a href="{% url 'routes:detail' route.id %}?from={{ from_page }}">← 돌아가기</a>
+</div>
 
+<!-- jQuery, jQuery UI, 사용자 스크립트 -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 <script src="{% static 'js/edit_route.js' %}"></script>
+
 {% endblock %}

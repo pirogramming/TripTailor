@@ -156,6 +156,7 @@ def edit_route_page(request, route_id):
 def update_route(request, route_id):
     route = get_object_or_404(Route, pk=route_id, creator=request.user)
 
+    # 1️⃣ 루트 정보 저장
     route.title = request.POST.get("title", "").strip()
     route.location_summary = request.POST.get("location_summary", "").strip()
     route.description = request.POST.get("description", "").strip()
@@ -163,30 +164,28 @@ def update_route(request, route_id):
     route.is_public = request.POST.get("is_public") == "true"
     route.save()
 
+    # 2️⃣ 장소 순서 처리 (place_ids_json이 존재할 경우)
+    place_ids_json = request.POST.get("place_ids_json")
+    if place_ids_json:
+        try:
+            import json
+            place_ids = json.loads(place_ids_json)
+
+            with transaction.atomic():
+                # 중복 방지를 위해 임시로 큰 수로 업데이트
+                for i, place_id in enumerate(place_ids):
+                    RoutePlace.objects.filter(route=route, place_id=place_id).update(stop_order=10000 + i)
+
+                # 실제 순서대로 저장
+                for i, place_id in enumerate(place_ids, start=1):
+                    RoutePlace.objects.filter(route=route, place_id=place_id).update(stop_order=i)
+
+        except Exception as e:
+            return JsonResponse({"ok": False, "error": f"장소 순서 저장 실패: {str(e)}"}, status=400)
+
+    # 3️⃣ 저장 후 리디렉션
     return redirect(f"{reverse('routes:detail', args=[route.id])}?from={request.POST.get('from', '')}")
 
-@login_required
-@require_POST
-def update_place_order(request, route_id):
-    route = get_object_or_404(Route, pk=route_id, creator=request.user)
-
-    try:
-        import json
-        data = json.loads(request.body)
-        place_ids = data.get("place_ids", [])
-
-        with transaction.atomic():
-            # 1단계: 일단 겹치지 않는 큰 값으로 임시 설정
-            for i, place_id in enumerate(place_ids):
-                RoutePlace.objects.filter(route=route, place_id=place_id).update(stop_order=10000 + i)
-
-            # 2단계: 진짜 순서로 다시 저장
-            for i, place_id in enumerate(place_ids, start=1):
-                RoutePlace.objects.filter(route=route, place_id=place_id).update(stop_order=i)
-
-        return JsonResponse({"ok": True})
-    except Exception as e:
-        return JsonResponse({"ok": False, "error": str(e)}, status=400)
 
 @login_required
 @require_POST
