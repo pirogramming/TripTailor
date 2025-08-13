@@ -60,6 +60,14 @@
       {% endfor %}
     </ul>
   </section>
+  <!-- 블로그 후기 섹션 -->
+  <section class="card">
+      <h3 class="section-title"">블로그 후기</h3>
+      <button id="load-blog-reviews" data-place-id="{{ place.id }}" class="tag">블로그 후기 불러오기</button>
+      <ul id="blog-review-list" style="margin-top:10px;">
+
+      </ul>
+  </section>
 
   <div class="place-detail__footer">
     <a class="back-link" href="{% url 'places:main' %}">← 목록으로 돌아가기</a>
@@ -67,12 +75,5 @@
     <a class="route-link" href="{% url 'routes:place_routes' place.id %}">이 장소가 포함된 루트 보기</a>
   </div>
 </div>
-<!-- 블로그 후기 섹션 -->
-<section class="mt-6">
-    <h3>블로그 후기</h3>
-    <button id="load-blog-reviews" data-place-id="{{ place.id }}">블로그 후기 불러오기</button>
-    <ul id="blog-review-list" style="margin-top:10px;"></ul>
-</section>
-
 
 {% endblock %}

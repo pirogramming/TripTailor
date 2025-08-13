@@ -119,3 +119,42 @@
     height: 500px;
     background-color: gray;
 }
+
+.blog {
+    padding: 10px;    
+}
+
+#blog-review-list > li {
+    border-top: 1px solid rgb(193, 193, 193);
+    padding: 5px;
+}
+
+#blog-review-list > li > a {
+    display: block;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #333;
+    text-decoration: none;
+    margin-bottom: 4px;
+    transition: color 0.3s ease;
+}
+
+#blog-review-list > li > a:hover {
+    color: var(--border-color);
+}
+
+#blog-review-list > li > div {
+    font-size: 0.9rem;
+    color: #555;
+    line-height: 1.4;
+    margin-bottom: 6px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#blog-review-list > li > small {
+    display: block;
+    color: gray;
+    font-size: 0.8rem;
+}
