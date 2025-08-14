@@ -1,0 +1,93 @@
+/* ====== 공통: 루트 리스트 / 장소별 루트 ====== */
+.route-list{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  width:100%;
+  max-width:1100px;
+  margin:0 auto 24px;
+}
+
+.route-card{
+  background:#fff;
+  border:1px solid rgba(98,179,184,.25);
+  border-radius:16px;
+  box-shadow:0 8px 20px rgba(0,0,0,.06);
+  padding:18px 18px 14px;
+}
+
+.route-card .route-title{
+  font-size:1.1rem;
+  font-weight:800;
+  color:#0f172a;
+  text-decoration:none;
+}
+.route-card .route-title:hover{ text-decoration:underline; }
+
+.route-summary{
+  margin:8px 0 12px;
+  color:#64748b;
+  font-size:.95rem;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.route-flow{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.stop-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  background:#f8fafc;
+  border:1px solid rgba(98,179,184,.25);
+  padding:8px 12px;
+  border-radius:999px;
+  transition:transform .12s ease, background .12s ease, border-color .12s ease;
+  color:#0f172a;
+  font-size:.92rem;
+}
+.stop-chip:hover{
+  transform:translateY(-1px);
+  background:#e0f7f8;
+  border-color:rgba(98,179,184,.45);
+}
+
+.stop-chip img{
+  width:22px;
+  height:22px;
+  border-radius:6px;
+  object-fit:cover;
+}
+.stop-chip .meta{
+  font-size:0.8rem;
+  color:#94a3b8;
+}
+
+.arrow{
+  color:#94a3b8;
+  user-select:none;
+}
+
+.no-stops{
+  color:#94a3b8;
+  font-size:.9rem;
+}
+
+.back-link{
+  display:inline-block;
+  margin: 0 auto;
+  padding:10px 16px;
+  border-radius:8px;
+  border:1px solid var(--border-color, #62B3B8);
+  background:#fff;
+  text-decoration:none;
+}
+.back-link:hover{
+  background:#e0f7f8;
+}

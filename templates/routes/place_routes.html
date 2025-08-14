@@ -1,22 +1,44 @@
 {% extends "base.html" %}
+{% load static %}
 {% block content %}
+<link rel="stylesheet" href="{% static 'css/plaace_route.css' %}">
 <h2>{{ place.name }}가 포함된 루트</h2>
-<ul>
+
+<ul class="route-list">
   {% for route in routes %}
-    <li>
-      <a href="{% url 'routes:detail' route.pk %}">{{ route.title }}</a>
-      <span>{{ route.summary }}</span>
+    <li class="route-card">
+      <a class="route-title" href="{% url 'routes:detail' route_id=route.id %}">{{ route.title }}</a>
+      {% if route.summary %}
+        <p class="route-summary">{{ route.summary }}</p>
+      {% endif %}
+
+      <div class="route-flow">
+        {% with stops=route.stops.all %}
+          {% if stops %}
+            {% for stop in stops %}
+              <a class="stop-chip" href="{% url 'places:detail' place_id=stop.place.id %}">
+                {% if stop.place.thumbnail_url %}
+                  <img src="{{ stop.place.thumbnail_url }}" alt="">
+                {% endif %}
+                <span class="name">{{ stop.place.name }}</span>
+                {% if stop.stay_minutes %}
+                  <small class="meta">{{ stop.stay_minutes }}분</small>
+                {% endif %}
+              </a>
+              {% if not forloop.last %}
+                <span class="arrow" title="다음 장소">→</span>
+              {% endif %}
+            {% endfor %}
+          {% else %}
+            <span class="no-stops">등록된 장소 없음</span>
+          {% endif %}
+        {% endwith %}
+      </div>
     </li>
+  {% empty %}
+    <li class="route-card no-result">이 장소를 포함한 루트가 없습니다.</li>
   {% endfor %}
 </ul>
-<div class="pagination">
-  {% if routes.has_previous %}
-    <a href="?page={{ routes.previous_page_number }}">이전</a>
-  {% endif %}
-  <span>{{ routes.number }} / {{ routes.paginator.num_pages }}</span>
-  {% if routes.has_next %}
-    <a href="?page={{ routes.next_page_number }}">다음</a>
-  {% endif %}
-</div>
-<a href="{% url 'routes:route_list' %}">← 전체 루트 보기</a>
+
+<a class="back-link" href="{% url 'routes:route_list' %}">← 전체 루트 보기</a>
 {% endblock %}

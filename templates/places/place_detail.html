@@ -11,7 +11,7 @@
     <form method="post" action="{% url 'places:place_like' place.pk %}" class="like-form">
       {% csrf_token %}
       <button type="submit" class="like-button">
-        {% if place.is_liked %}❤️ 취소{% else %}🤍 좋아요{% endif %}
+        {% if place.is_liked %}❤️ 찜취소 {% else %}🤍 찜하기{% endif %}
       </button>
     </form>
     {% endif %}
