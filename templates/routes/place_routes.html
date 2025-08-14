@@ -16,7 +16,8 @@
         {% with stops=route.stops.all %}
           {% if stops %}
             {% for stop in stops %}
-              <a class="stop-chip" href="{% url 'places:detail' place_id=stop.place.id %}">
+            <a class="stop-chip" href="{% url 'places:place_detail' pk=stop.place.id %}">
+
                 {% if stop.place.thumbnail_url %}
                   <img src="{{ stop.place.thumbnail_url }}" alt="">
                 {% endif %}
