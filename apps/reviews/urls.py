@@ -5,11 +5,13 @@ from . import views
 app_name = 'reviews'
 
 urlpatterns = [
-    path('', views.ReviewListView.as_view(), name='list'),
-    path('<int:pk>/', views.ReviewDetailView.as_view(), name='detail'),
-    path('create/', views.ReviewCreateView.as_view(), name='create'),
-    path('<int:pk>/edit/', views.ReviewUpdateView.as_view(), name='edit'),
-    path('<int:pk>/delete/', views.ReviewDeleteView.as_view(), name='delete'),
-    path("blogs/<int:place_id>/", views.blog_reviews, name="blog_reviews"),
-
+    # Place 기반 댓글 CRUD URL들
+    path('place/<int:place_id>/create/', views.PlaceReviewCreateView.as_view(), name='place_create'),
+    path('place/<int:place_id>/<int:pk>/edit/', views.PlaceReviewUpdateView.as_view(), name='place_edit'),
+    
+    # AJAX 삭제
+    path('place/<int:place_id>/<int:review_id>/delete/', views.delete_review_ajax, name='delete_review_ajax'),
+    
+    # HTMX 댓글 목록
+    path('htmx/<int:place_id>/', views.place_review_list_htmx, name='htmx_list'),
 ]
