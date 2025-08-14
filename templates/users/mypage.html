@@ -3,134 +3,60 @@
 {% load static %}
 {% load i18n %}
 
+{% block head %}
+    <link rel="stylesheet" href="{% static 'css/users/mypage.css' %}?v={% now 'U' %}">
+    {% if tab == "likes" %}
+        <link rel="stylesheet" href="{% static 'css/users/likes.css' %}?v={% now 'U' %}">
+    {% elif tab == "routes" %}
+        <link rel="stylesheet" href="{% static 'css/users/routes.css' %}?v={% now 'U' %}">
+    {% elif tab == "reviews" %}
+        <link rel="stylesheet" href="{% static 'css/users/reviews.css' %}?v={% now 'U' %}">
+    {% endif %}
+{% endblock %}
+
 {% block content %}
-<section class="container">
-    <h2>내가 좋아요한 장소 ({{ total_likes }})</h2>
-
-    {% if likes_page %}
-        <div>
-            {% for like in likes_page %}
-                {% with place=like.place %}
-                <article>
-                    <h3>
-                        <a href="{% url 'places:place_detail' place.pk %}">{{ place.name }}</a>
-                    </h3>
-                    <p>{{ place.region }} {{ place.address }}</p>
-
-                    {% if place.tags.all %}
-                    <ul>
-                        {% for tag in place.tags.all %}
-                            <li>#{{ tag.name }}</li>
-                        {% endfor %}
-                    </ul>
-                    {% endif %}
-                </article>
-                {% endwith %}
-            {% endfor %}
+<main>
+    <div id="profile-container">
+        <div id="profile-img">
+            <img src="{% static 'images/profile-default.png' %}" alt="프로필 이미지" id="profile-avatar">
         </div>
-
-        <nav>
-            {% if likes_page.has_previous %}
-                <a href="?page_likes={{ likes_page.previous_page_number }}&page_routes={{ routes_page.number }}&page_reviews={{ reviews_page.number }}">이전</a>
-            {% endif %}
-            <span>{{ likes_page.number }} / {{ likes_page.paginator.num_pages }}</span>
-            {% if likes_page.has_next %}
-                <a href="?page_likes={{ likes_page.next_page_number }}&page_routes={{ routes_page.number }}&page_reviews={{ reviews_page.number }}">다음</a>
-            {% endif %}
-        </nav>
-    {% else %}
-        <p>아직 좋아요한 장소가 없어요.</p>
-    {% endif %}
-
-    <h2>내 루트 ({{ routes_total }})</h2>
-    <ul>
-        {% for route in routes_page %}
-            <li style="margin-bottom:12px;">
-            <div>
-                <strong>{{ route.title }}</strong>
-                <small style="color:#666;"> · {{ route.created_at|date:"Y-m-d" }}</small>
+        <div id="profile-content">
+            <span class="username">{{user.username}}</span>
+            <span class="email">{{user.email}}</span>
+        </div>
+        <div id="profile-total">
+            <div id="total-likes">
+                <span>찜한 여행지</span>
+                {{ total_likes }}
             </div>
-            {% if route.location_summary %}
-                <div style="margin:4px 0; color:#444;">{{ route.location_summary }}</div>
-            {% endif %}
-            <div style="font-size:14px; color:#666;">
-                스탑 {{ route.num_stops }}개
+            <div id="total-routes">
+                <span>여행 루트</span>
+                {{ routes_total }}
             </div>
-
-            {# 미리보기: 현재 페이지에 prefetch된 stops 중 앞 3개 #}
-            {% if route.prefetched_stops %}
-                <ol style="margin:6px 0 0 20px; padding:0;">
-                {% for rp in route.prefetched_stops|slice:":3" %}
-                    <li>
-                    <a href="{% url 'places:place_detail' rp.place_id %}">{{ rp.place.name }}</a>
-                    <small style="color:#999;">#{{ rp.stop_order }}</small>
-                    </li>
-                {% endfor %}
-                {% if route.num_stops > 3 %}
-                    <li style="list-style:none; color:#999;">… 외 {{ route.num_stops|add:"-3" }}개</li>
-                {% endif %}
-                </ol>
-            {% else %}
-                <div style="color:#999;">아직 장소가 없어요.</div>
-            {% endif %}
-
-            {# 상세 진입(내 루트만 접근 가능하도록 서버에서 이미 잠금) #}
-            <div style="margin-top:4px;">
-                <a href="{% url 'routes:detail' route.id %}?from=mypage">루트 상세</a>
+            <div id="total-reviews">
+                <span>작성한 댓글수</span>
+                {{ total_reviews }}
             </div>
-            </li>
-        {% empty %}
-            <li>아직 만든 루트가 없어요. 여행지 목록에서 <em>"루트에 추가"</em> 버튼으로 만들어보세요!</li>
-        {% endfor %}
-    </ul>
-
-    <div style="margin:8px 0;">
-        {% if routes_page.has_previous %}
-            <a href="?page_routes={{ routes_page.previous_page_number }}&page_likes={{ likes_page.number }}&page_reviews={{ reviews_page.number }}">이전</a>
-        {% endif %}
-        <span>페이지 {{ routes_page.number }} / {{ routes_page.paginator.num_pages }}</span>
-        {% if routes_page.has_next %}
-            <a href="?page_routes={{ routes_page.next_page_number }}&page_likes={{ likes_page.number }}&page_reviews={{ reviews_page.number }}">다음</a>
+        </div>
+    </div>
+    <div class="filter-bar">
+        <a href="?tab=likes" class="tab {% if tab == 'likes' %}active{% endif %}" id="likes-bar">찜한 목록</a>
+        <a href="?tab=routes" class="tab {% if tab == 'routes' %}active{% endif %}" id="routes-bar">내 루트</a>
+        <a href="?tab=reviews" class="tab {% if tab == 'reviews' %}active{% endif %}" id="reviews-bar">작성한 댓글</a>
+    </div>
+    <div id="content">
+        {% if tab == 'likes' %}
+            {% include 'users/likes.html' %}
+        {% elif tab == 'routes' %}
+            {% include 'users/routes.html' %}
+        {% elif tab == 'reviews' %}
+            {% include 'users/reviews.html' %}
+        {% else %}
+            <p>잘못된 탭입니다.</p>
         {% endif %}
     </div>
 
-    <h2>내가 작성한 댓글 ({{ total_reviews }})</h2>
-    <ul>
-    {% for review in reviews_page %}
-        <li>
-        <p><strong>{{ review.place.name }}</strong></p>
-        <p>별점: {{ review.rating }} / 5.0</p>
-        <p>{{ review.content }}</p>
-        <p>{{ review.created_at|date:"Y-m-d H:i" }}</p>
-
-        {% if review.photos.all %}
-            <div>
-            {% for photo in review.photos.all %}
-                <img src="{{ photo.url }}" alt="리뷰 사진" width="150">
-            {% endfor %}
-            </div>
-        {% endif %}
-
-        <a href="{% url 'places:place_detail' review.place.pk %}">장소 상세보기</a>
-        </li>
-    {% empty %}
-        <li>작성한 댓글이 없습니다.</li>
-    {% endfor %}
-    </ul>
-
-    <div class="pagination">
-    {% if reviews_page.has_previous %}
-        <a href="?page_reviews=1&page_likes={{ likes_page.number }}&page_routes={{ routes_page.number }}">처음</a>
-        <a href="?page_reviews={{ reviews_page.previous_page_number }}&page_likes={{ likes_page.number }}&page_routes={{ routes_page.number }}">이전</a>
-    {% endif %}
-
-    <span>{{ reviews_page.number }} / {{ reviews_page.paginator.num_pages }}</span>
-
-    {% if reviews_page.has_next %}
-        <a href="?page_reviews={{ reviews_page.next_page_number }}&page_likes={{ likes_page.number }}&page_routes={{ routes_page.number }}">다음</a>
-        <a href="?page_reviews={{ reviews_page.paginator.num_pages }}&page_likes={{ likes_page.number }}&page_routes={{ routes_page.number }}">마지막</a>
-    {% endif %}
-    </div>
-
-</section>
+</main>
+<script src="{% static 'js/mypage.js' %}"></script>
+<script src="{% static 'js/like.js' %}?v={% now 'U' %}"></script>
 {% endblock %}

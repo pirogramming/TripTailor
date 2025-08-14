@@ -1,0 +1,166 @@
+.place-list{
+  max-width:1100px;
+  margin:0 auto;
+  padding:0 12px;
+  list-style:none;
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap:24px;
+}
+@media (max-width: 960px){ .place-list{ grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px){ .place-list{ grid-template-columns: 1fr; } }
+
+/* Card */
+.place-item{
+  display:flex;
+  flex-direction:column;
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:14px;
+  box-shadow:var(--shadow);
+  transition: transform .12s ease, box-shadow .12s ease;
+  width: 20vw;
+}
+.place-item:hover{ transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0,0,0,.10); }
+
+/* Media: square */
+.place-item__map{
+  aspect-ratio:1 / 1;
+  width:100%;
+  background: linear-gradient(135deg,#f8fafc,#eef2f7);
+  flex-shrink:0;
+}
+
+/* Header(정보 + 버튼) */
+.place-item__head{
+  position:relative;
+  display:grid;
+  grid-template-columns: 1fr 1fr;     /* 버튼 50%/50% 라인을 만들기 위해 2열 고정 */
+  gap:8px;
+  padding:12px 14px;
+  border-top:1px solid #eef2f7;
+}
+
+/* 제목/메타는 전체 폭 사용 */
+.place-item__name{ grid-column:1 / -1; font-weight:700; font-size:16px; }
+.place-item__meta{ grid-column:1 / -1; font-size:13px; color:var(--muted); }
+
+/* '자세히 보기'는 전체 폭 버튼 스타일(선택) */
+.place-item__link{
+  grid-column:1 / -1;
+  height:36px;
+  border:1px solid var(--border-color);
+  border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  background:#fff; font-size:13px;
+}
+.place-item__link:hover{ background: var(--chip-active-bg); }
+
+/* === 버튼 50%씩 (HTML 변경 없이) === */
+.like-form{ grid-column:1 / 2; display:flex; }
+.add-to-route-btn{ grid-column:2 / 3; }
+
+.like-button,
+.add-to-route-btn{
+  width:100%;
+  height:40px;
+  display:flex; align-items:center; justify-content:center;
+  border-radius:10px; font-size:14px;
+  background:#fff; border:1px solid #e5e7eb;
+}
+.like-button{ border-color:#f43f5e; color:#e11d48; }
+.like-button:hover{ background:#fff0f3; }
+.add-to-route-btn{ border-color: var(--border-color); }
+.add-to-route-btn:hover{ background: var(--chip-active-bg); }
+
+/* Tags */
+.tag-list{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  list-style:none;
+  padding:12px 14px 14px;
+  border-top:1px solid #eef2f7;
+  margin:0;
+}
+.tag{
+  display:inline-block;
+  font-size:12px;
+  padding:6px 10px;
+  border-radius:999px;
+  background:#f8fafc;
+  border:1px solid #e5e7eb;
+  color:#334155;
+}
+
+/* ===== 루트 팝업(HTML 수정 없이 예쁘게) ===== */
+.route-dropdown{
+  position:absolute;
+  top: calc(100% + 10px); /* 헤더 하단 기준 */
+  right: 14px;
+  z-index: 30;
+  display:none;                 /* 기본 닫힘 */
+  width: min(360px, 86vw);
+  padding:14px;
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:16px;
+  box-shadow: 0 18px 40px rgba(0,0,0,.14);
+  animation: rd-pop .12s ease-out;
+}
+@keyframes rd-pop {
+  from { transform: translateY(-4px); opacity:.0; }
+  to   { transform: translateY(0);    opacity:1; }
+}
+.place-item.show-dropdown .route-dropdown{ display:block; }
+
+/* 꼬리 */
+.route-dropdown::before{
+  content:"";
+  position:absolute; top:-10px; right:18px;
+  border-width:0 10px 10px 10px; border-style:solid;
+  border-color: transparent transparent #e5e7eb transparent;
+}
+.route-dropdown::after{
+  content:"";
+  position:absolute; top:-9px; right:18px;
+  border-width:0 10px 10px 10px; border-style:solid;
+  border-color: transparent transparent #fff transparent;
+}
+
+/* 팝업 내부 */
+.route-dropdown .route-list{
+  max-height: 220px;
+  overflow:auto;
+  padding:6px;
+  border:1px dashed #e5e7eb;
+  border-radius:10px;
+  font-size:14px;
+  color:#374151;
+  background:#fafafa;
+  margin-bottom:12px;
+}
+.route-dropdown hr{
+  border:0; height:1px; background:#f1f5f9; margin:12px 0;
+}
+.route-dropdown .create-route-form input{
+  width:100%;
+  padding:11px 12px;
+  margin-bottom:8px;
+  border:1px solid #e5e7eb;
+  border-radius:10px;
+  font-size:14px;
+}
+.route-dropdown .create-route-form label{
+  display:flex; align-items:center; gap:6px;
+  font-size:13px; color:#475569; margin-bottom:8px;
+}
+.create-route-btn{
+  width:100%;
+  height:38px;
+  border:1px solid var(--border-color);
+  border-radius:10px;
+  background: var(--primary);
+  color:#fff; font-size:14px;
+}
+.create-route-btn:hover{ background: var(--primary-hover); border-color: var(--primary-hover); }
