@@ -96,6 +96,7 @@ nav{
     flex-direction:column;
     padding:16px;
     transition: margin-right .28s var(--easing);
+    margin: 6rem auto 1.5rem; /* 상단 여백 */
 }
 
 /* ===== 스크림(배경 오버레이) ===== */
