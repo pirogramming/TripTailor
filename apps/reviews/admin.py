@@ -13,7 +13,7 @@ class ReviewPhotoInline(admin.TabularInline):
 class ReviewAdmin(admin.ModelAdmin):
     list_display = ('id','user', 'rating','created_at')
     list_filter = ('rating', 'created_at')
-    search_fields = ('content', 'user__username', 'route__name')
+    search_fields = ('content', 'user__username')
     inlines = [ReviewPhotoInline]
 
 @admin.register(ReviewPhoto)
