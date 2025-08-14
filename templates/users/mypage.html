@@ -3,7 +3,17 @@
 {% load static %}
 {% load i18n %}
 
+{% block head %}
+{% endblock %}
+    <link rel="stylesheet" href="{% static 'css/users/mypage.css' %}?v={% now 'U' %}">
 {% block content %}
+<main>
+    <div id="profile-container">
+
+    </div>
+    
+</main>
+
 <section class="container">
     <h2>내가 좋아요한 장소 ({{ total_likes }})</h2>
 
