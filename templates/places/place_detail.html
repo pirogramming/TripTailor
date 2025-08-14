@@ -90,39 +90,23 @@
           <label for="id_rating">평점 *</label>
           <select name="rating" id="id_rating" class="form-control" required>
             <option value="">평점 선택</option>
-            <option value="5.0">5.0 - 매우 좋음</option>
-            <option value="4.5">4.5 - 좋음</option>
-            <option value="4.0">4.0 - 보통</option>
-            <option value="3.5">3.5 - 보통</option>
-            <option value="3.0">3.0 - 보통</option>
-            <option value="2.5">2.5 - 나쁨</option>
-            <option value="2.0">2.0 - 나쁨</option>
-            <option value="1.5">1.5 - 매우 나쁨</option>
-            <option value="1.0">1.0 - 비추천</option>
-            <option value="0.5">0.5 - 매우 나쁨</option>
-            <option value="0.0">0.0 - 가지마</option>
+            <option value="5.0">5.0</option>
+            <option value="4.5">4.5</option>
+            <option value="4.0">4.0</option>
+            <option value="3.5">3.5</option>
+            <option value="3.0">3.0</option>
+            <option value="2.5">2.5 </option>
+            <option value="2.0">2.0</option>
+            <option value="1.5">1.5</option>
+            <option value="1.0">1.0</option>
+            <option value="0.5">0.5</option>
+            <option value="0.0">0.0</option>
           </select>
-        </div>
-        
-        <div class="form-group">
-          <label for="id_summary">요약 *</label>
-          <input type="text" name="summary" id="id_summary" class="form-control" required maxlength="255" placeholder="간단한 요약을 입력하세요">
         </div>
         
         <div class="form-group">
           <label for="id_content">내용 *</label>
           <textarea name="content" id="id_content" class="form-control" rows="4" required placeholder="상세한 후기를 작성해주세요"></textarea>
-        </div>
-
-        <div class="form-group">
-          <label for="id_route">루트 *</label>
-          <select name="route" id="id_route" class="form-control" required>
-            <option value="">루트 선택 (필수)</option>
-            {% for route in user_routes %}
-            <option value="{{ route.id }}">{{ route.title }}</option>
-            {% endfor %}
-          </select>
-          <small class="form-text text-muted">이 댓글을 연결할 여행 루트를 선택하세요</small>
         </div>
 
         <div class="form-group">

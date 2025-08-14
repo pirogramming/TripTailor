@@ -17,19 +17,7 @@ class Review(models.Model):
         verbose_name="장소",
     )
 
-    # Route는 선택적 입력 항목 (기존 기능 유지)
-    route = models.ForeignKey(
-        Route,
-        related_name="reviews",
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        verbose_name="여행 경로",
-    )
-
-    title = models.CharField(max_length=200, verbose_name="게시물 제목")
-
-    # 0.0 ~ 5.0 (소수 첫째 자리)
+    # 0.5 단위로 입력
     rating = models.DecimalField(
         max_digits=2,
         decimal_places=1,
@@ -37,7 +25,7 @@ class Review(models.Model):
             MinValueValidator(Decimal("0.0")),
             MaxValueValidator(Decimal("5.0")),
         ],
-        help_text="0.0 ~ 5.0 (소수 첫째 자리)",
+        help_text="0.0 ~ 5.0 (0.5 단위)",
     )
 
     content = models.TextField()
