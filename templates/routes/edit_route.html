@@ -44,27 +44,24 @@
   <!-- ✅ 장소 순서를 담을 hidden input -->
     <input type="hidden" name="place_ids_json" id="place-ids-input">
 
+  <h3 style="margin-top:32px;">🗺️ 포함된 장소</h3>
+
+  <!-- ✅ form 밖이지만 submit할 때 순서 반영됨 -->
+  <ol id="sortable-list" style="padding-left: 20px;">
+    {% for rp in stops %}
+      <li data-place-id="{{ rp.place.id }}" style="margin: 8px 0; cursor: move;">
+        {{ rp.place.name }}
+        <button type="button" class="delete-btn" data-place-id="{{ rp.place.id }}">삭제</button>
+      </li>
+    {% endfor %}
+  </ol>
+
   <!-- 저장 버튼 -->
-
-</form>
-
-<!-- 장소 리스트 -->
-<h3 style="margin-top:32px;">🗺️ 포함된 장소</h3>
-
-<!-- ✅ form 밖이지만 submit할 때 순서 반영됨 -->
-<ol id="sortable-list" style="padding-left: 20px;">
-  {% for rp in stops %}
-    <li data-place-id="{{ rp.place.id }}" style="margin: 8px 0; cursor: move;">
-      {{ rp.place.name }}
-      <button type="button" class="delete-btn" data-place-id="{{ rp.place.id }}">삭제</button>
-    </li>
-  {% endfor %}
-</ol>
-
-<div>
+  <div>
     <button type="submit">💾 저장</button>
     <a href="{% url 'routes:detail' route.id %}?from={{ from_page }}">← 돌아가기</a>
-</div>
+  </div>
+</form>
 
 <!-- jQuery, jQuery UI, 사용자 스크립트 -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
