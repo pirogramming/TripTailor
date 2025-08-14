@@ -1,0 +1,35 @@
+
+{% if likes_page %}
+<div>
+    {% for like in likes_page %}
+        {% with place=like.place %}
+        <article>
+            <h3>
+                <a href="{% url 'places:place_detail' place.pk %}">{{ place.name }}</a>
+            </h3>
+            <p>{{ place.region }} {{ place.address }}</p>
+
+            {% if place.tags.all %}
+            <ul>
+                {% for tag in place.tags.all %}
+                    <li>#{{ tag.name }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </article>
+        {% endwith %}
+    {% endfor %}
+</div>
+<div class="paginateion">
+    {% if likes_page.has_previous %}
+        <a href="?page_likes={{ likes_page.previous_page_number }}&page_routes={{ routes_page.number }}&page_reviews={{ reviews_page.number }}">이전</a>
+    {% endif %}
+    <span>{{ likes_page.number }} / {{ likes_page.paginator.num_pages }}</span>
+    {% if likes_page.has_next %}
+        <a href="?page_likes={{ likes_page.next_page_number }}&page_routes={{ routes_page.number }}&page_reviews={{ reviews_page.number }}">다음</a>
+    {% endif %}
+</div>
+
+{% else %}
+<p>아직 좋아요한 장소가 없어요.</p>
+{% endif %}

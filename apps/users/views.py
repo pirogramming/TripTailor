@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from apps.places.models import PlaceLike
+from apps.places.models import PlaceLike, Place
 from django.db.models import Count, Prefetch
 from django.db.models import prefetch_related_objects
 from apps.routes.models import Route, RoutePlace
@@ -20,6 +20,17 @@ def main_page(request):
 
 @login_required
 def my_page(request):
+    tab = request.GET.get("tab", "likes")
+    ctx = {"tab": tab}
+
+    if tab == "likes":
+        ctx["items"] = PlaceLike.objects.filter(user=request.user).order_by("-created_at")[:30]
+    elif tab == "routes":
+        ctx["items"] = Route.objects.filter(creator=request.user).order_by("-created_at")[:30]
+    elif tab == "reviews":
+        ctx["items"] = Review.objects.filter(user=request.user).order_by("-created_at")[:30]
+
+
     # --- 좋아요한 장소
     likes_qs = (
         PlaceLike.objects
@@ -68,7 +79,9 @@ def my_page(request):
             Prefetch("stops", queryset=preview_qs, to_attr="prefetched_stops"),
         )
 
-    return render(request, "users/mypage.html", {
+    return render(request, "users/mypage.html",{
+        "tab": tab,
+        
         # 좋아요 섹션
         "likes_page": likes_page,
         "total_likes": total_likes,
