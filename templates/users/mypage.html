@@ -94,16 +94,14 @@
         {% endif %}
     </div>
 
-    <h2>내가 작성한 리뷰 ({{ total_reviews }})</h2>
+    <h2>내가 작성한 댓글 ({{ total_reviews }})</h2>
     <ul>
     {% for review in reviews_page %}
         <li>
-        <h3>{{ review.title }}</h3>
+        <p><strong>{{ review.place.name }}</strong></p>
         <p>별점: {{ review.rating }} / 5.0</p>
-        <p>{{ review.summary }}</p>
+        <p>{{ review.content }}</p>
         <p>{{ review.created_at|date:"Y-m-d H:i" }}</p>
-
-        <p>관련 루트: <a href="{% url 'routes:detail' review.route.id %}">{{ review.route.title }}</a></p>
 
         {% if review.photos.all %}
             <div>
@@ -113,10 +111,10 @@
             </div>
         {% endif %}
 
-        <a href="{% url 'reviews:detail' review.pk %}">자세히 보기</a>
+        <a href="{% url 'places:place_detail' review.place.pk %}">장소 상세보기</a>
         </li>
     {% empty %}
-        <li>작성한 리뷰가 없습니다.</li>
+        <li>작성한 댓글이 없습니다.</li>
     {% endfor %}
     </ul>
 
