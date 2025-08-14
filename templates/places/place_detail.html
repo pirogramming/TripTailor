@@ -82,11 +82,6 @@
       <form method="post" action="{% url 'reviews:place_create' place.id %}" class="review-form" id="review-form">
         {% csrf_token %}
         <div class="form-group">
-          <label for="id_title">제목 *</label>
-          <input type="text" name="title" id="id_title" class="form-control" required maxlength="200">
-        </div>
-        
-        <div class="form-group">
           <label for="id_rating">평점 *</label>
           <select name="rating" id="id_rating" class="form-control" required>
             <option value="">평점 선택</option>
