@@ -2,7 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.db.models import Exists, OuterRef, BooleanField, Value, Count, Q
 from django.http import JsonResponse
-
+from urllib.parse import urlencode
+from django.core.paginator import Paginator
 import recommend 
 from django.core.paginator import Paginator
 from .models import Place, PlaceLike, Tag
@@ -281,7 +282,6 @@ def get_recommendation_context(prompt, followup, user):
         'show_followup': show_followup,
     }
 
-
 def main(request):
     prompt = request.GET.get('prompt', '')
     followup = request.GET.get('followup', '')
@@ -294,10 +294,8 @@ def main(request):
     if class_filter and class_filter.isdigit():
         qs = qs.filter(place_class=int(class_filter))
 
-    # ✅ 태그 필터 (Place.tags 기준)
-    # URL 예: ?tags=레트로,야경&match=any
+    # ✅ 태그 필터 (URL 예: ?tags=레트로&tags=야경&match=any)
     selected, match_mode, _ = _parse_selected_tags(request)
-
     if selected:
         # 1차: 교집합
         qs_all = qs
@@ -311,17 +309,33 @@ def main(request):
             # 2차: 합집합
             qs = qs.filter(tags__name__in=selected).distinct()
 
-    qs = qs.prefetch_related('tags') 
-    tags_qs = Tag.objects.order_by('name')
-
-
-    # 좋아요 메타 붙이기
+    # 태그/좋아요 메타
     qs = qs.prefetch_related('tags')
     qs = with_like_meta(qs, request.user)
 
     # 페이지네이션
     paginator = Paginator(qs, 21)
     page_obj = paginator.get_page(request.GET.get('page'))
+
+    # page 제외 쿼리스트링
+    q = request.GET.copy()
+    q.pop('page', None)
+    base_qs = q.urlencode()
+    base_prefix = f"?{base_qs}&" if base_qs else "?"   # 템플릿에서 한 줄로 사용
+
+    # === 페이지 번호 윈도우(5개) ===
+    num_pages = page_obj.paginator.num_pages
+    cur = page_obj.number
+    window = 5
+    start = max(1, cur - 2)
+    end = min(num_pages, start + window - 1)
+    start = max(1, end - window + 1)
+
+    page_window = range(start, end + 1)
+    show_first = start > 1
+    show_last = end < num_pages
+    show_first_ellipsis = start > 2
+    show_last_ellipsis = end < (num_pages - 1)
 
     # 모델 호출 1회
     context = get_recommendation_context(prompt, followup, request.user)
@@ -334,23 +348,34 @@ def main(request):
         'recommendations': context.get('recommendations', []),
     }
 
-    # 컨텍스트 합치기 (+ 태그 상태 전달)
+    # 컨텍스트
     context.update({
-        'places': page_obj,
+        'places': page_obj,             # Page 객체
+        'base_qs': base_qs,
+        'base_prefix': base_prefix,     # "?...&" 또는 "?"
+        'prompt': prompt,
+        'followup': followup,
         'place_class': class_filter,
-        'tags': tags_qs,
-        'match': match_mode,     # 'any' or 'all'
+        'tags': Tag.objects.order_by('name'),
+        'match': match_mode,            # 'any' or 'all'
         'selected_tags': selected,
+        # 페이지네이션 창 관련
+        'page_window': page_window,
+        'show_first': show_first,
+        'show_last': show_last,
+        'show_first_ellipsis': show_first_ellipsis,
+        'show_last_ellipsis': show_last_ellipsis,
     })
 
+    # 추천 결과 라우팅
     if context.get('recommended_places') and not context.get('show_followup'):
-        from urllib.parse import urlencode
-        q = {'prompt': prompt}
+        redir_q = {'prompt': prompt}
         if followup:
-            q['followup'] = followup
-        return redirect(f"/search/?{urlencode(q)}")
+            redir_q['followup'] = followup
+        return redirect(f"/search/?{urlencode(redir_q)}")
 
     return render(request, 'places/main.html', context)
+
 
 def search(request):
     prompt = request.GET.get('prompt', '')
