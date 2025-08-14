@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 {% load static %}
 {% block content %}
-<link rel="stylesheet" href="{% static 'css/plaace_route.css' %}">
-<h2>{{ place.name }}가 포함된 루트</h2>
+<link rel="stylesheet" href="{% static 'css/place_route.css' %}">
+
+<h2 class="page-title">{{ place.name }}가 포함된 루트</h2>
 
 <ul class="route-list">
   {% for route in routes %}
@@ -16,10 +17,9 @@
         {% with stops=route.stops.all %}
           {% if stops %}
             {% for stop in stops %}
-            <a class="stop-chip" href="{% url 'places:place_detail' pk=stop.place.id %}">
-
+              <a class="stop-chip" href="{% url 'places:place_detail' pk=stop.place.id %}" title="{{ stop.place.name }}">
                 {% if stop.place.thumbnail_url %}
-                  <img src="{{ stop.place.thumbnail_url }}" alt="">
+                  <img src="{{ stop.place.thumbnail_url }}" alt="" />
                 {% endif %}
                 <span class="name">{{ stop.place.name }}</span>
                 {% if stop.stay_minutes %}
