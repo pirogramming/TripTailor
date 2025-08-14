@@ -3,16 +3,27 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from apps.users.models import User
 from apps.routes.models import Route
+from apps.places.models import Place
 
 
 class Review(models.Model):
     user = models.ForeignKey(User, related_name="reviews", on_delete=models.CASCADE)
 
-    # Route는 필수 입력 항목
+    # Place는 필수 입력 항목 (장소 기반 댓글)
+    place = models.ForeignKey(
+        Place,
+        related_name="reviews",
+        on_delete=models.CASCADE,
+        verbose_name="장소",
+    )
+
+    # Route는 선택적 입력 항목 (기존 기능 유지)
     route = models.ForeignKey(
         Route,
         related_name="reviews",
         on_delete=models.CASCADE,
+        null=True,
+        blank=True,
         verbose_name="여행 경로",
     )
 

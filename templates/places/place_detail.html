@@ -60,13 +60,99 @@
       {% endfor %}
     </ul>
   </section>
+
   <!-- 블로그 후기 섹션 -->
   <section class="card">
-      <h3 class="section-title"">블로그 후기</h3>
+      <h3 class="section-title">블로그 후기</h3>
       <button id="load-blog-reviews" data-place-id="{{ place.id }}" class="tag">블로그 후기 불러오기</button>
       <ul id="blog-review-list" style="margin-top:10px;">
 
       </ul>
+  </section>
+
+  <!-- 댓글 섹션 -->
+  <section class="card">
+    <h3 class="section-title">댓글</h3>
+    
+    <!-- CSRF 토큰 (JavaScript용) -->
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+    
+    <!-- 댓글 작성 폼 -->
+    {% if user.is_authenticated %}
+    <div class="review-form-section">
+      <h4>댓글 작성</h4>
+      <form method="post" action="{% url 'reviews:place_create' place.id %}" class="review-form" id="review-form">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="id_title">제목 *</label>
+          <input type="text" name="title" id="id_title" class="form-control" required maxlength="200">
+        </div>
+        
+        <div class="form-group">
+          <label for="id_rating">평점 *</label>
+          <select name="rating" id="id_rating" class="form-control" required>
+            <option value="">평점 선택</option>
+            <option value="5.0">5.0 - 매우 좋음</option>
+            <option value="4.5">4.5 - 좋음</option>
+            <option value="4.0">4.0 - 보통</option>
+            <option value="3.5">3.5 - 보통</option>
+            <option value="3.0">3.0 - 보통</option>
+            <option value="2.5">2.5 - 나쁨</option>
+            <option value="2.0">2.0 - 나쁨</option>
+            <option value="1.5">1.5 - 매우 나쁨</option>
+            <option value="1.0">1.0 - 비추천</option>
+            <option value="0.5">0.5 - 매우 나쁨</option>
+            <option value="0.0">0.0 - 가지마</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="id_summary">요약 *</label>
+          <input type="text" name="summary" id="id_summary" class="form-control" required maxlength="255" placeholder="간단한 요약을 입력하세요">
+        </div>
+        
+        <div class="form-group">
+          <label for="id_content">내용 *</label>
+          <textarea name="content" id="id_content" class="form-control" rows="4" required placeholder="상세한 후기를 작성해주세요"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="id_route">루트 *</label>
+          <select name="route" id="id_route" class="form-control" required>
+            <option value="">루트 선택 (필수)</option>
+            {% for route in user_routes %}
+            <option value="{{ route.id }}">{{ route.title }}</option>
+            {% endfor %}
+          </select>
+          <small class="form-text text-muted">이 댓글을 연결할 여행 루트를 선택하세요</small>
+        </div>
+
+        <div class="form-group">
+          <label>이미지 URL (최대 5개, 선택사항)</label>
+          <div id="photo-inputs">
+            <div class="photo-input-row">
+              <input type="url" name="photo_urls[]" class="form-control photo-url-input" placeholder="https://example.com/image1.jpg">
+              <div class="photo-preview"></div>
+            </div>
+          </div>
+          <button type="button" id="add-photo-btn" class="btn btn-sm btn-outline-secondary">+ 이미지 추가</button>
+          <small class="form-text text-muted">댓글과 함께 표시할 이미지의 URL을 입력하세요 (최대 5개)</small>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">댓글 작성</button>
+      </form>
+    </div>
+    {% else %}
+    <div class="review-form-section">
+      <p>댓글을 작성하려면 <a href="{% url 'account_login' %}">로그인</a>이 필요합니다.</p>
+    </div>
+    {% endif %}
+
+    <!-- 댓글 목록 -->
+    <div id="review-list">
+      <!-- 댓글 목록이 여기에 표시됩니다 -->
+      <div class="loading-reviews">댓글 목록을 불러오는 중...</div>
+    </div>
   </section>
 
   <div class="place-detail__footer">
@@ -76,5 +162,179 @@
   </div>
 </div>
 
+
+
 <script src="{% static 'js/like.js' %}"></script>
+<script>
+// 페이지 로드 시 댓글 목록 불러오기
+document.addEventListener('DOMContentLoaded', function() {
+    loadReviews();
+});
+
+// 댓글 목록 불러오기 함수
+function loadReviews() {
+    const reviewList = document.getElementById('review-list');
+    if (reviewList) {
+        fetch(`{% url 'reviews:htmx_list' place.id %}`)
+            .then(response => response.text())
+            .then(html => {
+                reviewList.innerHTML = html;
+                // 댓글 목록 로드 후 삭제 버튼 이벤트 리스너 등록
+                setupDeleteButtons();
+            })
+            .catch(error => {
+                console.error('댓글 목록을 불러오는 중 오류 발생:', error);
+                reviewList.innerHTML = '<p>댓글 목록을 불러오는 중 오류가 발생했습니다.</p>';
+            });
+    }
+}
+
+// 삭제 버튼 이벤트 리스너 설정
+function setupDeleteButtons() {
+    console.log('삭제 버튼 이벤트 리스너 설정 중...');
+    const deleteButtons = document.querySelectorAll('.delete-review-btn');
+    console.log('발견된 삭제 버튼 개수:', deleteButtons.length);
+    
+    deleteButtons.forEach(button => {
+        // 기존 이벤트 리스너 제거 (중복 방지)
+        button.removeEventListener('click', handleDeleteClick);
+        // 새 이벤트 리스너 추가
+        button.addEventListener('click', handleDeleteClick);
+    });
+}
+
+// 삭제 버튼 클릭 핸들러
+function handleDeleteClick(event) {
+    const button = event.currentTarget;
+    const reviewId = button.getAttribute('data-review-id');
+    const placeId = button.getAttribute('data-place-id');
+    
+    console.log('삭제 버튼 클릭됨:', reviewId, placeId);
+    
+    if (confirm('정말 삭제하시겠습니까?')) {
+        console.log('사용자가 확인을 클릭함');
+        
+        // CSRF 토큰 가져오기
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        console.log('CSRF 토큰:', csrfToken);
+        
+        // 삭제 요청 보내기
+        fetch(`/reviews/place/${placeId}/${reviewId}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => {
+            console.log('응답 상태:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('응답 데이터:', data);
+            if (data.success) {
+                console.log('삭제 성공, 댓글 목록 새로고침');
+                // 성공 시 댓글 목록만 새로고침
+                loadReviews();
+            } else {
+                console.log('삭제 실패:', data.message);
+                alert('삭제 중 오류가 발생했습니다: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('삭제 요청 오류:', error);
+            alert('삭제 중 오류가 발생했습니다.');
+        });
+    } else {
+        console.log('사용자가 취소를 클릭함');
+    }
+}
+
+// 이미지 추가/삭제 및 미리보기 기능
+document.addEventListener('DOMContentLoaded', function() {
+    const addPhotoBtn = document.getElementById('add-photo-btn');
+    const photoInputs = document.getElementById('photo-inputs');
+    const maxPhotos = 5;
+
+    // 이미지 추가 버튼
+    if (addPhotoBtn) {
+        addPhotoBtn.addEventListener('click', function() {
+            const currentPhotos = photoInputs.querySelectorAll('.photo-input-row');
+            if (currentPhotos.length < maxPhotos) {
+                const newRow = document.createElement('div');
+                newRow.className = 'photo-input-row';
+                newRow.innerHTML = `
+                    <input type="url" name="photo_urls[]" class="form-control photo-url-input" placeholder="https://example.com/image${currentPhotos.length + 1}.jpg">
+                    <button type="button" class="btn btn-sm btn-danger remove-photo-btn">삭제</button>
+                    <div class="photo-preview"></div>
+                `;
+                photoInputs.appendChild(newRow);
+                
+                // 삭제 버튼 이벤트
+                newRow.querySelector('.remove-photo-btn').addEventListener('click', function() {
+                    photoInputs.removeChild(newRow);
+                    updateAddButton();
+                });
+                
+                // URL 입력 이벤트
+                newRow.querySelector('.photo-url-input').addEventListener('input', handlePhotoUrlInput);
+                
+                updateAddButton();
+            }
+        });
+    }
+
+    // 이미지 URL 입력 처리
+    function handlePhotoUrlInput(event) {
+        const input = event.target;
+        const preview = input.parentElement.querySelector('.photo-preview');
+        const url = input.value.trim();
+        
+        if (url && isValidUrl(url)) {
+            preview.innerHTML = `<img src="${url}" alt="미리보기" style="max-width: 100px; max-height: 100px; margin: 5px;">`;
+        } else {
+            preview.innerHTML = '';
+        }
+    }
+
+    // URL 유효성 검사
+    function isValidUrl(string) {
+        try {
+            new URL(string);
+            return true;
+        } catch (_) {
+            return false;
+        }
+    }
+
+    // 추가 버튼 상태 업데이트
+    function updateAddButton() {
+        const currentPhotos = photoInputs.querySelectorAll('.photo-input-row');
+        if (currentPhotos.length >= maxPhotos) {
+            addPhotoBtn.disabled = true;
+            addPhotoBtn.textContent = '이미지 최대 개수 도달';
+        } else {
+            addPhotoBtn.disabled = false;
+            addPhotoBtn.textContent = '+ 이미지 추가';
+        }
+    }
+
+    // 기존 이미지 입력 필드에 이벤트 추가
+    const existingInputs = photoInputs.querySelectorAll('.photo-url-input');
+    existingInputs.forEach(input => {
+        input.addEventListener('input', handlePhotoUrlInput);
+    });
+
+    // 폼 제출 후 댓글 목록 새로고침
+    const reviewForm = document.getElementById('review-form');
+    if (reviewForm) {
+        reviewForm.addEventListener('submit', function() {
+            // 폼 제출 후 잠시 대기 후 댓글 목록 새로고침
+            setTimeout(function() {
+                loadReviews();
+            }, 1000);
+        });
+    }
+});
+</script>
 {% endblock %}
