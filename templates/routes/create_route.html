@@ -1,41 +1,55 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block head %}
+  <link rel="stylesheet" href="{% static 'css/routes/create_route.css' %}?v={% now 'U' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lemon&display=swap" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
-<h2>🗺️ 새 루트 만들기</h2>
+<main>
+  <h1>새 루트 만들기</h1>
+  <div id="form-container">
+    <form id="create-route-form">
+      {% csrf_token %}
 
-<form id="create-route-form">
-  {% csrf_token %}
+      <div class="form-group">
+        <label>루트 제목</label><br />
+        <input type="text" name="title" placeholder="루트 제목을 입력하세요" />
+      </div>
 
-  <div>
-    <label>루트 제목</label><br />
-    <input type="text" name="title" required />
+      <div class="form-group">
+        <label>지역 요약</label><br />
+        <input type="text" name="location_summary" maxlength="200" placeholder="여행 지역을 간단히 요약해주세요"/>
+      </div>
+
+      <div class="form-group">
+        <label>설명</label><br />
+        <textarea name="description" placeholder="루트에 대한 자세한 설명을 입력하세요"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>대표 이미지 URL</label><br />
+        <input type="url" name="cover_photo_url" placeholder="대표 이미지 URL을 입력하세요"/>
+      </div>
+
+      <div>
+        <label class="checkbox-label">
+          <input type="checkbox" name="is_public" value="true" checked />
+          공개 루트로 설정
+        </label>
+      </div>
+
+      <button type="submit"><span>루트 생성</span></button>
+    </form>    
   </div>
 
-  <div>
-    <label>지역 요약</label><br />
-    <input type="text" name="location_summary" maxlength="200" />
-  </div>
+</main>
 
-  <div>
-    <label>설명</label><br />
-    <textarea name="description"></textarea>
-  </div>
 
-  <div>
-    <label>대표 이미지 URL</label><br />
-    <input type="url" name="cover_photo_url" />
-  </div>
 
-  <div>
-    <label>
-      <input type="checkbox" name="is_public" value="true" checked />
-      공개 루트로 설정
-    </label>
-  </div>
-
-  <button type="submit">루트 생성</button>
-</form>
 
 <script>
   document.getElementById("create-route-form").addEventListener("submit", async function (e) {

@@ -17,18 +17,32 @@
 {% block content %}
 <main>
     <div id="profile-container">
-        <div id="profile-img"></div>
-        <div id="profile-content"></div>
+        <div id="profile-img">
+            <img src="{% static 'images/profile-default.png' %}" alt="프로필 이미지" id="profile-avatar">
+        </div>
+        <div id="profile-content">
+            <span class="username">{{user.username}}</span>
+            <span class="email">{{user.email}}</span>
+        </div>
         <div id="profile-total">
-            <div id="total-likes">{{ total_likes }}</div>
-            <div id="total-routes">{{ routes_total }}</div>
-            <div id="total-reviews">{{ total_reviews }}</div>
+            <div id="total-likes">
+                <span>찜한 여행지</span>
+                {{ total_likes }}
+            </div>
+            <div id="total-routes">
+                <span>여행 루트</span>
+                {{ routes_total }}
+            </div>
+            <div id="total-reviews">
+                <span>작성한 댓글수</span>
+                {{ total_reviews }}
+            </div>
         </div>
     </div>
     <div class="filter-bar">
-        <a href="?tab=likes" class="tab {% if tab == 'likes' %}active{% endif %}">찜한 목록</a>
-        <a href="?tab=routes" class="tab {% if tab == 'routes' %}active{% endif %}">내 루트</a>
-        <a href="?tab=reviews" class="tab {% if tab == 'reviews' %}active{% endif %}">작성한 댓글</a>
+        <a href="?tab=likes" class="tab {% if tab == 'likes' %}active{% endif %}" id="likes-bar">찜한 목록</a>
+        <a href="?tab=routes" class="tab {% if tab == 'routes' %}active{% endif %}" id="routes-bar">내 루트</a>
+        <a href="?tab=reviews" class="tab {% if tab == 'reviews' %}active{% endif %}" id="reviews-bar">작성한 댓글</a>
     </div>
     <div id="content">
         {% if tab == 'likes' %}
@@ -44,4 +58,5 @@
 
 </main>
 <script src="{% static 'js/mypage.js' %}"></script>
+<script src="{% static 'js/like.js' %}?v={% now 'U' %}"></script>
 {% endblock %}

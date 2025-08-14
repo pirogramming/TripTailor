@@ -1,50 +1,59 @@
-        <ul>
-            {% for route in routes_page %}
-                <li style="margin-bottom:12px;">
-                <div>
-                    <strong>{{ route.title }}</strong>
-                    <small style="color:#666;"> · {{ route.created_at|date:"Y-m-d" }}</small>
-                </div>
-                {% if route.location_summary %}
-                    <div style="margin:4px 0; color:#444;">{{ route.location_summary }}</div>
-                {% endif %}
-                <div style="font-size:14px; color:#666;">
-                    스탑 {{ route.num_stops }}개
-                </div>
-
-                {# 미리보기: 현재 페이지에 prefetch된 stops 중 앞 3개 #}
-                {% if route.prefetched_stops %}
-                    <ol style="margin:6px 0 0 20px; padding:0;">
-                    {% for rp in route.prefetched_stops|slice:":3" %}
-                        <li>
-                        <a href="{% url 'places:place_detail' rp.place_id %}">{{ rp.place.name }}</a>
-                        <small style="color:#999;">#{{ rp.stop_order }}</small>
-                        </li>
-                    {% endfor %}
-                    {% if route.num_stops > 3 %}
-                        <li style="list-style:none; color:#999;">… 외 {{ route.num_stops|add:"-3" }}개</li>
-                    {% endif %}
-                    </ol>
-                {% else %}
-                    <div style="color:#999;">아직 장소가 없어요.</div>
-                {% endif %}
-
-                {# 상세 진입(내 루트만 접근 가능하도록 서버에서 이미 잠금) #}
-                <div style="margin-top:4px;">
-                    <a href="{% url 'routes:detail' route.id %}?from=mypage">루트 상세</a>
-                </div>
-                </li>
-            {% empty %}
-                <li>아직 만든 루트가 없어요. 여행지 목록에서 <em>"루트에 추가"</em> 버튼으로 만들어보세요!</li>
-            {% endfor %}
-        </ul>
-
-        <div style="margin:8px 0;">
-            {% if routes_page.has_previous %}
-                <a href="?page_routes={{ routes_page.previous_page_number }}&page_likes={{ likes_page.number }}&page_reviews={{ reviews_page.number }}">이전</a>
-            {% endif %}
-            <span>페이지 {{ routes_page.number }} / {{ routes_page.paginator.num_pages }}</span>
-            {% if routes_page.has_next %}
-                <a href="?page_routes={{ routes_page.next_page_number }}&page_likes={{ likes_page.number }}&page_reviews={{ reviews_page.number }}">다음</a>
-            {% endif %}
+<div id="routes-container">
+    <div class="top-container">
+        <div class="text">나의 여행 루트</div>
+        <div class="button">
+            <a href="{% url 'routes:create_route_page' %}" class="btn">+ 새 루트 만들기</a>
         </div>
+    </div>
+
+    <ul>
+        {% for route in routes_page %}
+            <li style="margin-bottom:12px;">
+            <div>
+                <strong>{{ route.title }}</strong>
+                <small style="color:#666;"> · {{ route.created_at|date:"Y-m-d" }}</small>
+            </div>
+            {% if route.location_summary %}
+                <div style="margin:4px 0; color:#444;">{{ route.location_summary }}</div>
+            {% endif %}
+            <div style="font-size:14px; color:#666;">
+                스탑 {{ route.num_stops }}개
+            </div>
+
+            {# 미리보기: 현재 페이지에 prefetch된 stops 중 앞 3개 #}
+            {% if route.prefetched_stops %}
+                <ol style="margin:6px 0 0 20px; padding:0;">
+                {% for rp in route.prefetched_stops|slice:":3" %}
+                    <li>
+                    <a href="{% url 'places:place_detail' rp.place_id %}">{{ rp.place.name }}</a>
+                    <small style="color:#999;">#{{ rp.stop_order }}</small>
+                    </li>
+                {% endfor %}
+                {% if route.num_stops > 3 %}
+                    <li style="list-style:none; color:#999;">… 외 {{ route.num_stops|add:"-3" }}개</li>
+                {% endif %}
+                </ol>
+            {% else %}
+                <div style="color:#999;">아직 장소가 없어요.</div>
+            {% endif %}
+
+            {# 상세 진입(내 루트만 접근 가능하도록 서버에서 이미 잠금) #}
+            <div style="margin-top:4px;">
+                <a href="{% url 'routes:detail' route.id %}?from=mypage">루트 상세</a>
+            </div>
+            </li>
+        {% empty %}
+            <li>아직 만든 루트가 없어요. 여행지 목록에서 <em>"루트에 추가"</em> 버튼으로 만들어보세요!</li>
+        {% endfor %}
+    </ul>
+
+    <div style="margin:8px 0;">
+        {% if routes_page.has_previous %}
+            <a href="?page_routes={{ routes_page.previous_page_number }}&page_likes={{ likes_page.number }}&page_reviews={{ reviews_page.number }}">이전</a>
+        {% endif %}
+        <span>페이지 {{ routes_page.number }} / {{ routes_page.paginator.num_pages }}</span>
+        {% if routes_page.has_next %}
+            <a href="?page_routes={{ routes_page.next_page_number }}&page_likes={{ likes_page.number }}&page_reviews={{ reviews_page.number }}">다음</a>
+        {% endif %}
+    </div>    
+</div>
