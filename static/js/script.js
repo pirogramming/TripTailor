@@ -154,7 +154,7 @@
                 const title = (titleInput.value || '').trim();
                 const summary = (summaryInput?.value || '').trim();
                 const isPublic = dropdown.querySelector('.new-route-public').checked;
-                
+
                 if (!title) {
                     alert('제목을 입력하세요');
                     return;

@@ -5,8 +5,105 @@ from django.urls import reverse
 from django.views.generic import CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
+import re
+import requests
+from django.http import JsonResponse, Http404
+from django.conf import settings
+
+
 from .models import Review, ReviewPhoto
 from apps.places.models import Place
+
+BLACKLIST_SUBSTR = (
+    "smartstore.naver.com", "shopping.naver.com", "brand.naver.com",
+    "/product/", "/category/", "/ads", "/event", "news.naver.com"
+)
+
+
+def _is_allowed_link(link: str) -> bool:
+    url = (link or "").lower()
+    if any(b in url for b in BLACKLIST_SUBSTR):
+        return False
+    # 대표 블로그 도메인들 (넓게 허용)
+    return any(d in url for d in (
+        "blog.naver.com", "m.blog.naver.com",
+        "post.naver.com", "naver.me",
+        "tistory.com", "brunch.co.kr", "velog.io"
+    ))
+
+def _loose_contains(text: str, place_name: str) -> bool:
+    # 괄호/공백/특수문자 제거 후 포함 여부
+    def norm(s): return re.sub(r"[\s\(\)\[\]\{\}\-_/·•~!@#$%^&*=+|:;\"'<>?,.]+", "", s or "")
+    t = norm(text)
+    n = norm(place_name)
+    # 이름이 너무 짧으면(2자 이하) 오탐 많으니 패스
+    if len(n) <= 2:
+        return n in t and len(t) > 10
+    # 이름 그대로 또는 괄호 제거 버전 일부라도 포함
+    return (n in t) or (n[: max(3, len(n)//2)] in t)
+
+def blog_reviews(request, place_id: int):
+    try:
+        place = Place.objects.get(id=place_id)
+    except Place.DoesNotExist:
+        raise Http404("Place not found")
+
+    city = getattr(place, "city", "") or getattr(place, "region", "") or ""
+    # 폴백 쿼리 세트 (점점 완화)
+    queries = [
+        f"\"{place.name}\" {city} 후기",
+        f"{place.name} {city} 후기",
+        f"{place.name} 후기",
+        f"{place.name} 여행기",
+        f"{place.name} 방문기",
+    ]
+
+    collected = []
+    headers = {
+        "X-Naver-Client-Id": settings.NAVER_CLIENT_ID,
+        "X-Naver-Client-Secret": settings.NAVER_CLIENT_SECRET,
+    }
+    url = "https://openapi.naver.com/v1/search/blog.json"
+
+    for q in queries:
+        params = {"query": q, "display": 30, "start": 1, "sort": "sim"}  # 정확도 우선
+        try:
+            r = requests.get(url, params=params, headers=headers, timeout=5)
+            r.raise_for_status()
+            items = r.json().get("items", [])
+        except requests.RequestException:
+            continue
+
+        for it in items:
+            title = it.get("title", "")
+            desc = it.get("description", "")
+            link = it.get("link", "")
+
+            if not _is_allowed_link(link):
+                continue
+            if not _loose_contains(title + " " + desc, place.name):
+                continue
+
+            collected.append({
+                "title": title, "link": link,
+                "summary": desc,
+                "blogger": it.get("bloggername", ""),
+                "postdate": it.get("postdate", ""),
+            })
+
+        # 충분히 모이면 종료
+        if len(collected) >= 10:
+            break
+
+    # 링크 기준 중복 제거
+    seen, dedup = set(), []
+    for x in collected:
+        if x["link"] in seen:
+            continue
+        seen.add(x["link"])
+        dedup.append(x)
+
+    return JsonResponse({"items": dedup[:10]})
 
 class PlaceReviewCreateView(LoginRequiredMixin, CreateView):
     model = Review

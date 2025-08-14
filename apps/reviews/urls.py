@@ -14,4 +14,5 @@ urlpatterns = [
     
     # HTMX 댓글 목록
     path('htmx/<int:place_id>/', views.place_review_list_htmx, name='htmx_list'),
+    path("blogs/<int:place_id>/", views.blog_reviews, name="blog_reviews"),
 ]

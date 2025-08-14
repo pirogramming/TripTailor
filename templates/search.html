@@ -37,9 +37,11 @@
             <div class="place-card__body">
                 <h3 class="place-card__title">{{ rec.place.name }}</h3>
                 <p class="place-card__region">{{ rec.place.region }}</p>
-                <p class="place-card__reason">{{ rec.reason }}</p>
+                <p class="place-card__summary">{{ rec.reason }}</p>
                 <p class="place-card__tip">{{ rec.tip }}</p>
+                {% if not rec.reason and not rec.tip %} 
                 <p class="place-card__summary">{{ rec.place.summary|truncatechars:200|default:"설명 없음" }}</p>
+                {% endif %}
                 <ul class="tag-list">
                     {% for tag in rec.place.tags.all %}
                     <li class="tag">#{{ tag.name }}</li>
@@ -65,4 +67,5 @@
 </div>
 {% endif %}
 <a href="{% url 'places:main' %}" class="back-link">← 메인으로 돌아가기</a>
+<script src="{% static 'js/like.js' %}"></script>
 {% endblock %}

@@ -74,8 +74,6 @@
   <section class="card">
     <h3 class="section-title">댓글</h3>
     
-    <!-- CSRF 토큰 (JavaScript용) -->
-    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
     
     <!-- 댓글 작성 폼 -->
     {% if user.is_authenticated %}
@@ -149,7 +147,7 @@
     {% endif %}
 
     <!-- 댓글 목록 -->
-    <div id="review-list">
+    <div id="review-list" data-place-id="{{ place.id }}">
       <!-- 댓글 목록이 여기에 표시됩니다 -->
       <div class="loading-reviews">댓글 목록을 불러오는 중...</div>
     </div>
@@ -162,179 +160,7 @@
   </div>
 </div>
 
-
-
 <script src="{% static 'js/like.js' %}"></script>
-<script>
-// 페이지 로드 시 댓글 목록 불러오기
-document.addEventListener('DOMContentLoaded', function() {
-    loadReviews();
-});
+<script src="{% static 'js/comment_crud.js' %}"></script>
 
-// 댓글 목록 불러오기 함수
-function loadReviews() {
-    const reviewList = document.getElementById('review-list');
-    if (reviewList) {
-        fetch(`{% url 'reviews:htmx_list' place.id %}`)
-            .then(response => response.text())
-            .then(html => {
-                reviewList.innerHTML = html;
-                // 댓글 목록 로드 후 삭제 버튼 이벤트 리스너 등록
-                setupDeleteButtons();
-            })
-            .catch(error => {
-                console.error('댓글 목록을 불러오는 중 오류 발생:', error);
-                reviewList.innerHTML = '<p>댓글 목록을 불러오는 중 오류가 발생했습니다.</p>';
-            });
-    }
-}
-
-// 삭제 버튼 이벤트 리스너 설정
-function setupDeleteButtons() {
-    console.log('삭제 버튼 이벤트 리스너 설정 중...');
-    const deleteButtons = document.querySelectorAll('.delete-review-btn');
-    console.log('발견된 삭제 버튼 개수:', deleteButtons.length);
-    
-    deleteButtons.forEach(button => {
-        // 기존 이벤트 리스너 제거 (중복 방지)
-        button.removeEventListener('click', handleDeleteClick);
-        // 새 이벤트 리스너 추가
-        button.addEventListener('click', handleDeleteClick);
-    });
-}
-
-// 삭제 버튼 클릭 핸들러
-function handleDeleteClick(event) {
-    const button = event.currentTarget;
-    const reviewId = button.getAttribute('data-review-id');
-    const placeId = button.getAttribute('data-place-id');
-    
-    console.log('삭제 버튼 클릭됨:', reviewId, placeId);
-    
-    if (confirm('정말 삭제하시겠습니까?')) {
-        console.log('사용자가 확인을 클릭함');
-        
-        // CSRF 토큰 가져오기
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-        console.log('CSRF 토큰:', csrfToken);
-        
-        // 삭제 요청 보내기
-        fetch(`/reviews/place/${placeId}/${reviewId}/delete/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': csrfToken,
-                'Content-Type': 'application/json',
-            },
-        })
-        .then(response => {
-            console.log('응답 상태:', response.status);
-            return response.json();
-        })
-        .then(data => {
-            console.log('응답 데이터:', data);
-            if (data.success) {
-                console.log('삭제 성공, 댓글 목록 새로고침');
-                // 성공 시 댓글 목록만 새로고침
-                loadReviews();
-            } else {
-                console.log('삭제 실패:', data.message);
-                alert('삭제 중 오류가 발생했습니다: ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('삭제 요청 오류:', error);
-            alert('삭제 중 오류가 발생했습니다.');
-        });
-    } else {
-        console.log('사용자가 취소를 클릭함');
-    }
-}
-
-// 이미지 추가/삭제 및 미리보기 기능
-document.addEventListener('DOMContentLoaded', function() {
-    const addPhotoBtn = document.getElementById('add-photo-btn');
-    const photoInputs = document.getElementById('photo-inputs');
-    const maxPhotos = 5;
-
-    // 이미지 추가 버튼
-    if (addPhotoBtn) {
-        addPhotoBtn.addEventListener('click', function() {
-            const currentPhotos = photoInputs.querySelectorAll('.photo-input-row');
-            if (currentPhotos.length < maxPhotos) {
-                const newRow = document.createElement('div');
-                newRow.className = 'photo-input-row';
-                newRow.innerHTML = `
-                    <input type="url" name="photo_urls[]" class="form-control photo-url-input" placeholder="https://example.com/image${currentPhotos.length + 1}.jpg">
-                    <button type="button" class="btn btn-sm btn-danger remove-photo-btn">삭제</button>
-                    <div class="photo-preview"></div>
-                `;
-                photoInputs.appendChild(newRow);
-                
-                // 삭제 버튼 이벤트
-                newRow.querySelector('.remove-photo-btn').addEventListener('click', function() {
-                    photoInputs.removeChild(newRow);
-                    updateAddButton();
-                });
-                
-                // URL 입력 이벤트
-                newRow.querySelector('.photo-url-input').addEventListener('input', handlePhotoUrlInput);
-                
-                updateAddButton();
-            }
-        });
-    }
-
-    // 이미지 URL 입력 처리
-    function handlePhotoUrlInput(event) {
-        const input = event.target;
-        const preview = input.parentElement.querySelector('.photo-preview');
-        const url = input.value.trim();
-        
-        if (url && isValidUrl(url)) {
-            preview.innerHTML = `<img src="${url}" alt="미리보기" style="max-width: 100px; max-height: 100px; margin: 5px;">`;
-        } else {
-            preview.innerHTML = '';
-        }
-    }
-
-    // URL 유효성 검사
-    function isValidUrl(string) {
-        try {
-            new URL(string);
-            return true;
-        } catch (_) {
-            return false;
-        }
-    }
-
-    // 추가 버튼 상태 업데이트
-    function updateAddButton() {
-        const currentPhotos = photoInputs.querySelectorAll('.photo-input-row');
-        if (currentPhotos.length >= maxPhotos) {
-            addPhotoBtn.disabled = true;
-            addPhotoBtn.textContent = '이미지 최대 개수 도달';
-        } else {
-            addPhotoBtn.disabled = false;
-            addPhotoBtn.textContent = '+ 이미지 추가';
-        }
-    }
-
-    // 기존 이미지 입력 필드에 이벤트 추가
-    const existingInputs = photoInputs.querySelectorAll('.photo-url-input');
-    existingInputs.forEach(input => {
-        input.addEventListener('input', handlePhotoUrlInput);
-    });
-
-    // 폼 제출 후 댓글 목록 새로고침
-    const reviewForm = document.getElementById('review-form');
-    if (reviewForm) {
-        reviewForm.addEventListener('submit', function() {
-            // 폼 제출 후 잠시 대기 후 댓글 목록 새로고침
-            setTimeout(function() {
-                loadReviews();
-            }, 1000);
-        });
-    }
-});
-</script>
 {% endblock %}
