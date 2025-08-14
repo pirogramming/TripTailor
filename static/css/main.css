@@ -487,6 +487,12 @@ form[method="get"] > div button[type="submit"]:hover {
   border-color: var(--primary);
 }
 
+  .btn{display:inline-block;padding:8px 12px;margin-right:8px;border:1px solid var(--border-color);border-radius:8px;background:#fff}
+  .btn.active{background:var(--border-color);color:#fff;border-color:var(--border-color)}
+  .pagination{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:24px 0}
+  .pagination a,.pagination span{padding:6px 10px;border:1px solid var(--border-color);border-radius:6px;background:#fff}
+  .pagination .current{background:var(--border-color);color:#fff}
+
 
 /* =========================
    Radio Tab – 이중선 완전 차단(override 강제)

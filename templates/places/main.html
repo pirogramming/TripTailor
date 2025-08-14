@@ -48,20 +48,6 @@
   </div>
   <button type="button" class="chip more" aria-expanded="false">+ 더보기</button>
 </section>
-
-<style>
-  .btn{display:inline-block;padding:8px 12px;margin-right:8px;border:1px solid var(--border-color);border-radius:8px;background:#fff}
-  .btn.active{background:var(--border-color);color:#fff;border-color:var(--border-color)}
-  .pagination{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:24px 0}
-  .pagination a,.pagination span{padding:6px 10px;border:1px solid var(--border-color);border-radius:6px;background:#fff}
-  .pagination .current{background:var(--border-color);color:#fff}
-  /* 라디오 탭 스타일 */
-  .filter-bar { display:flex; gap:8px; margin:12px 0 16px; align-items:center; flex-wrap:wrap; }
-  .filter-bar label { display:inline-flex; align-items:center; gap:6px; padding:8px 12px; border:1px solid var(--border-color); border-radius:8px; background:#fff; cursor:pointer; }
-  .filter-bar input[type="radio"] { accent-color: var(--border-color); }
-  .filter-bar input[type="radio"]:checked + .text { font-weight:700; color:#0f172a; }
-</style>
-
 <!-- 라디오 탭 폼 -->
 <div class="filter-bar">
   <form id="filterForm">
@@ -177,4 +163,5 @@
 
 <script src="{% static 'js/like.js' %}"></script>
 <script src="{% static 'js/tabbar.js' %}"></script>
+<script src="{% static 'js/script.js' %}"></script>
 {% endblock %}
