@@ -11,48 +11,28 @@
 
   <form method="post">
     {% csrf_token %}
-    <div class="form-group mb-3">
-      <label for="id_title">제목 *</label>
-      <input type="text" name="title" id="id_title" class="form-control" value="{{ form.title.value|default:'' }}" required maxlength="200">
-    </div>
     
     <div class="form-group mb-3">
       <label for="id_rating">평점 *</label>
       <select name="rating" id="id_rating" class="form-control" required>
         <option value="">평점 선택</option>
-        <option value="5.0" {% if form.rating.value == "5.0" %}selected{% endif %}>5.0 - 매우 좋음</option>
-        <option value="4.5" {% if form.rating.value == "4.5" %}selected{% endif %}>4.5 - 좋음</option>
-        <option value="4.0" {% if form.rating.value == "4.0" %}selected{% endif %}>4.0 - 보통</option>
-        <option value="3.5" {% if form.rating.value == "3.5" %}selected{% endif %}>3.5 - 보통</option>
-        <option value="3.0" {% if form.rating.value == "3.0" %}selected{% endif %}>3.0 - 보통</option>
-        <option value="2.5" {% if form.rating.value == "2.5" %}selected{% endif %}>2.5 - 나쁨</option>
-        <option value="2.0" {% if form.rating.value == "2.0" %}selected{% endif %}>2.0 - 나쁨</option>
-        <option value="1.5" {% if form.rating.value == "1.5" %}selected{% endif %}>1.5 - 매우 나쁨</option>
-        <option value="1.0" {% if form.rating.value == "1.0" %}selected{% endif %}>1.0 - 비추천</option>
-        <option value="0.5" {% if form.rating.value == "0.5" %}selected{% endif %}>0.5 - 매우 나쁨</option>
-        <option value="0.0" {% if form.rating.value == "0.0" %}selected{% endif %}>0.0 - 가지마</option>
+        <option value="5.0" {% if form.rating.value == "5.0" %}selected{% endif %}>5.0</option>
+        <option value="4.5" {% if form.rating.value == "4.5" %}selected{% endif %}>4.5</option>
+        <option value="4.0" {% if form.rating.value == "4.0" %}selected{% endif %}>4.0</option>
+        <option value="3.5" {% if form.rating.value == "3.5" %}selected{% endif %}>3.5</option>
+        <option value="3.0" {% if form.rating.value == "3.0" %}selected{% endif %}>3.0</option>
+        <option value="2.5" {% if form.rating.value == "2.5" %}selected{% endif %}>2.5</option>
+        <option value="2.0" {% if form.rating.value == "2.0" %}selected{% endif %}>2.0</option>
+        <option value="1.5" {% if form.rating.value == "1.5" %}selected{% endif %}>1.5</option>
+        <option value="1.0" {% if form.rating.value == "1.0" %}selected{% endif %}>1.0</option>
+        <option value="0.5" {% if form.rating.value == "0.5" %}selected{% endif %}>0.5</option>
+        <option value="0.0" {% if form.rating.value == "0.0" %}selected{% endif %}>0.0</option>
       </select>
-    </div>
-    
-    <div class="form-group mb-3">
-      <label for="id_summary">요약 *</label>
-      <input type="text" name="summary" id="id_summary" class="form-control" value="{{ form.summary.value|default:'' }}" required maxlength="255" placeholder="간단한 요약을 입력하세요">
     </div>
     
     <div class="form-group mb-3">
       <label for="id_content">내용 *</label>
       <textarea name="content" id="id_content" class="form-control" rows="4" required placeholder="상세한 후기를 작성해주세요">{{ form.content.value|default:'' }}</textarea>
-    </div>
-
-    <div class="form-group mb-3">
-      <label for="id_route">루트 *</label>
-      <select name="route" id="id_route" class="form-control" required>
-        <option value="">루트 선택 (필수)</option>
-        {% for route in user_routes %}
-        <option value="{{ route.id }}" {% if selected_route_id == route.id %}selected{% endif %}>{{ route.title }}</option>
-        {% endfor %}
-      </select>
-      <small class="form-text text-muted">이 댓글을 연결할 여행 루트를 선택하세요</small>
     </div>
 
     <div class="form-group mb-3">
