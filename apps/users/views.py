@@ -43,11 +43,11 @@ def my_page(request):
     routes_page = routes_paginator.get_page(request.GET.get("page_routes", 1))
     total_routes = routes_qs.count()
 
-    # --- 내가 작성한 리뷰 (루트가 있는 것만)
+    # --- 내가 작성한 리뷰 (내용이 있는 것만)
     reviews_qs = (
         Review.objects
-        .filter(user=request.user, route__isnull=False)  # 루트가 있는 리뷰만
-        .select_related("route")
+        .filter(user=request.user, content__isnull=False).exclude(content='')  # 내용이 있는 리뷰만
+        .select_related("place")
         .prefetch_related("photos")
         .order_by("-created_at")
     )

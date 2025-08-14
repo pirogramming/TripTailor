@@ -114,6 +114,7 @@ class PlaceReviewCreateView(LoginRequiredMixin, CreateView):
         form.instance.user = self.request.user
         form.instance.place_id = self.kwargs.get('place_id')
         
+        
         # 댓글 저장
         review = form.save()
         
@@ -131,6 +132,7 @@ class PlaceReviewCreateView(LoginRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['place'] = get_object_or_404(Place, pk=self.kwargs.get('place_id'))
+        
         return context
 
 class PlaceReviewUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
@@ -141,8 +143,7 @@ class PlaceReviewUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView)
     def test_func(self):
         review = self.get_object()
         return review.user == self.request.user
-
-    def form_valid(self, form):
+        
         # 댓글 저장
         review = form.save()
         
@@ -170,7 +171,7 @@ class PlaceReviewUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView)
 # HTMX를 위한 댓글 목록 뷰
 def place_review_list_htmx(request, place_id):
     """HTMX로 댓글 목록을 반환하는 뷰"""
-    print(f"DEBUG: place_review_list_htmx 호출됨, place_id: {place_id}")
+    print(f"DEBUG: review_list_htmx 호출됨, place_id: {place_id}")
     
     place = get_object_or_404(Place, pk=place_id)
     print(f"DEBUG: Place 찾음: {place.name}")
@@ -179,7 +180,7 @@ def place_review_list_htmx(request, place_id):
     print(f"DEBUG: 댓글 개수: {reviews.count()}")
     
     for review in reviews:
-        print(f"DEBUG: 댓글 - {review.user.username}의 댓글 by {review.user.username}")
+        print(f"DEBUG: 댓글 by {review.user.username}")
     
     return render(request, 'reviews/review_list_fragment.html', {
         'reviews': reviews,
