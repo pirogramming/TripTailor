@@ -2,7 +2,7 @@
 {% load static %}
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/main.css' %}?v={% now 'U' %}">
-<link rel="stylesheet" href="{% static 'css/tag.css' %} ?v={% now 'U' %}">
+<link rel="stylesheet" href="{% static 'css/tag.css' %}?v={% now 'U' %}">
 
 <form method="get" action="">
   <input
@@ -88,7 +88,12 @@
   <ul class="place-list">
     {% for place in places %}
     <li class="place-item">
-      <div class="place-item__map"></div>
+      <div 
+      id="map-{{ place.id }}"
+      class="place-item__map"
+      data-lat="{{place.lat}}"
+      data-lng="{{place.lng}}"
+      ></div>
       <div class="place-item__head">
         <span class="place-item__name">{{ place.name }}</span>
         <span class="place-item__meta">({{ place.region }}) ·
@@ -161,6 +166,11 @@
   {% endif %}
 </div>
 
+<script src="{% static 'js/map.js' %}?v={% now 'U' %}"></script>
+<script
+src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAwXkCM9qv8KRUi2rUVGSlMcRpKRix_Tvs&callback=initMap&v=weekly&libraries=marker"
+defer
+></script>
 <script src="{% static 'js/like.js' %}"></script>
 <script src="{% static 'js/tabbar.js' %}"></script>
 <script src="{% static 'js/script.js' %}"></script>

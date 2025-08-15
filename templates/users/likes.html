@@ -6,7 +6,12 @@
             
             <li class="place-item">
                 {% with place=like.place %}
-                <div class="place-item__map"></div> <!-- 지도/이미지 자리 -->
+                <div 
+                id="map-{{ place.id }}"
+                class="place-item__map"
+                data-lat="{{place.lat}}"
+                data-lng="{{place.lng}}"
+                ></div> <!-- 지도/이미지 자리 -->
                 <div class="place-item__head">
                 <span class="place-item__name">{{ place.name }}</span>
                 <span class="place-item__meta">({{ place.region }}) ·
