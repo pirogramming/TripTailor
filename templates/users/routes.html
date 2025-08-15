@@ -6,46 +6,67 @@
         </div>
     </div>
 
-    <ul>
+    <div class="route-list">
         {% for route in routes_page %}
-            <li style="margin-bottom:12px;">
-            <div>
-                <strong>{{ route.title }}</strong>
-                <small style="color:#666;"> · {{ route.created_at|date:"Y-m-d" }}</small>
+        <article class="route-card">
+            <header class="route-header">
+            <h3 class="route-title">
+                <a href="{% url 'routes:detail' route_id=route.id %}?from=public_list">
+                {{ route.title }}
+                </a>
+            </h3>
+            {% if route.status %}
+                <span class="route-badge badge-{{ route.status|default:'default' }}">
+                {{ route.status }}
+                </span>
+            {% endif %}
+            </header>
+
+            <div class="route-meta">
+            {% if route.created_at %}
+                <span class="meta-item">📅 {{ route.created_at|date:"Y-m-d" }}</span>
+            {% endif %}
             </div>
+
             {% if route.location_summary %}
-                <div style="margin:4px 0; color:#444;">{{ route.location_summary }}</div>
+            <p class="route-summary">{{ route.location_summary }}</p>
             {% endif %}
-            <div style="font-size:14px; color:#666;">
-                스탑 {{ route.num_stops }}개
-            </div>
 
-            {# 미리보기: 현재 페이지에 prefetch된 stops 중 앞 3개 #}
-            {% if route.prefetched_stops %}
-                <ol style="margin:6px 0 0 20px; padding:0;">
-                {% for rp in route.prefetched_stops|slice:":3" %}
-                    <li>
-                    <a href="{% url 'places:place_detail' rp.place_id %}">{{ rp.place.name }}</a>
-                    <small style="color:#999;">#{{ rp.stop_order }}</small>
-                    </li>
+            <div class="route-stops">
+            {% with stops=route.stops.all %}
+                {% if stops %}
+                {% for stop in stops %}
+                    <a class="stop-card" href="{% url 'places:place_detail' pk=stop.place.id %}" title="{{ stop.place.name }}">
+                    {% if stop.place.thumbnail_url %}
+                        <div class="stop-thumb">
+                        <img src="{{ stop.place.thumbnail_url }}" alt="{{ stop.place.name }}">
+                        </div>
+                    {% endif %}
+                    <span class="stop-name">{{ stop.place.name }}</span>
+                    </a>
+                    {% if not forloop.last %}
+                    <span class="stop-arrow">→</span>
+                    {% endif %}
                 {% endfor %}
-                {% if route.num_stops > 3 %}
-                    <li style="list-style:none; color:#999;">… 외 {{ route.num_stops|add:"-3" }}개</li>
+                {% else %}
+                <span class="no-stops">등록된 장소 없음</span>
                 {% endif %}
-                </ol>
-            {% else %}
-                <div style="color:#999;">아직 장소가 없어요.</div>
-            {% endif %}
-
-            {# 상세 진입(내 루트만 접근 가능하도록 서버에서 이미 잠금) #}
-            <div style="margin-top:4px;">
-                <a href="{% url 'routes:detail' route.id %}?from=mypage">루트 상세</a>
+            {% endwith %}
             </div>
-            </li>
-        {% empty %}
-            <li>아직 만든 루트가 없어요. 여행지 목록에서 <em>"루트에 추가"</em> 버튼으로 만들어보세요!</li>
+
+            <footer class="route-footer">
+            <span class="route-author">👤 {{ route.creator.username }}</span>
+            <div class="route-actions">
+                <a href="{% url 'routes:edit_route_page' route_id=route.id %}" class="btn-edit" title="루트 편집">✏️</a>
+                <a href="{% url 'routes:delete_route' route_id=route.id %}" class="btn-delete" title="루트 삭제">🗑️</a>
+            </div>
+            </footer>
+        </article>
         {% endfor %}
-    </ul>
+    </div>
+
+        
+
 
     <div style="margin:8px 0;">
         {% if routes_page.has_previous %}

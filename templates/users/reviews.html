@@ -1,25 +1,29 @@
-<ul>
-{% for review in reviews_page %}
-    <li>
-    <p><strong>{{ review.place.name }}</strong></p>
-    <p>별점: {{ review.rating }} / 5.0</p>
-    <p>{{ review.content }}</p>
-    <p>{{ review.created_at|date:"Y-m-d H:i" }}</p>
-
-    {% if review.photos.all %}
-        <div>
-        {% for photo in review.photos.all %}
-            <img src="{{ photo.url }}" alt="리뷰 사진" width="150">
-        {% endfor %}
-        </div>
-    {% endif %}
-
-    <a href="{% url 'places:place_detail' review.place.pk %}">장소 상세보기</a>
-    </li>
-{% empty %}
+<div id="review-list">
+    {% for review in reviews_page %}
+    <div class="review-item">
+        <h3 class="review-title">
+            <a href="{% url 'places:place_detail' review.place.pk %}">{{ review.place.name }}</a>
+        </h3>
+        <p class="review-rating">별점: {{ review.rating }} / 5.0</p>
+        <p class="review-content">{{ review.content }}</p>
+        <p class="review-date">{{ review.created_at|date:"Y-m-d H:i" }}</p>
+    
+        {% if review.photos.all %}
+            <div class="review-photos">
+            {% for photo in review.photos.all %}
+                <img src="{{ photo.url }}" alt="리뷰 사진" width="150">
+            {% endfor %}
+            </div>
+        {% endif %}
+    
+        <a href="{% url 'places:place_detail' review.place.pk %}" class="review-place-link">장소 상세보기</a>
+    </div>
+    {% empty %}
     <li>작성한 댓글이 없습니다.</li>
 {% endfor %}
-</ul>
+</div>
+
+
 
 <div class="pagination">
 {% if reviews_page.has_previous %}
