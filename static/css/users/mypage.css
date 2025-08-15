@@ -11,14 +11,20 @@ main {
 
 #profile-container {
     width: 60vw;
-    height: 150px;
+    height: 165px;
     border-radius: 25px;
     border-color: transparent;
     box-shadow: var(--shadow);
     background-color: white;
     display: flex;
-    justify-content: center;
+    justify-content: space-around;
     align-items: center;
+}
+
+#profile-left {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 #profile-avatar {
@@ -32,6 +38,35 @@ main {
     flex-direction: column;
     justify-content: center;
     padding: 0 20px;
+}
+
+#profile-total {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+}
+
+#total-likes, #total-routes, #total-reviews {
+    width: 150px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background-color: #EDEDED; 
+}
+
+#total-likes > span, #total-routes > span, #total-reviews > span {
+    font-size: 14px;
+    color: #4B5563; /* Gray-600 */
+}
+
+.number {
+    font-size: 16px !important; 
+    font-weight: bold;
+    color: #62B3B8 !important;
 }
 
 .filter-bar {

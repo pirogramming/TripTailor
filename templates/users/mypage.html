@@ -17,25 +17,25 @@
 {% block content %}
 <main>
     <div id="profile-container">
-        <div id="profile-img">
+        <div id="profile-left">
             <img src="{% static 'images/profile-default.png' %}" alt="프로필 이미지" id="profile-avatar">
-        </div>
-        <div id="profile-content">
-            <span class="username">{{user.username}}</span>
-            <span class="email">{{user.email}}</span>
+            <div id="profile-content">
+                <span class="username">{{user.username}}</span>
+                <span class="email">{{user.email}}</span>
+            </div>            
         </div>
         <div id="profile-total">
             <div id="total-likes">
                 <span>찜한 여행지</span>
-                {{ total_likes }}
+                <span class="number">{{ total_likes }}</span>
             </div>
             <div id="total-routes">
                 <span>여행 루트</span>
-                {{ routes_total }}
+                <span class="number">{{ routes_total }}</span>
             </div>
             <div id="total-reviews">
                 <span>작성한 댓글수</span>
-                {{ total_reviews }}
+                <span class="number">{{ total_reviews }}</span>
             </div>
         </div>
     </div>
