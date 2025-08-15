@@ -203,7 +203,7 @@ form[method="get"] > div button[type="submit"]:hover {
 .place-card:hover{transform:translateY(-2px)}
 
 /* 지도/이미지 영역(비워져 있어도 비율 유지) */
-.place-card__map{
+.place-item__map{
   aspect-ratio:16/9; /* 이미지/지도 삽입 시 유지 */
   background:linear-gradient(135deg,#f8fafc,#eef2f7);
   border-bottom:1px solid #eef2f7;

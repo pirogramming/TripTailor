@@ -130,7 +130,7 @@
 .route-link { text-decoration: none; }
 
 /* ===== 지도 ===== */
-.map-section-detail {
+.place-item__map {
     width: 100%;
     height: 500px;
     background-color: gray;
