@@ -56,9 +56,9 @@
                     {% csrf_token %}
                     <button type="submit" class="like-button">
                         {% if rec.place.is_liked %}
-                            ❤️ 취소
+                            ❤️ 찜취소
                         {% else %}
-                            🤍 좋아요
+                            🤍 찜하기
                         {% endif %}
                     </button>
                 </form>

@@ -1,5 +1,17 @@
 :root {
     --shadow: 0 8px 10px rgba(0,0,0,.06);
+  --rt-bg:#f6f7fb;
+  --rt-card:#fff;
+  --rt-text:#0f172a;
+  --rt-muted:#64748b;
+  --rt-border:rgba(98,179,184,.25);
+  --rt-brand:#62B3B8;
+  --rt-badge-yellow:#fde68a;
+  --rt-chip-bg:#f8fafc;
+  --rt-chip-active:#e6fffe;
+  --rt-shadow:0 8px 20px rgba(0,0,0,.06);
+  --rt-radius:16px;
+    
 }
 
 main {
@@ -68,6 +80,21 @@ label {
     margin: 20px 0;
 }
 
+li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 15px;
+    background:var(--rt-chip-bg); 
+    border:1px solid var(--rt-border);
+    padding:8px 12px; 
+    transition: transform .12s ease, background .12s ease, border-color .12s ease;
+}
+
+.delete-btn {
+    all: unset;
+    cursor: pointer;
+}
 
 .submit {
     /* appearance: none; */

@@ -11,31 +11,6 @@ from django.urls import reverse
 from .models import Route, RoutePlace
 from apps.places.models import Place
 
-def route_detail(request, route_id: int):
-    """루트 상세: 내가 만든 루트거나 공개 루트면 볼 수 있도록"""
-
-    # 로그인했을 때는 creator거나 공개된 루트면 허용
-    # 로그인 안했으면 공개 루트만 허용
-    q = Q(pk=route_id) & (Q(is_public=True) | Q(creator=request.user if request.user.is_authenticated else None))
-    route = get_object_or_404(Route, q)
-
-    stops_qs = (
-        RoutePlace.objects
-        .filter(route=route)
-        .select_related("place")
-        .prefetch_related("place__tags")
-        .order_by("stop_order")
-    )
-
-    stops = list(stops_qs)
-    from_page = request.GET.get("from", "")
-
-    return render(request, "routes/detail.html", {
-        "route": route,
-        "stops": stops,
-        "from_page": from_page,
-    })
-
 @login_required
 @require_GET
 def my_routes_json(request):
@@ -44,10 +19,6 @@ def my_routes_json(request):
     data = [{"id": r.id, "title": r.title} for r in qs]
     return JsonResponse({"routes": data})
 
-
-@login_required
-@require_POST
-# apps/routes/views.py
 @login_required
 @require_POST
 def create_route(request):
@@ -67,7 +38,6 @@ def create_route(request):
         creator=request.user,
         title=title,
         description=request.POST.get("description", "").strip(),
-        cover_photo_url=request.POST.get("cover_photo_url", "").strip(),
         location_summary=location_summary,
         is_public=is_public,  # ✅ 저장
     )
@@ -111,7 +81,9 @@ def remove_place(request, route_id: int, place_id: int):
     # AJAX/일반 모두 고려
     if request.headers.get("X-Requested-With") == "XMLHttpRequest":
         return JsonResponse({"ok": True})
-    return redirect("routes:detail", route_id=route.id)
+    from_page = request.GET.get("from") or request.POST.get("from") or ""
+    edit_url = reverse("routes:edit_route_page", args=[route.id])
+    return redirect(f"{edit_url}?from={from_page}") if from_page else redirect(edit_url)
 
 def route_list(request):
     routes = Route.objects.filter(is_public=True).order_by('-created_at')
@@ -145,6 +117,14 @@ def edit_route_page(request, route_id):
     )
 
     from_page = request.GET.get("from", "")
+    if not from_page:
+        # Referer 기반 추론(선택)
+        ref = (request.META.get("HTTP_REFERER") or "").lower()
+        if "/users/mypage" in ref:
+            from_page = "mypage"
+        elif "/routes/" in ref and "public" in ref:  # 너네 공개목록 경로에 맞게 조건 조정
+            from_page = "public_list"
+
     return render(request, "routes/edit_route.html", {
         "route": route,
         "from_page": from_page,
@@ -160,7 +140,7 @@ def update_route(request, route_id):
     route.title = request.POST.get("title", "").strip()
     route.location_summary = request.POST.get("location_summary", "").strip()
     route.description = request.POST.get("description", "").strip()
-    route.cover_photo_url = request.POST.get("cover_photo_url", "").strip()
+
     route.is_public = request.POST.get("is_public") == "true"
     route.save()
 
@@ -183,9 +163,15 @@ def update_route(request, route_id):
         except Exception as e:
             return JsonResponse({"ok": False, "error": f"장소 순서 저장 실패: {str(e)}"}, status=400)
 
-    # 3️⃣ 저장 후 리디렉션
-    return redirect(f"{reverse('routes:detail', args=[route.id])}?from={request.POST.get('from', '')}")
+    # --- 리다이렉트: 상세페이지 없이 분기 ---
+    from_page = (request.POST.get("from") or "").strip()
+    if from_page == "mypage":
+        return redirect(f"{reverse('users:my_page')}?tab=routes")
+    if from_page == "public_list":
+        return redirect("routes:route_list")
 
+    # 기본값(안전한 경로): 공개 루트 목록
+    return redirect("routes:route_list")
 
 @login_required
 @require_http_methods(["GET", "POST"])  
@@ -197,7 +183,7 @@ def delete_route(request, route_id):
     from_page = request.GET.get("from", "")
 
     if from_page == "mypage":
-        redirect_url = reverse("users:my_page")
+         redirect_url = f"{reverse('users:my_page')}?tab=routes"
     elif from_page == "public_list":
         redirect_url = reverse("routes:route_list")
     else:

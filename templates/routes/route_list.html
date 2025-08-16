@@ -11,9 +11,7 @@
       <article class="route-card">
         <header class="route-header">
           <h3 class="route-title">
-            <a href="{% url 'routes:detail' route_id=route.id %}?from=public_list">
-              {{ route.title }}
-            </a>
+            {{ route.title }}
           </h3>
           {% if route.status %}
             <span class="route-badge badge-{{ route.status|default:'default' }}">
@@ -58,7 +56,7 @@
           <span class="route-author">👤 {{ route.creator.username }}</span>
           <div class="route-actions">
             {% if request.user == route.creator %}
-              <a href="{% url 'routes:edit_route_page' route_id=route.id %}" class="btn-edit" title="루트 편집">✏️</a>
+              <a href="{% url 'routes:edit_route_page' route_id=route.id %}?from=public_list" class="btn-edit" title="루트 편집">✏️</a>
               <a href="{% url 'routes:delete_route' route_id=route.id %}" class="btn-delete" title="루트 삭제">🗑️</a>
             {% endif %}
           </div>

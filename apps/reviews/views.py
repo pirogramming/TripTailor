@@ -12,6 +12,7 @@ from django.conf import settings
 
 
 from .models import Review, ReviewPhoto
+from .forms import ReviewForm
 from apps.places.models import Place
 
 BLACKLIST_SUBSTR = (
@@ -107,22 +108,21 @@ def blog_reviews(request, place_id: int):
 
 class PlaceReviewCreateView(LoginRequiredMixin, CreateView):
     model = Review
+    form_class = ReviewForm
     template_name = 'reviews/place_review_form.html'
-    fields = ['rating', 'content']
 
     def form_valid(self, form):
         form.instance.user = self.request.user
         form.instance.place_id = self.kwargs.get('place_id')
         
-        
         # 댓글 저장
         review = form.save()
         
-        # 여러 이미지 URL 처리
-        photo_urls = self.request.POST.getlist('photo_urls[]')
-        for photo_url in photo_urls:
-            if photo_url and photo_url.strip():
-                ReviewPhoto.objects.create(review=review, url=photo_url.strip())
+        # 여러 이미지 파일 처리 (HTML form에서 name="photos"로 전송됨)
+        photo_files = self.request.FILES.getlist('photos')
+        for photo_file in photo_files:
+            if photo_file:
+                ReviewPhoto.objects.create(review=review, image=photo_file)
         
         return super().form_valid(form)
 
@@ -137,22 +137,27 @@ class PlaceReviewCreateView(LoginRequiredMixin, CreateView):
 
 class PlaceReviewUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Review
+    form_class = ReviewForm
     template_name = 'reviews/place_review_form.html'
-    fields = ['rating', 'content']
 
     def test_func(self):
         review = self.get_object()
         return review.user == self.request.user
-        
+    
+    def form_valid(self, form):
         # 댓글 저장
         review = form.save()
         
-        # 기존 이미지 삭제 후 새 이미지 URL 처리
-        review.photos.all().delete()
-        photo_urls = self.request.POST.getlist('photo_urls[]')
-        for photo_url in photo_urls:
-            if photo_url and photo_url.strip():
-                ReviewPhoto.objects.create(review=review, url=photo_url.strip())
+        # 삭제할 이미지 처리
+        delete_photo_ids = self.request.POST.getlist('delete_photo_ids')
+        if delete_photo_ids:
+            ReviewPhoto.objects.filter(id__in=delete_photo_ids, review=review).delete()
+        
+        # 새 이미지 파일 처리
+        photo_files = self.request.FILES.getlist('photos')
+        for photo_file in photo_files:
+            if photo_file:
+                ReviewPhoto.objects.create(review=review, image=photo_file)
         
         return super().form_valid(form)
 
@@ -164,7 +169,7 @@ class PlaceReviewUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView)
         context['place'] = self.object.place
         
         # 현재 이미지들을 배열로 전달
-        context['current_photo_urls'] = [photo.url for photo in self.object.photos.all()]
+        context['current_photos'] = self.object.photos.all()
         
         return context
 
