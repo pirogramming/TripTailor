@@ -1,7 +1,10 @@
 document.addEventListener('DOMContentLoaded', function () {
-  const deleteBtn = document.getElementById("delete-route-btn");
+  const deleteBtn = document.querySelector(".btn-delete");
+  if (!deleteBtn) return;
 
-  deleteBtn.addEventListener("click", function () {
+  deleteBtn.addEventListener("click", function (e) {
+    e.preventDefault();  // a 태그 본래 이동 막기
+
     const confirmed = confirm("정말 이 루트를 삭제하시겠습니까?");
     if (!confirmed) return;
 
