@@ -83,18 +83,20 @@
                     {% endfor %}
                 </ul>
                 {% if user.is_authenticated %}
-                <form method="post" action="{% url 'places:place_like' rec.place.pk %}" class="like-form">
-                    {% csrf_token %}
-                    <button type="submit" class="like-button">
-                        {% if rec.place.is_liked %}
-                            ❤️ 찜취소
-                        {% else %}
-                            🤍 찜하기
-                        {% endif %}
-                    </button>
-                </form>
-                {% endif %}
-                <a href="{% url 'places:place_detail' rec.place.pk %}" class="link">자세히 보기</a>
+                <div class="card_btn">
+                    <form method="post" action="{% url 'places:place_like' rec.place.pk %}" class="like-form">
+                        {% csrf_token %}
+                        <button type="submit" class="like-button">
+                            {% if rec.place.is_liked %}
+                                ❤️ 찜취소
+                            {% else %}
+                                🤍 찜하기
+                            {% endif %}
+                        </button>
+                    </form>
+                    {% endif %}
+                    <a href="{% url 'places:place_detail' rec.place.pk %}" class="link">자세히 보기</a>
+                </div>
             </div>
         </div>
         {% endfor %}
