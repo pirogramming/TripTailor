@@ -62,8 +62,9 @@
 
 <script src="{% static 'js/map.js' %}?v={% now 'U' %}"></script>
 <script
-src="https://maps.googleapis.com/maps/api/js?key={{GOOGLE_MAPS_API_KEY}}&callback=initMap&v=weekly&libraries=marker"
-defer
+  src="https://maps.googleapis.com/maps/api/js?key={{GOOGLE_MAPS_API_KEY}}&v=weekly&loading=async&callback=initMap"
+  async
+  defer
 ></script>
 <script src="{% static 'js/mypage.js' %}"></script>
 <script src="{% static 'js/like.js' %}"></script>
