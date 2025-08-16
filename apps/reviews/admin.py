@@ -11,12 +11,12 @@ class ReviewPhotoInline(admin.TabularInline):
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
-    list_display = ('id', 'route', 'user', 'rating', 'summary', 'created_at')
-    list_filter = ('route', 'rating', 'created_at')
-    search_fields = ('summary', 'content', 'user__username', 'route__name')
+    list_display = ('id','user', 'rating','created_at')
+    list_filter = ('rating', 'created_at')
+    search_fields = ('content', 'user__username')
     inlines = [ReviewPhotoInline]
 
 @admin.register(ReviewPhoto)
 class ReviewPhotoAdmin(admin.ModelAdmin):
-    list_display = ('id', 'review', 'url')
-    search_fields = ('url',)
+    list_display = ('id', 'review', 'image')
+    search_fields = ('image',)

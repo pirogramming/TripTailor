@@ -1,29 +1,63 @@
 {% extends "base.html" %}
 {% load static %}
 {% block content %}
-<link rel="stylesheet" href="{% static 'css/main.css' %}">
-<link rel="stylesheet" href="{% static 'css/tag.css' %}">
+<link rel="stylesheet" href="{% static 'css/main.css' %}?v={% now 'U' %}">
+<link rel="stylesheet" href="{% static 'css/tag.css' %}?v={% now 'U' %}">
+
+<h1 class="search-title">Trip Tailor</h1>
 <form method="get" action="">
-    <input
-        type="text"
-        name="prompt"
-        placeholder="여행지 조건을 입력해보세요!"
-        value="{{ prompt }}"
-    />
-    {% if show_followup %}
-    <div>
-        <strong>🤔 {{ question }}</strong>
-        <input type="text" name="followup" placeholder="답변을 입력하세요" />
-        <button type="submit">
-            <svg xmlns="http://www.w3.org/2000/svg" id="Outline" viewBox="0 0 24 24" width="20" height="20"><path d="M23.119.882a2.966,2.966,0,0,0-2.8-.8l-16,3.37a4.995,4.995,0,0,0-2.853,8.481L3.184,13.65a1,1,0,0,1,.293.708v3.168a2.965,2.965,0,0,0,.3,1.285l-.008.007.026.026A3,3,0,0,0,5.157,20.2l.026.026.007-.008a2.965,2.965,0,0,0,1.285.3H9.643a1,1,0,0,1,.707.292l1.717,1.717A4.963,4.963,0,0,0,15.587,24a5.049,5.049,0,0,0,1.605-.264,4.933,4.933,0,0,0,3.344-3.986L23.911,3.715A2.975,2.975,0,0,0,23.119.882ZM4.6,12.238,2.881,10.521a2.94,2.94,0,0,1-.722-3.074,2.978,2.978,0,0,1,2.5-2.026L20.5,2.086,5.475,17.113V14.358A2.978,2.978,0,0,0,4.6,12.238Zm13.971,7.17a3,3,0,0,1-5.089,1.712L11.762,19.4a2.978,2.978,0,0,0-2.119-.878H6.888L21.915,3.5Z"/></svg>
-        </button>
+  {% if show_followup %}
+    <!-- 기존 질문(수정 불가, 말풍선 표시) -->
+    <div class="chat-log">
+      {# 여러 개의 과거 질문을 지원하려면 previous_prompts 전달 #}
+      {% if previous_prompts %}
+        {% for p in previous_prompts %}
+          <div class="bubble bubble-user">{{ p }}</div>
+        {% endfor %}
+      {% else %}
+        <div class="bubble bubble-user">{{ prompt }}</div>
+      {% endif %}
     </div>
+
+    {# 서버로 기존 질문을 넘기기 위한 hidden 필드 #}
+    {% if previous_prompts %}
+      {% for p in previous_prompts %}
+        <input type="hidden" name="previous_prompts" value="{{ p }}">
+      {% endfor %}
     {% else %}
-    <button type="submit">
-        <svg xmlns="http://www.w3.org/2000/svg" id="Outline" viewBox="0 0 24 24" width="40" height="40"><path d="M23.707,22.293l-5.969-5.969a10.016,10.016,0,1,0-1.414,1.414l5.969,5.969a1,1,0,0,0,1.414-1.414ZM10,18a8,8,0,1,1,8-8A8.009,8.009,0,0,1,10,18Z"/></svg>
-    </button>
+      <input type="hidden" name="prompt" value="{{ prompt }}">
     {% endif %}
+
+    <!-- 보충 질문 영역 -->
+    <div class="additional_ques">
+      <strong>🤔 {{ question }}</strong>
+      <input type="text" name="followup" value="{{ followup }}" placeholder="답변을 입력하세요" />
+      <button type="submit" aria-label="보충 답변 제출">
+        <!-- 아이콘 생략(원문 그대로) -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20"><path d="M23.119.882a2.966,2.966,0,0,0-2.8-.8l-16,3.37a4.995,4.995,0,0,0-2.853,8.481L3.184,13.65a1,1,0,0,1,.293.708v3.168a2.965,2.965,0,0,0,.3,1.285l-.008.007.026.026A3,3,0,0,0,5.157,20.2l.026.026.007-.008a2.965,2.965,0,0,0,1.285.3H9.643a1,1,0,0,1,.707.292l1.717,1.717A4.963,4.963,0,0,0,15.587,24a5.049,5.049,0,0,0,1.605-.264,4.933,4.933,0,0,0,3.344-3.986L23.911,3.715A2.975,2.975,0,0,0,23.119.882ZM4.6,12.238,2.881,10.521a2.94,2.94,0,0,1-.722-3.074,2.978,2.978,0,0,1,2.5-2.026L20.5,2.086,5.475,17.113V14.358A2.978,2.978,0,0,0,4.6,12.238Zm13.971,7.17a3,3,0,0,1-5.089,1.712L11.762,19.4a2.978,2.978,0,0,0-2.119-.878H6.888L21.915,3.5Z"/></svg>
+      </button>
+    </div>
+  {% else %}
+    <!-- 최초 검색 상태: 기존 입력창 그대로 -->
+    <input
+      type="text"
+      name="prompt"
+      placeholder="여행지 조건을 입력해보세요!"
+      value="{{ prompt }}"
+    />
+    <button type="submit" aria-label="검색">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36"><path d="M23.707,22.293l-5.969-5.969a10.016,10.016,0,1,0-1.414,1.414l5.969,5.969a1,1,0,0,0,1.414-1.414ZM10,18a8,8,0,1,1,8-8A8.009,8.009,0,0,1,10,18Z"/></svg>
+    </button>
+  {% endif %}
+
+  {# 선택된 필터 유지 #}
+  {% if place_class %}<input type="hidden" name="place_class" value="{{ place_class }}">{% endif %}
+  {% if match %}<input type="hidden" name="match" value="{{ match }}">{% endif %}
+  {% for t in selected_tags %}
+    <input type="hidden" name="tags" value="{{ t }}">
+  {% endfor %}
 </form>
+
 
 <section class="tag-rail" data-expanded="false">
   <div class="track" id="tagTrack">
@@ -39,78 +73,130 @@
   </div>
   <button type="button" class="chip more" aria-expanded="false">+ 더보기</button>
 </section>
-
-<style>
-    .btn {
-        display: inline-block;
-        padding: 8px 16px;
-        margin-right: 8px;
-        background: #eee;
-        color: #333;
-        border-radius: 4px;
-        text-decoration: none;
-        border: 1px solid #ccc;
-    }
-    .btn.active {
-        background: #007bff;
-        color: #fff;
-        border-color: #007bff;
-    }
-</style>
+<!-- 라디오 탭 폼 -->
 <div class="filter-bar">
-  <a href="?{% if prompt %}prompt={{ prompt }}&{% endif %}"
-     class="btn {% if not place_class %}active{% endif %}">전체</a>
-  <a href="?{% if prompt %}prompt={{ prompt }}&{% endif %}place_class=1"
-     class="btn {% if place_class == '1' %}active{% endif %}">레포츠</a>
-  <a href="?{% if prompt %}prompt={{ prompt }}&{% endif %}place_class=2"
-     class="btn {% if place_class == '2' %}active{% endif %}">쇼핑</a>
-  <a href="?{% if prompt %}prompt={{ prompt }}&{% endif %}place_class=3"
-     class="btn {% if place_class == '3' %}active{% endif %}">관광지</a>
-  <a href="?{% if prompt %}prompt={{ prompt }}&{% endif %}place_class=4"
-     class="btn {% if place_class == '4' %}active{% endif %}">문화시설</a>
+  <form id="filterForm">
+    <label>
+      <input type="radio" name="place_class" value="" {% if not place_class %}checked{% endif %}>
+      <span class="text">전체</span>
+    </label>
+    <label>
+      <input type="radio" name="place_class" value="1" {% if place_class == '1' %}checked{% endif %}>
+      <span class="text">레포츠</span>
+    </label>
+    <label>
+      <input type="radio" name="place_class" value="2" {% if place_class == '2' %}checked{% endif %}>
+      <span class="text">쇼핑</span>
+    </label>
+    <label>
+      <input type="radio" name="place_class" value="3" {% if place_class == '3' %}checked{% endif %}>
+      <span class="text">관광지</span>
+    </label>
+    <label>
+      <input type="radio" name="place_class" value="4" {% if place_class == '4' %}checked{% endif %}>
+      <span class="text">문화시설</span>
+    </label>
+
+    {# 검색어/기존 필터 유지 #}
+    {% if prompt %}<input type="hidden" name="prompt" value="{{ prompt }}">{% endif %}
+    {% if followup %}<input type="hidden" name="followup" value="{{ followup }}">{% endif %}
+    {% if match %}<input type="hidden" name="match" value="{{ match }}">{% endif %}
+    {% for t in selected_tags %}
+      <input type="hidden" name="tags" value="{{ t }}">
+    {% endfor %}
+  </form>
 </div>
+
 <h2 class="place-section__title">전체 여행지</h2>
-<ul class="place-list">
-  {% for place in places %}
-  <li class="place-item">
-    <div class="place-item__head">
-      <span class="place-item__name">{{ place.name }}</span>
-      <span class="place-item__meta">({{ place.region }}) ·
-        {% if place.place_class == 1 %}레포츠{% elif place.place_class == 2 %}쇼핑{% elif place.place_class == 3 %}관광지{% elif place.place_class == 4 %}문화시설{% endif %}
-      </span>
-      <a class="place-item__link" href="{% url 'places:place_detail' place.pk %}">자세히 보기</a>
-      {% if user.is_authenticated %}
-      <form method="post" action="{% url 'places:place_like' place.pk %}" class="like-form">
-        {% csrf_token %}
-        <button type="submit" class="like-button">
-          {% if place.is_liked %}❤️ 취소{% else %}🤍 좋아요{% endif %}
-        </button>
-      </form>
-      <button type="button" class="add-to-route-btn" data-place-id="{{ place.id }}">
-        ➕ 루트에 추가
-      </button>
-      <!-- 드롭다운 -->
-      <div class="route-dropdown" style="display:none; position:absolute; background:#fff; border:1px solid #ccc; padding:.5rem; z-index:10; min-width:200px;">
-        <div class="route-list">불러오는 중...</div>
-        <hr>
-        <div class="create-route-form">
-          <input type="text" class="new-route-title" placeholder="새 루트 제목" style="width:100%; margin-bottom:.25rem;">
-          <input type="text" class="new-route-summary" placeholder="루트 요약(선택, 200자 이내)" style="width:100%; margin-bottom:.25rem;">
-          <label style="display:block; margin-bottom:.25rem;">
-            <input type="checkbox" class="new-route-public" checked>공개 루트로 만들기
-          </label>
-          <button type="button" class="create-route-btn">＋ 새 루트 만들기</button>
+
+<div id="results">
+  <ul class="place-list">
+    {% for place in places %}
+    <li class="place-item">
+      <div 
+      id="map-{{ place.id }}"
+      class="place-item__map"
+      data-lat="{{place.lat}}"
+      data-lng="{{place.lng}}"
+      ></div>
+      <div class="place-item__head">
+        <span class="place-item__name">{{ place.name }}</span>
+        <span class="place-item__meta">({{ place.region }}) ·
+          {% if place.place_class == 1 %}레포츠{% elif place.place_class == 2 %}쇼핑{% elif place.place_class == 3 %}관광지{% elif place.place_class == 4 %}문화시설{% endif %}
+        </span>
+        <a class="place-item__link" href="{% url 'places:place_detail' place.pk %}">자세히 보기</a>
+
+        {% if user.is_authenticated %}
+        <form method="post" action="{% url 'places:place_like' place.pk %}" class="like-form">
+          {% csrf_token %}
+          <button type="submit" class="like-button">
+            {% if place.is_liked %}❤️ 찜취소{% else %}🤍 찜하기{% endif %}
+          </button>
+        </form>
+
+        <button type="button" class="add-to-route-btn" data-place-id="{{ place.id }}">➕ 루트에 추가</button>
+        <div class="route-dropdown" style="display:none; position:absolute; background:#fff; border:1px solid #ccc; padding:.5rem; z-index:10; min-width:200px;">
+          <div class="route-list">불러오는 중...</div>
+          <hr>
+          <div class="create-route-form">
+            <input type="text" class="new-route-title" placeholder="새 루트 제목" style="width:100%; margin-bottom:.25rem;">
+            <input type="text" class="new-route-summary" placeholder="루트 요약(선택, 200자 이내)" style="width:100%; margin-bottom:.25rem;">
+            <label style="display:block; margin-bottom:.25rem;">
+              <input type="checkbox" class="new-route-public" checked>공개 루트로 만들기
+            </label>
+            <button type="button" class="create-route-btn">＋ 새 루트 만들기</button>
+          </div>
         </div>
+        {% endif %}
       </div>
+      <ul class="tag-list">
+        {% for tag in place.tags.all %}
+          <li class="tag">#{{ tag.name }}</li>
+        {% endfor %}
+      </ul>
+    </li>
+    {% empty %}
+      <li>표시할 여행지가 없습니다.</li>
+    {% endfor %}
+  </ul>
+
+  {% if places.paginator.num_pages > 1 %}
+  <div class="pagination">
+    {% if places.has_previous %}
+      <a href="?{{ base_qs }}{% if base_qs %}&{% endif %}page={{ places.previous_page_number }}">이전</a>
+    {% endif %}
+
+    {% if show_first %}
+      <a href="?{{ base_qs }}{% if base_qs %}&{% endif %}page=1">1</a>
+    {% endif %}
+    {% if show_first_ellipsis %}<span>…</span>{% endif %}
+
+    {% for num in page_window %}
+      {% if num == places.number %}
+        <span class="current">{{ num }}</span>
+      {% else %}
+        <a href="?{{ base_qs }}{% if base_qs %}&{% endif %}page={{ num }}">{{ num }}</a>
       {% endif %}
-    </div>
-    <ul class="tag-list">
-      {% for tag in place.tags.all %}
-      <li class="tag">#{{ tag.name }}</li>
-      {% endfor %}
-    </ul>
-  </li>
-  {% endfor %}
-</ul>
+    {% endfor %}
+
+    {% if show_last_ellipsis %}<span>…</span>{% endif %}
+    {% if show_last %}
+      <a href="?{{ base_qs }}{% if base_qs %}&{% endif %}page={{ places.paginator.num_pages }}">{{ places.paginator.num_pages }}</a>
+    {% endif %}
+
+    {% if places.has_next %}
+      <a href="?{{ base_qs }}{% if base_qs %}&{% endif %}page={{ places.next_page_number }}">다음</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+
+<script src="{% static 'js/map.js' %}?v={% now 'U' %}"></script>
+<script
+src="https://maps.googleapis.com/maps/api/js?key={{GOOGLE_MAPS_API_KEY}}&callback=initMap&v=weekly&libraries=marker"
+defer
+></script>
 <script src="{% static 'js/like.js' %}"></script>
+<script src="{% static 'js/tabbar.js' %}"></script>
+<script src="{% static 'js/script.js' %}"></script>
 {% endblock %}

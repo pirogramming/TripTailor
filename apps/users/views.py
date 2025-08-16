@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from apps.places.models import PlaceLike
+from apps.places.models import PlaceLike, Place
 from django.db.models import Count, Prefetch
 from django.db.models import prefetch_related_objects
 from apps.routes.models import Route, RoutePlace
@@ -20,6 +20,17 @@ def main_page(request):
 
 @login_required
 def my_page(request):
+    tab = request.GET.get("tab", "likes")
+    ctx = {"tab": tab}
+
+    if tab == "likes":
+        ctx["items"] = PlaceLike.objects.filter(user=request.user).order_by("-created_at")[:30]
+    elif tab == "routes":
+        ctx["items"] = Route.objects.filter(creator=request.user).order_by("-created_at")[:30]
+    elif tab == "reviews":
+        ctx["items"] = Review.objects.filter(user=request.user).order_by("-created_at")[:30]
+
+
     # --- 좋아요한 장소
     likes_qs = (
         PlaceLike.objects
@@ -32,6 +43,10 @@ def my_page(request):
     likes_page = likes_paginator.get_page(request.GET.get("page_likes", 1))
     total_likes = likes_qs.count()
 
+    for lk in likes_page.object_list:
+        # lk는 PlaceLike, lk.place는 select_related로 미리 붙어 있음
+        lk.place.is_liked = True
+
     # --- 내가 만든 루트
     routes_qs = (
         Route.objects
@@ -43,11 +58,11 @@ def my_page(request):
     routes_page = routes_paginator.get_page(request.GET.get("page_routes", 1))
     total_routes = routes_qs.count()
 
-    # --- 내가 작성한 리뷰 (루트가 있는 것만)
+    # --- 내가 작성한 리뷰 (내용이 있는 것만)
     reviews_qs = (
         Review.objects
-        .filter(user=request.user, route__isnull=False)  # 루트가 있는 리뷰만
-        .select_related("route")
+        .filter(user=request.user, content__isnull=False).exclude(content='')  # 내용이 있는 리뷰만
+        .select_related("place")
         .prefetch_related("photos")
         .order_by("-created_at")
     )
@@ -68,7 +83,9 @@ def my_page(request):
             Prefetch("stops", queryset=preview_qs, to_attr="prefetched_stops"),
         )
 
-    return render(request, "users/mypage.html", {
+    return render(request, "users/mypage.html",{
+        "tab": tab,
+        
         # 좋아요 섹션
         "likes_page": likes_page,
         "total_likes": total_likes,

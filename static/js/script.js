@@ -13,6 +13,36 @@
 
     // ---------- After DOM Ready ----------
     document.addEventListener('DOMContentLoaded', function () {
+        // ===== 좋아요 AJAX =====
+        document.querySelectorAll('.like-form').forEach(function (form) {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const button = form.querySelector('.like-button');
+                const actionUrl = form.getAttribute('action');
+                const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+
+                fetch(actionUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.liked) {
+                            button.textContent = '❤️ 취소';
+                        } else {
+                            button.textContent = '🤍 좋아요';
+                        }
+                        // 필요시 좋아요 개수 등도 업데이트 가능
+                    })
+                    .catch(() => {
+                        alert('좋아요 처리 중 오류가 발생했습니다.');
+                    });
+            });
+        });
+
         // ===== TAGS: “더보기/접기 & Ajax 필터” (교체된 부분) =====
         (function initTagChipsAjax() {
             const rail = document.querySelector('.tag-rail');
@@ -23,16 +53,31 @@
 
             // 더보기/접기 초기화
             (function initMore() {
-                if (!moreBtn) return;
-                const hidden = track.querySelectorAll('.chip.extra').length;
-                if (!hidden) moreBtn.style.display = 'none';
+                if (!moreBtn || rail.dataset.jsInit === '1') return;
+                rail.dataset.jsInit = '1';
+
+                const extraChips = track.querySelectorAll('.chip.extra');
+                if (!extraChips.length) {
+                    moreBtn.style.display = 'none';
+                    return;
+                }
+
+                // 초기 상태 설정
+                rail.setAttribute('data-expanded', 'false');
+                moreBtn.setAttribute('aria-expanded', 'false');
+                moreBtn.textContent = '+ 더보기';
+                
                 moreBtn.addEventListener('click', () => {
-                    const expanded = rail.dataset.expanded === 'true';
-                    rail.dataset.expanded = (!expanded).toString();
-                    moreBtn.textContent = expanded ? '+ 더보기' : '접기';
-                    moreBtn.setAttribute('aria-expanded', (!expanded).toString());
+                    const expanded = rail.getAttribute('data-expanded') === 'true';
+                    const next = !expanded;
+                    rail.setAttribute('data-expanded', String(next));
+                    moreBtn.setAttribute('aria-expanded', String(next));
+                    moreBtn.textContent = next ? '접기' : '+ 더보기';
                 });
+
+                console.log('[initMore] 더보기/접기 토글 초기화 완료');
             })();
+
 
             // 목록만 Ajax 교체
             async function fetchAndSwapList(nextParams) {
@@ -58,6 +103,7 @@
                     document.getElementById('list-loading')?.remove();
                 }
             }
+
 
             // 칩 클릭 → URL 파라미터 갱신 → Ajax로 목록만 갱신
             track.addEventListener('click', async (e) => {
@@ -107,7 +153,6 @@
                     const listBox = dropdown.querySelector('.route-list');
                     listBox.textContent = '불러오는 중...';
                     try {
-                        // ⚠️ 정적 .js 파일이면 아래 템플릿 태그를 문자열 URL로 바꾸세요.
                         const res = await fetch('/routes/mine/json/', { credentials: 'same-origin' });
                         const data = await res.json();
                         if (!data.routes.length) {
@@ -129,10 +174,13 @@
 
             // 루트 선택 → 장소 추가
             if (e.target.classList.contains('select-route-btn')) {
+                // 중복 방지: 이미 처리 중이면 return
+                if (e.target.dataset.clicked === 'true') return;
+                e.target.dataset.clicked = 'true';
+
                 const routeId = e.target.dataset.routeId;
                 const placeId = e.target.dataset.placeId;
-                // ⚠️ 정적 .js 파일이면 템플릿 태그 대신 `/routes/${routeId}/add/${placeId}/` 로 직접 구성
-                const endpoint = `/routes/${routeId}/add/${placeId}/`
+                const endpoint = `/routes/${routeId}/add/${placeId}/`;
                 try {
                     const res = await fetch(endpoint, {
                         method: 'POST',
@@ -143,11 +191,18 @@
                     alert(data.duplicated ? '이미 해당 루트에 있음' : '루트에 추가됨');
                 } catch (err) {
                     alert('추가 실패');
+                } finally {
+                    // 0.5초 후 다시 클릭 가능하게
+                    setTimeout(() => { e.target.dataset.clicked = 'false'; }, 500);
                 }
             }
 
             // 새 루트 생성 → 목록 갱신
             if (e.target.classList.contains('create-route-btn')) {
+                // 중복 방지: 이미 처리 중이면 return
+                if (e.target.dataset.clicked === 'true') return;
+                e.target.dataset.clicked = 'true';
+
                 const dropdown = e.target.closest('.route-dropdown');
                 const titleInput = dropdown.querySelector('.new-route-title');
                 const summaryInput = dropdown.querySelector('.new-route-summary');
@@ -157,6 +212,7 @@
 
                 if (!title) {
                     alert('제목을 입력하세요');
+                    e.target.dataset.clicked = 'false';
                     return;
                 }
                 try {
@@ -164,7 +220,6 @@
                     fd.append('title', title);
                     fd.append('location_summary', summary);
                     fd.append('is_public', isPublic ? 'true' : 'false');
-                    // ⚠️ 정적 .js 파일이면 템플릿 태그 대신 '/routes/create/' 등으로 변경
                     const res = await fetch('/routes/create/', {
                         method: 'POST',
                         headers: { 'X-CSRFToken': csrftoken, 'X-Requested-With': 'XMLHttpRequest' },
@@ -185,6 +240,9 @@
                     }
                 } catch (err) {
                     alert('오류 발생');
+                } finally {
+                    // 0.5초 후 다시 클릭 가능하게
+                    setTimeout(() => { e.target.dataset.clicked = 'false'; }, 500);
                 }
             }
         });
@@ -317,3 +375,4 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+

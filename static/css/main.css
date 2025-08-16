@@ -1,309 +1,617 @@
 :root {
-    --border-color: #62B3B8;
-    --primary_send: #95f9fe;
-    --primary_send-hover: #63f1f9;
-    --primary: #62B3B8;
-    --primary-hover: #4e9fa4;
-    --background: #EFFEFF;
-    --white: #fff;
-    --text: #111;
-    --muted: #6b7280;
-    --chip-bg: #f3f4f6;
-    --chip-active-bg: #e0f7f8;
-    --shadow: 0 4px 12px rgba(0,0,0,.08);
+  --border-color: #62B3B8;
+  --primary_send: #95f9fe;
+  --primary_send-hover: #63f1f9;
+  --primary: #62B3B8;
+  --primary-hover: #4e9fa4;
+  --background: #EFFEFF;
+  --white: #fff;
+  --text: #111;
+  --muted: #6b7280;
+  --chip-bg: #f3f4f6;
+  --chip-active-bg: #e0f7f8;
+  --shadow: 0 8px 20px rgba(0,0,0,.06);
+  --rhythm: 8px;
+  --lh: 1.5;
 }
 
-/* 공통 초기화 */
-* { box-sizing: border-box; }
+
+/* =========================
+   Reset / Base
+   ========================= */
+* {
+  box-sizing: border-box;
+}
+
 body {
-    margin: 0;
-    font-family: 'Noto Sans KR', sans-serif;
-    background-color: var(--background);
-    color: var(--text);
+  margin: 0;
+  font-family: 'Noto Sans KR', sans-serif;
+  background-color: var(--background);
+  color: var(--text);
+  position: relative;
 }
-a { text-decoration: none; color: inherit; }
-button { font: inherit; cursor: pointer; }
 
-/* ===== 검색 폼 (카톡 직사각형 스타일) ===== */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+
+/* =========================
+   Search Form (카톡 직사각형)
+   ========================= */
+
+
+.search-title {
+  font-family: 'Lemon', sans-serif;
+  margin: 60px;
+  color: var(--border-color);
+  font-size: 50px;
+  margin-top: 70px;
+}
+
 form[method="get"] {
-    width: 900px;
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-    padding: .75rem .9rem;
-    border: 1px solid var(--border-color);
-    border-radius: 12px; /* 직사각형 */
-    background: #fff;
-    box-shadow: none;
-    transition: box-shadow .15s ease, border-color .15s ease;
-    margin: 6rem auto 1.5rem; /* 상단 여백 */
+  width: 900px;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .75rem .9rem;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: none;
+  transition: box-shadow .15s ease, border-color .15s ease;
+  /* margin: 6rem auto 1.5rem; */
 }
 
 form[method="get"]:hover,
 form[method="get"]:focus-within {
-    box-shadow: var(--shadow);
-    border-color: transparent;
+  box-shadow: var(--shadow);
+  border-color: transparent;
 }
 
 /* 입력창 */
 form[method="get"] input[type="text"] {
-    flex: 1;
-    height: 44px;
-    font-size: 16px;
-    border: 0;
-    outline: 0;
-    background: transparent;
-    padding: 0 .6rem;
+  flex: 1;
+  height: 44px;
+  font-size: 16px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  padding: 0 .6rem;
 }
 
-/* 플레이스홀더 색상 */
+/* 플레이스홀더 */
 form[method="get"] input::placeholder {
-    color: #80868b;
+  color: #80868b;
 }
 
 /* 제출 버튼 */
 form[method="get"] > button {
-    border: 0;
-    background: transparent;
-    width: 44px;
-    height: 44px;
-    border-radius: 10px; /* 둥근 버튼 */
-    display: grid;
-    place-items: center;
-    cursor: pointer;
-    transition: background-color .15s ease;
+  border: 0;
+  background: transparent;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background-color .15s ease;
 }
+
 form[method="get"] > button:hover {
-    background: #f1f3f4;
+  background: #f1f3f4;
 }
+
 form[method="get"] > button:active {
-    background: #e8eaed;
+  background: #e8eaed;
 }
+
 form[method="get"] > button svg {
-    width: 24px;
-    height: 24px;
-    fill: #5f6368;
+  width: 24px;
+  height: 24px;
+  fill: #5f6368;
 }
 
-/* 보충 질문 (카톡 말풍선) */
+/* 보충 질문 말풍선 */
 form[method="get"] > div {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
 }
+
 form[method="get"] > div strong {
-    align-self: flex-start;
-    background: #f1f1f1;
-    color: #333;
-    padding: 10px 14px;
-    border-radius: 14px;
-    max-width: 80%;
-    line-height: 1.45;
-    position: relative;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
+  align-self: flex-start;
+  background: #f1f1f1;
+  color: #333;
+  padding: 10px 14px;
+  border-radius: 14px;
+  max-width: 80%;
+  line-height: 1.45;
+  position: relative;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
 }
+
 form[method="get"] > div strong::after {
-    content: "";
-    position: absolute;
-    left: -6px;
-    bottom: 6px;
-    border: 8px solid transparent;
-    border-right-color: #f1f1f1;
+  content: "";
+  position: absolute;
+  left: -6px;
+  bottom: 6px;
+  border: 8px solid transparent;
+  border-right-color: #f1f1f1;
 }
+
 form[method="get"] > div input[type="text"] {
-    align-self: flex-end;
-    background: var(--background);
-    border: 1px solid var(--border-color);
-    border-radius: 14px;
-    padding: 10px 14px;
-    font-size: 15px;
-    max-width: 100%;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
+  align-self: flex-end;
+  background: var(--background);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 10px 14px;
+  font-size: 15px;
+  max-width: 100%;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
 }
+
 form[method="get"] > div button[type="submit"] {
-    align-self: flex-end;
-    background: var(--primary_send);
-    color: #fff;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 20px;
-    font-size: 14px;
-    margin-top: 4px;
-    transition: background .2s ease;
+  align-self: flex-end;
+  background: var(--primary_send);
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  margin-top: 4px;
+  transition: background .2s ease;
 }
+
 form[method="get"] > div button[type="submit"]:hover {
-    background: var(--primary_send-hover);
+  background: var(--primary_send-hover);
 }
 
-/* ===== 태그 레일 ===== */
-.tag-rail {
-    max-width: 980px;
-    margin: 0 auto 16px;
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-.tag-rail .track {
-    flex: 1;
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    scrollbar-width: none;
-}
-.tag-rail .track::-webkit-scrollbar { display: none; }
-.chip {
-    padding: 8px 12px;
-    border-radius: 999px;
-    background: var(--chip-bg);
-    border: 1px solid #e5e7eb;
-    white-space: nowrap;
-    transition: background 0.2s;
-}
-.chip:hover { background: #f0f0f0; }
-.chip.active {
-    background: var(--chip-active-bg);
-    border-color: var(--border-color);
-    color: var(--primary-hover);
-    font-weight: bold;
-}
-.chip.more {
-    border: 1px dashed var(--border-color);
-    background: var(--white);
+.additional_ques {
+  border-left: 1px solid #eef2f7;
+  padding-left: 20px;
 }
 
-/* 5개 이상 숨기기 */
-.tag-rail[data-expanded="false"] .extra { display: none; }
-.tag-rail[data-expanded="true"] .extra { display: inline-flex; }
+/* 기존 질문 말풍선(읽기 전용) */
+.chat-log{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: .5rem;
+}
+.bubble{
+  max-width: 80%;
+  padding: 10px 14px;
+  border-radius: 14px;
+  line-height: 1.45;
+  box-shadow: 0 1px 2px rgba(0,0,0,.05);
+}
+.bubble-user{
+  align-self: flex-start;
+  background: #f1f1f1;
+  color: #333;
+  position: relative;
+}
+.bubble-user::after{
+  content:"";
+  position:absolute;
+  left:-6px; bottom:6px;
+  border:8px solid transparent;
+  border-right-color:#f1f1f1;
+}
 
-/* ===== 필터 바 ===== */
+
+
+/* =========================
+   Tag Rail / Filter Bar
+   ========================= */
+.tag-rail,
 .filter-bar {
-    max-width: 980px;
-    margin: 0 auto 16px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-.filter-bar .btn {
-    display: inline-block;
-    padding: 8px 14px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-    background: var(--white);
-    transition: background 0.2s;
-}
-.filter-bar .btn:hover { background: var(--chip-active-bg); }
-.filter-bar .btn.active {
-    background: var(--primary);
-    color: var(--white);
-    border-color: var(--primary);
+  max-width: 1100px;
+  margin: 0 auto calc(var(--rhythm) * 2);
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
-/* ===== 여행지 리스트 ===== */
+.tag-rail .track {
+  flex: 1;
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tag-rail .track::-webkit-scrollbar {
+  display: none;
+}
+
+.chip {
+  padding: 9px 14px;
+  border-radius: 999px;
+  background: var(--chip-bg);
+  border: 1px solid #e5e7eb;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.chip.active {
+  background: var(--chip-active-bg);
+  border-color: var(--border-color);
+  color: var(--primary-hover);
+  font-weight: 700;
+}
+
+.chip.more {
+  border-style: dashed;
+  background: #fff;
+}
+
+.tag-rail[data-expanded="false"] .extra {
+  display: none;
+}
+
+.tag-rail[data-expanded="true"] .extra {
+  display: inline-flex;
+}
+
+/* =========================
+   Section Title
+   ========================= */
 .place-section__title {
-    max-width: 980px;
-    margin: 20px auto 10px;
-    font-size: 20px;
-    font-weight: bold;
+  max-width: 1100px;
+  margin: 24px auto 12px;
+  padding: 0 12px;
+  font-size: 20px;
+  font-weight: 700;
 }
+
+
+/* =========================
+   Place List (3 → 2 → 1 cols)
+   ========================= */
 .place-list {
-    max-width: 980px;
-    list-style: none;
-    margin: 0 auto;
-    padding: 0;
-    display: grid;
-    gap: 12px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 12px;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
 }
+
+@media (max-width: 960px) {
+  .place-list { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 600px) {
+  .place-list { grid-template-columns: 1fr; }
+}
+
+
+/* =========================
+   Card
+   ========================= */
 .place-item {
-    background: var(--white);
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 14px;
-    box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  transition: transform .12s ease, box-shadow .12s ease;
+  z-index: 999;
 }
+
+.place-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(0,0,0,.10);
+}
+
+/* Media: square */
+.place-item__map {
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  background: linear-gradient(135deg,#f8fafc,#eef2f7);
+  flex-shrink: 0;
+  width: 100%;
+  border-radius: 14px 14px 0 0;
+}
+
+/* Header */
 .place-item__head {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    align-items: center;
-    position: relative;
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* 버튼 50%/50% */
+  gap: 8px;
+  padding: 12px 14px;
+  border-top: 1px solid #eef2f7;
 }
-.place-item__name { font-weight: bold; font-size: 18px; }
-.place-item__meta { font-size: 14px; color: var(--muted); }
+
+/* 제목/메타 전체 폭 */
+.place-item__name {
+  grid-column: 1 / -1;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.place-item__meta {
+  grid-column: 1 / -1;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* 자세히 보기 버튼 */
 .place-item__link {
-    margin-left: auto;
-    padding: 6px 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    background: var(--white);
+  grid-column: 1 / -1;
+  height: 36px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  font-size: 13px;
 }
+
 .place-item__link:hover { background: var(--chip-active-bg); }
 
-/* ===== 좋아요 버튼 ===== */
-.like-form { margin: 0; }
-.like-button {
-    padding: 6px 10px;
-    border: 1px solid #f43f5e;
-    border-radius: 6px;
-    background: var(--white);
-    color: #e11d48;
-}
-.like-button:hover {
-    background: #fff0f3;
-}
+/* 50% 버튼 분할 */
+.like-form { grid-column: 1 / 2; display: flex; }
+.add-to-route-btn { grid-column: 2 / 3; }
 
-/* ===== 루트 추가 버튼 & 드롭다운 ===== */
+.like-button,
 .add-to-route-btn {
-    padding: 6px 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    background: var(--white);
+  width: 100%;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-size: 14px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
 }
-.add-to-route-btn:hover {
-    background: var(--chip-active-bg);
-}
-.route-dropdown {
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
-    z-index: 10;
-    background: var(--white);
-    border: 1px solid #ccc;
-    padding: .5rem;
-    border-radius: 8px;
-    min-width: 200px;
-    box-shadow: var(--shadow);
-}
-.route-dropdown input {
-    width: 100%;
-    margin-bottom: .25rem;
-    padding: .4rem;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-}
-.create-route-btn {
-    width: 100%;
-    padding: .4rem;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    background: var(--white);
-}
-.create-route-btn:hover { background: var(--chip-active-bg); }
 
-/* ===== 장소 태그 ===== */
+.like-button { border-color: #f43f5e; color: #e11d48; }
+.like-button:hover { background: #fff0f3; }
+.add-to-route-btn { border-color: var(--border-color); }
+.add-to-route-btn:hover { background: var(--chip-active-bg); }
+
+/* 태그 리스트 */
 .tag-list {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-    margin-top: 10px;
-    padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  padding: 12px 14px 14px;
+  border-top: 1px solid #eef2f7;
+  margin: 0;
 }
+
 .tag {
-    list-style: none;
-    font-size: 12px;
-    padding: 4px 8px;
-    border-radius: 999px;
-    background: #f8fafc;
-    border: 1px solid #e5e7eb;
-    color: #334155;
+  display: inline-block;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  color: #334155;
 }
+
+
+/* =========================
+   Route Dropdown (Popup)
+   ========================= */
+.route-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 14px;
+  z-index: 30;
+  display: none;
+  width: min(360px, 86vw);
+  padding: 14px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 18px 40px rgba(0,0,0,.14);
+  animation: rd-pop .12s ease-out;
+}
+
+@keyframes rd-pop {
+  from { transform: translateY(-4px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.place-item.show-dropdown .route-dropdown { display: block; }
+
+/* 꼬리 */
+.route-dropdown::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  right: 18px;
+  border-width: 0 10px 10px 10px;
+  border-style: solid;
+  border-color: transparent transparent #e5e7eb transparent;
+}
+
+.route-dropdown::after {
+  content: "";
+  position: absolute;
+  top: -9px;
+  right: 18px;
+  border-width: 0 10px 10px 10px;
+  border-style: solid;
+  border-color: transparent transparent #fff transparent;
+}
+
+/* 내부 */
+.route-dropdown .route-list {
+  max-height: 220px;
+  overflow: auto;
+  padding: 6px;
+  border: 1px dashed #e5e7eb;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #374151;
+  background: #fafafa;
+  margin-bottom: 12px;
+}
+
+.route-dropdown hr {
+  border: 0;
+  height: 1px;
+  background: #f1f5f9;
+  margin: 12px 0;
+}
+
+.create-route-form {
+  z-index: 99999;
+}
+
+.route-dropdown .create-route-form input {
+  width: 100%;
+  padding: 11px 12px;
+  margin-bottom: 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.route-dropdown .create-route-form label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #475569;
+  margin-bottom: 8px;
+}
+
+.create-route-btn {
+  width: 100%;
+  height: 38px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 14px;
+}
+
+.create-route-btn:hover {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+
+/* =========================
+   Pagination
+   ========================= */
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin: 28px 0;
+}
+
+.pagination a,
+.pagination span {
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 14px;
+}
+
+.pagination .current {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+  .btn{display:inline-block;padding:8px 12px;margin-right:8px;border:1px solid var(--border-color);border-radius:8px;background:#fff}
+  .btn.active{background:var(--border-color);color:#fff;border-color:var(--border-color)}
+  .pagination{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:24px 0}
+  .pagination a,.pagination span{padding:6px 10px;border:1px solid var(--border-color);border-radius:6px;background:#fff}
+  .pagination .current{background:var(--border-color);color:#fff}
+
+
+/* =========================
+   Radio Tab – 이중선 완전 차단(override 강제)
+   ========================= */
+
+/* 라디오 숨김 */
+.filter-bar input[type="radio"] {
+  position: absolute !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* label: 컨테이너만(테두리/배경/패딩/아웃라인 전부 제거) */
+.filter-bar label {
+  display: inline-flex !important;
+  align-items: center !important;
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  outline: none !important;
+  cursor: pointer !important;
+  box-shadow: none !important;
+  gap: 15px;
+}
+
+/* 실제 버튼 모양은 span 하나만 담당 */
+.filter-bar label > span {
+  display: inline-block !important;
+  padding: 10px 16px !important;
+  border-radius: 10px !important;
+  border: 1px solid var(--border-color) !important;  /* ← 테두리는 span만 */
+  background: #fff !important;
+  font-size: 14px !important;
+  color: inherit !important;
+  transition: background .3s, color .3s, border-color .3s, box-shadow .2s !important;
+  box-shadow: none !important;
+}
+
+/* 비선택 hover */
+.filter-bar label:hover > span {
+  background: var(--chip-active-bg) !important;
+}
+
+/* 선택 상태 */
+.filter-bar input[type="radio"]:checked + span {
+  background: var(--primary) !important;
+  color: #fff !important;
+  border-color: var(--primary) !important;
+  font-weight: 600 !important;
+}
+
+/* 선택 + hover */
+.filter-bar input[type="radio"]:checked + span:hover {
+  background: var(--primary-hover) !important;
+  border-color: var(--primary-hover) !important;
+}
+
+/* 키보드 포커스일 때만 포커스 링은 span에만 */
+.filter-bar input[type="radio"]:focus-visible + span {
+  outline: 2px solid var(--primary) !important;
+  outline-offset: 2px !important;
+}
+
+/* 마우스 클릭 후 포커스 링 제거 */
+.filter-bar input[type="radio"]:focus:not(:focus-visible) + span {
+  outline: none !important;
+}
+

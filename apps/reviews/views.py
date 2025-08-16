@@ -12,6 +12,7 @@ from django.conf import settings
 
 
 from .models import Review, ReviewPhoto
+from .forms import ReviewForm
 from apps.places.models import Place
 
 BLACKLIST_SUBSTR = (
@@ -107,35 +108,21 @@ def blog_reviews(request, place_id: int):
 
 class PlaceReviewCreateView(LoginRequiredMixin, CreateView):
     model = Review
+    form_class = ReviewForm
     template_name = 'reviews/place_review_form.html'
-    fields = ['title', 'rating', 'content', 'summary']
 
     def form_valid(self, form):
         form.instance.user = self.request.user
         form.instance.place_id = self.kwargs.get('place_id')
         
-        # 루트 선택 처리 (필수)
-        route_id = self.request.POST.get('route')
-        if not route_id:
-            form.add_error('route', '루트를 선택해주세요.')
-            return self.form_invalid(form)
-        
-        from apps.routes.models import Route
-        try:
-            route = Route.objects.get(id=route_id, creator=self.request.user)
-            form.instance.route = route
-        except Route.DoesNotExist:
-            form.add_error('route', '유효하지 않은 루트입니다.')
-            return self.form_invalid(form)
-        
         # 댓글 저장
         review = form.save()
         
-        # 여러 이미지 URL 처리
-        photo_urls = self.request.POST.getlist('photo_urls[]')
-        for photo_url in photo_urls:
-            if photo_url and photo_url.strip():
-                ReviewPhoto.objects.create(review=review, url=photo_url.strip())
+        # 여러 이미지 파일 처리 (HTML form에서 name="photos"로 전송됨)
+        photo_files = self.request.FILES.getlist('photos')
+        for photo_file in photo_files:
+            if photo_file:
+                ReviewPhoto.objects.create(review=review, image=photo_file)
         
         return super().form_valid(form)
 
@@ -146,45 +133,31 @@ class PlaceReviewCreateView(LoginRequiredMixin, CreateView):
         context = super().get_context_data(**kwargs)
         context['place'] = get_object_or_404(Place, pk=self.kwargs.get('place_id'))
         
-        # 사용자의 루트 목록 추가
-        from apps.routes.models import Route
-        context['user_routes'] = Route.objects.filter(creator=self.request.user).order_by('-created_at')
-        
         return context
 
 class PlaceReviewUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Review
+    form_class = ReviewForm
     template_name = 'reviews/place_review_form.html'
-    fields = ['title', 'rating', 'content', 'summary']
 
     def test_func(self):
         review = self.get_object()
         return review.user == self.request.user
-
+    
     def form_valid(self, form):
-        # 루트 선택 처리 (필수)
-        route_id = self.request.POST.get('route')
-        if not route_id:
-            form.add_error('route', '루트를 선택해주세요.')
-            return self.form_invalid(form)
-        
-        from apps.routes.models import Route
-        try:
-            route = Route.objects.get(id=route_id, creator=self.request.user)
-            form.instance.route = route
-        except Route.DoesNotExist:
-            form.add_error('route', '유효하지 않은 루트입니다.')
-            return self.form_invalid(form)
-        
         # 댓글 저장
         review = form.save()
         
-        # 기존 이미지 삭제 후 새 이미지 URL 처리
-        review.photos.all().delete()
-        photo_urls = self.request.POST.getlist('photo_urls[]')
-        for photo_url in photo_urls:
-            if photo_url and photo_url.strip():
-                ReviewPhoto.objects.create(review=review, url=photo_url.strip())
+        # 삭제할 이미지 처리
+        delete_photo_ids = self.request.POST.getlist('delete_photo_ids')
+        if delete_photo_ids:
+            ReviewPhoto.objects.filter(id__in=delete_photo_ids, review=review).delete()
+        
+        # 새 이미지 파일 처리
+        photo_files = self.request.FILES.getlist('photos')
+        for photo_file in photo_files:
+            if photo_file:
+                ReviewPhoto.objects.create(review=review, image=photo_file)
         
         return super().form_valid(form)
 
@@ -195,32 +168,24 @@ class PlaceReviewUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView)
         context = super().get_context_data(**kwargs)
         context['place'] = self.object.place
         
-        # 사용자의 루트 목록 추가
-        from apps.routes.models import Route
-        context['user_routes'] = Route.objects.filter(creator=self.request.user).order_by('-created_at')
-        
-        # 현재 선택된 루트와 이미지 URL 추가
-        if self.object.route:
-            context['selected_route_id'] = self.object.route.id
-        
         # 현재 이미지들을 배열로 전달
-        context['current_photo_urls'] = [photo.url for photo in self.object.photos.all()]
+        context['current_photos'] = self.object.photos.all()
         
         return context
 
 # HTMX를 위한 댓글 목록 뷰
 def place_review_list_htmx(request, place_id):
     """HTMX로 댓글 목록을 반환하는 뷰"""
-    print(f"DEBUG: place_review_list_htmx 호출됨, place_id: {place_id}")
+    print(f"DEBUG: review_list_htmx 호출됨, place_id: {place_id}")
     
     place = get_object_or_404(Place, pk=place_id)
     print(f"DEBUG: Place 찾음: {place.name}")
     
-    reviews = Review.objects.filter(place=place).select_related('user', 'route').order_by('-created_at')
+    reviews = Review.objects.filter(place=place).select_related('user').order_by('-created_at')
     print(f"DEBUG: 댓글 개수: {reviews.count()}")
     
     for review in reviews:
-        print(f"DEBUG: 댓글 - {review.title} by {review.user.username}, 루트: {review.route.title if review.route else 'None'}")
+        print(f"DEBUG: 댓글 by {review.user.username}")
     
     return render(request, 'reviews/review_list_fragment.html', {
         'reviews': reviews,

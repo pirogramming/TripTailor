@@ -1,0 +1,127 @@
+/* ===== Route page only (safe with base.html) ===== */
+.route-page{
+  /* 지역 변수 (base와 분리) */
+  --rt-bg:#f6f7fb;
+  --rt-card:#fff;
+  --rt-text:#0f172a;
+  --rt-muted:#64748b;
+  --rt-border:rgba(98,179,184,.25);
+  --rt-brand:#62B3B8;
+  --rt-badge-yellow:#fde68a;
+  --rt-chip-bg:#f8fafc;
+  --rt-chip-active:#e6fffe;
+  --rt-shadow:0 8px 20px rgba(0,0,0,.06);
+  --rt-radius:16px;
+
+  width:100%;
+  max-width:1100px;
+  margin: 0 auto;                 /* base의 .main_div가 바깥 여백 관리 */
+  padding: 8px 16px 32px;         /* nav 75px은 base에서 처리됨 */
+  border-radius: 12px;
+}
+
+/* 페이지 타이틀 */
+.route-page .page-title{
+  margin:0 0 16px;
+  font-size:1.35rem;
+  font-weight:800;
+  color:var(--rt-text);
+}
+
+/* 리스트 */
+.route-page .route-list{
+  display:flex; flex-direction:column; gap:16px;
+  width:100%;
+  margin:0 0 24px;
+}
+
+/* 카드 */
+.route-page .route-card{
+  background:var(--rt-card);
+  border:1px solid var(--rt-border);
+  border-radius:var(--rt-radius);
+  box-shadow:var(--rt-shadow);
+  padding:18px 18px 14px;
+}
+.route-page .route-card a{ color:inherit; text-decoration:none; }
+.route-page .route-card a:focus-visible{ outline:2px solid var(--rt-brand); outline-offset:2px; }
+
+/* 헤더 */
+.route-page .route-header{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+}
+.route-page .route-title{ margin:0; font-size:1.1rem; font-weight:800; line-height:1.2; }
+.route-page .route-title a:hover{ text-decoration:underline; }
+
+/* 배지 */
+.route-page .route-badge{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:4px 10px; border-radius:999px; font-size:.8rem; font-weight:700;
+  border:1px solid rgba(0,0,0,.06);
+  background:var(--rt-chip-bg);
+}
+.route-page .badge-default{ background:var(--rt-chip-bg); }
+.route-page .badge-계획중,
+.route-page .badge-planning{ background:var(--rt-badge-yellow); }
+
+/* 메타 */
+.route-page .route-meta{
+  display:flex; flex-wrap:wrap; gap:10px 14px;
+  margin:10px 0 6px; color:var(--rt-muted); font-size:.92rem;
+}
+.route-page .meta-item{ display:inline-flex; align-items:center; gap:6px; }
+
+/* 요약 (한 줄) */
+.route-page .route-summary{
+  margin:0 0 10px; color:var(--rt-muted); font-size:.95rem;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+
+/* 스톱 칩 */
+.route-page .route-stops{
+  display:flex; align-items:center; flex-wrap:wrap; gap:10px; padding-top:4px;
+}
+.route-page .stop-card{
+  display:inline-flex; align-items:center; gap:8px;
+  background:var(--rt-chip-bg); border:1px solid var(--rt-border);
+  padding:8px 12px; border-radius:999px;
+  transition: transform .12s ease, background .12s ease, border-color .12s ease;
+}
+.route-page .stop-card:hover{
+  transform:translateY(-1px); background:var(--rt-chip-active);
+  border-color:rgba(98,179,184,.45);
+}
+.route-page .stop-thumb{
+  width:22px; height:22px; border-radius:6px; overflow:hidden; flex:0 0 22px;
+  background:#e5e7eb; border:1px solid rgba(0,0,0,.05);
+}
+.route-page .stop-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+.route-page .stop-name{ font-size:.92rem; color:var(--rt-text); }
+.route-page .stop-arrow{ color:#94a3b8; user-select:none; }
+
+/* 푸터(카드 내부) */
+.route-page .route-footer{
+  margin-top:12px; padding-top:10px; border-top:1px dashed rgba(0,0,0,.06);
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+}
+.route-page .route-author{ color:var(--rt-muted); font-size:.9rem; }
+.route-page .route-actions{ display:flex; gap:8px; }
+.route-page .route-actions a{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:32px; height:32px; border-radius:10px; border:1px solid var(--rt-border); background:#fff;
+  transition: background .12s ease, transform .12s ease, border-color .12s ease;
+}
+.route-page .route-actions a:hover{
+  background:var(--rt-chip-active); border-color:rgba(98,179,184,.45); transform:translateY(-1px);
+}
+
+
+/* 반응형 */
+@media (max-width:640px){
+  .route-page{ padding:8px 12px 28px; border-radius:10px; }
+  .route-page .route-card{ padding:14px; border-radius:14px; }
+  .route-page .route-title{ font-size:1rem; }
+  .route-page .route-stops{ gap:8px; }
+  .route-page .stop-card{ padding:7px 10px; }
+  .route-page .route-actions a{ width:30px; height:30px; border-radius:8px; }
+}

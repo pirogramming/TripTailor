@@ -1,39 +1,42 @@
-{% if place %}
-<h4>{{ place.name }}의 댓글 ({{ reviews.count }}개)</h4>
-{% endif %}
-
 <ul class="review-list">
   {% for r in reviews %}
   <li class="review-item">
     <div class="review-header">
-      <h5 class="review-title">
-        {{ r.title }}
-      </h5>
       <div class="review-meta">
-        {% if r.route %}
-        <span class="route-badge">{{ r.route.title }}</span>
-        {% endif %}
-        <span class="rating">⭐{{ r.rating }}</span>
-        <span class="summary">{{ r.summary }}</span>
+        <span class="rating">⭐ {{ r.rating }}</span>
       </div>
       <div class="review-info">
         <span class="author">by {{ r.user.username }}</span>
         <span class="date">{{ r.created_at|date:"Y-m-d H:i" }}</span>
       </div>
     </div>
-    
-    {% if r.photos.exists %}
+
+    <div class="review-content">
+      {{ r.content|linebreaksbr }}
+    </div>
+
+    {# ✅ 사진 있을 때만 표시: exists() 대신 count 또는 all 사용 #}
+    {% if r.photos.count %}
     <div class="review-photos">
       {% for photo in r.photos.all %}
-        <img src="{{ photo.url }}" alt="댓글 이미지" class="review-photo" style="max-width: 100px; max-height: 100px; margin: 5px; border-radius: 5px;">
+        {# ✅ 안전하게 이미지 접근: image 필드가 있고 파일이 있을 때만 사용 #}
+        {% if photo.image %}
+          <img
+            src="{{ photo.image.url }}"
+            alt="댓글 이미지"
+            class="review-photo"
+            loading="lazy"
+            style="max-width: 100px; max-height: 100px; margin: 5px; border-radius: 5px; object-fit: cover;">
+        {% endif %}
       {% endfor %}
     </div>
     {% endif %}
-    
+
     {% if user == r.user %}
       <div class="action-buttons">
         <a href="{% url 'reviews:place_edit' place.id r.id %}" class="btn btn-sm btn-outline-primary">✏️ 수정</a>
-        <button type="button" class="btn btn-sm btn-outline-danger delete-review-btn" data-review-id="{{ r.id }}" data-place-id="{{ place.id }}">🗑️ 삭제</button>
+        <button type="button" class="btn btn-sm btn-outline-danger delete-review-btn"
+                data-review-id="{{ r.id }}" data-place-id="{{ place.id }}">🗑️ 삭제</button>
       </div>
     {% endif %}
   </li>

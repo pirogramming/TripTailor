@@ -1,24 +1,38 @@
 {% extends "base.html" %}
 {% load static %}
 {% block content %}
-<link rel="stylesheet" href="{% static 'css/place_detail.css' %}">
+<link rel="stylesheet" href="{% static 'css/places/place_detail.css' %}">
 
 <div class="place-detail container">
   <div class="place-detail__header">
     <h2 class="place-detail__title">{{ place.name }}</h2>
-
-    {% if user.is_authenticated %}
-    <form method="post" action="{% url 'places:place_like' place.pk %}" class="like-form">
-      {% csrf_token %}
-      <button type="submit" class="like-button">
-        {% if place.is_liked %}❤️ 취소{% else %}🤍 좋아요{% endif %}
-      </button>
-    </form>
-    {% endif %}
   </div>
 
+  <!-- 액션 카드: 찜하기 + 이 장소가 포함된 루트 보기 -->
+  <section class="card actions-card">
+    <div class="actions-card__row">
+      {% if user.is_authenticated %}
+      <form method="post" action="{% url 'places:place_like' place.pk %}" class="like-form">
+        {% csrf_token %}
+        <button type="submit" class="like-button">
+          {% if place.is_liked %}❤️ 찜취소 {% else %}🤍 찜하기{% endif %}
+        </button>
+      </form>
+      {% endif %}
+
+      <a class="route-link btn btn-outline" href="{% url 'routes:place_routes' place.id %}">
+        이 장소가 포함된 루트 보기
+      </a>
+    </div>
+  </section>
+
   <div class="card">
-    <div class="map-section-detail"></div>
+    <div 
+    id="map-{{ place.id }}"
+    class="place-item__map"
+    data-lat="{{place.lat}}"
+    data-lng="{{place.lng}}"
+    ></div>
   </div>
 
   <div class="card">
@@ -63,104 +77,82 @@
 
   <!-- 블로그 후기 섹션 -->
   <section class="card">
-      <h3 class="section-title">블로그 후기</h3>
-      <button id="load-blog-reviews" data-place-id="{{ place.id }}" class="tag">블로그 후기 불러오기</button>
-      <ul id="blog-review-list" style="margin-top:10px;">
-
-      </ul>
+    <h3 class="section-title">블로그 후기</h3>
+    <button id="load-blog-reviews" data-place-id="{{ place.id }}" class="tag">블로그 후기 불러오기</button>
+    <ul id="blog-review-list" class="blog" style="margin-top:10px;"></ul>
   </section>
 
   <!-- 댓글 섹션 -->
-  <section class="card">
+  <section class="card review-card">
     <h3 class="section-title">댓글</h3>
-    
-    
+
     <!-- 댓글 작성 폼 -->
     {% if user.is_authenticated %}
     <div class="review-form-section">
-      <h4>댓글 작성</h4>
-      <form method="post" action="{% url 'reviews:place_create' place.id %}" class="review-form" id="review-form">
+      <h4 class="review-form__title">댓글 작성</h4>
+      <form method="post" action="{% url 'reviews:place_create' place.id %}" class="review-form" id="review-form" enctype="multipart/form-data">
         {% csrf_token %}
-        <div class="form-group">
-          <label for="id_title">제목 *</label>
-          <input type="text" name="title" id="id_title" class="form-control" required maxlength="200">
-        </div>
-        
-        <div class="form-group">
-          <label for="id_rating">평점 *</label>
-          <select name="rating" id="id_rating" class="form-control" required>
-            <option value="">평점 선택</option>
-            <option value="5.0">5.0 - 매우 좋음</option>
-            <option value="4.5">4.5 - 좋음</option>
-            <option value="4.0">4.0 - 보통</option>
-            <option value="3.5">3.5 - 보통</option>
-            <option value="3.0">3.0 - 보통</option>
-            <option value="2.5">2.5 - 나쁨</option>
-            <option value="2.0">2.0 - 나쁨</option>
-            <option value="1.5">1.5 - 매우 나쁨</option>
-            <option value="1.0">1.0 - 비추천</option>
-            <option value="0.5">0.5 - 매우 나쁨</option>
-            <option value="0.0">0.0 - 가지마</option>
-          </select>
-        </div>
-        
-        <div class="form-group">
-          <label for="id_summary">요약 *</label>
-          <input type="text" name="summary" id="id_summary" class="form-control" required maxlength="255" placeholder="간단한 요약을 입력하세요">
-        </div>
-        
-        <div class="form-group">
-          <label for="id_content">내용 *</label>
-          <textarea name="content" id="id_content" class="form-control" rows="4" required placeholder="상세한 후기를 작성해주세요"></textarea>
-        </div>
-
-        <div class="form-group">
-          <label for="id_route">루트 *</label>
-          <select name="route" id="id_route" class="form-control" required>
-            <option value="">루트 선택 (필수)</option>
-            {% for route in user_routes %}
-            <option value="{{ route.id }}">{{ route.title }}</option>
-            {% endfor %}
-          </select>
-          <small class="form-text text-muted">이 댓글을 연결할 여행 루트를 선택하세요</small>
-        </div>
-
-        <div class="form-group">
-          <label>이미지 URL (최대 5개, 선택사항)</label>
-          <div id="photo-inputs">
-            <div class="photo-input-row">
-              <input type="url" name="photo_urls[]" class="form-control photo-url-input" placeholder="https://example.com/image1.jpg">
-              <div class="photo-preview"></div>
-            </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="id_rating">평점 *</label>
+            <select name="rating" id="id_rating" class="form-control" required>
+              <option value="">평점 선택</option>
+              <option value="5.0">5.0</option>
+              <option value="4.5">4.5</option>
+              <option value="4.0">4.0</option>
+              <option value="3.5">3.5</option>
+              <option value="3.0">3.0</option>
+              <option value="2.5">2.5 </option>
+              <option value="2.0">2.0</option>
+              <option value="1.5">1.5</option>
+              <option value="1.0">1.0</option>
+              <option value="0.5">0.5</option>
+              <option value="0.0">0.0</option>
+            </select>
           </div>
-          <button type="button" id="add-photo-btn" class="btn btn-sm btn-outline-secondary">+ 이미지 추가</button>
-          <small class="form-text text-muted">댓글과 함께 표시할 이미지의 URL을 입력하세요 (최대 5개)</small>
+
+          <div class="form-group form-group--full">
+            <label for="id_content">내용 *</label>
+            <textarea name="content" id="id_content" class="form-control" rows="4" required placeholder="상세한 후기를 작성해주세요"></textarea>
+          </div>
+
+          <div class="form-group form-group--full">
+            <label for="id_photos">이미지 업로드 (최대 5장, 선택사항)</label>
+            <input type="file" id="id_photos" name="photos" class="form-control" accept="image/*" multiple>
+            <small class="form-text text-muted">JPG/PNG 등 이미지 파일을 업로드하세요. 최대 5장까지 가능합니다.</small>
+            
+            <!-- 새로 업로드하는 파일들의 미리보기 -->
+            <div id="photo-previews" class="d-flex flex-wrap gap-2 mt-3"></div>
+          </div>
         </div>
-        
-        <button type="submit" class="btn btn-primary">댓글 작성</button>
+        <div class="review-form__actions">
+          <button type="submit" class="btn btn-primary">댓글 작성</button>
+        </div>
       </form>
     </div>
     {% else %}
-    <div class="review-form-section">
+    <div class="review-form-section review-form-section--empty">
       <p>댓글을 작성하려면 <a href="{% url 'account_login' %}">로그인</a>이 필요합니다.</p>
     </div>
     {% endif %}
 
     <!-- 댓글 목록 -->
-    <div id="review-list" data-place-id="{{ place.id }}">
-      <!-- 댓글 목록이 여기에 표시됩니다 -->
+    <div id="review-list" data-place-id="{{ place.id }}" class="review-list">
       <div class="loading-reviews">댓글 목록을 불러오는 중...</div>
+      <!-- comment_crud.js가 여기에 목록을 렌더링 -->
     </div>
   </section>
 
   <div class="place-detail__footer">
     <a class="back-link" href="{% url 'places:main' %}">← 목록으로 돌아가기</a>
-    <br>
-    <a class="route-link" href="{% url 'routes:place_routes' place.id %}">이 장소가 포함된 루트 보기</a>
   </div>
 </div>
 
+<script src="{% static 'js/map.js' %}?v={% now 'U' %}"></script>
+<script
+src="https://maps.googleapis.com/maps/api/js?key={{GOOGLE_MAPS_API_KEY}}&callback=initMap&v=weekly&libraries=marker"
+defer
+></script>
 <script src="{% static 'js/like.js' %}"></script>
 <script src="{% static 'js/comment_crud.js' %}"></script>
-
 {% endblock %}
