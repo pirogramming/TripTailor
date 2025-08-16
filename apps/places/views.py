@@ -18,10 +18,22 @@ def _norm_name(s: str) -> str:
     return s.lower()
 
 def _parse_selected_tags(request):
-    raw = (request.GET.get('tags') or '').strip()
-    selected = [t for t in raw.split(',') if t]
-    match = (request.GET.get('match') or 'any').lower()  # 'any' or 'all'
-    return selected, match, raw
+    raw_list = request.GET.getlist('tags')
+
+    selected = []
+    for raw in raw_list:
+        if ',' in raw:
+            selected += [tag.strip() for tag in raw.split(',')]
+        else:
+            selected.append(raw.strip())
+
+    # ✅ 중복 제거
+    selected = list(dict.fromkeys([tag for tag in selected if tag]))
+
+    match = (request.GET.get('match') or 'any').lower()
+
+    return selected, match, ','.join(selected)
+
 
 # 1) 더 튼튼한 파서
 def parse_recommendations(recommendations):
