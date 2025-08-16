@@ -18,7 +18,6 @@ main {
     background-color: white;
     display: flex;
     justify-content: space-around;
-    align-items: center;
 }
 
 #profile-left {
@@ -38,6 +37,15 @@ main {
     flex-direction: column;
     justify-content: center;
     padding: 0 20px;
+    align-items: start;
+    flex-flow: column;
+    margin-left: 5px;
+    gap: 5px;
+}
+
+.content_name {
+    color: gray;
+    opacity: 0.7;
 }
 
 #profile-total {
@@ -98,4 +106,29 @@ main {
 #likes-bar.active, #routes-bar.active, #reviews-bar.active {
     background-color: #62B3B8; /* Blue-500 */
     color: white;
+}
+
+.paginateion {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.total-container {
+    display: flex;
+    flex-flow: row;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+}
+
+.number {
+    position: absolute;
+    right: 20px;
+}
+
+.total-name {
+    position: absolute;
+    left: 20px;
 }
