@@ -43,6 +43,10 @@ def my_page(request):
     likes_page = likes_paginator.get_page(request.GET.get("page_likes", 1))
     total_likes = likes_qs.count()
 
+    for lk in likes_page.object_list:
+        # lk는 PlaceLike, lk.place는 select_related로 미리 붙어 있음
+        lk.place.is_liked = True
+
     # --- 내가 만든 루트
     routes_qs = (
         Route.objects
