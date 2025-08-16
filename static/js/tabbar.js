@@ -20,13 +20,34 @@
   };
 
   const toggleArrayParam = (params, key, value) => {
-    const list = params.getAll(key);
-    const idx = list.indexOf(value);
+    // 기존 tags 파라미터 모두 모아서 split하고 하나의 배열로 만듬
+    let allValues = [];
+
+    params.getAll(key).forEach((item) => {
+      item.split(',').forEach((v) => {
+        const trimmed = v.trim();
+        if (trimmed) allValues.push(trimmed);
+      });
+    });
+
+    // 중복 없이 set으로 관리
+    const set = new Set(allValues);
+
+    if (set.has(value)) {
+      set.delete(value);  // 이미 있으면 제거
+    } else {
+      set.add(value);     // 없으면 추가
+    }
+
+    // 기존 파라미터 모두 삭제 후 갱신
     params.delete(key);
-    if (idx === -1) list.push(value);
-    else list.splice(idx, 1);
-    for (const v of list) params.append(key, v);
+
+    if (set.size > 0) {
+      params.set(key, Array.from(set).join(','));
+    }
   };
+
+
 
   const swapPartialsFromHTML = (htmlText) => {
     const doc = new DOMParser().parseFromString(htmlText, "text/html");
@@ -103,22 +124,22 @@
     fetchPartial(href, true);
   });
 
-  // -------- 태그칩(버튼) 토글 --------
+    // -------- 태그칩(버튼) 토글 --------
   document.addEventListener("click", (e) => {
     const chip = e.target.closest(".tag-rail .chip:not(.more)");
     if (!chip || chip.tagName !== "BUTTON") return;
     e.preventDefault();
+
     const tag = chip.getAttribute("data-tag");
     if (!tag) return;
+
+    // ✅ 먼저 active 클래스를 토글해서 시각적으로 반영
+    chip.classList.toggle("active");
+
     const params = currentParams();
     toggleArrayParam(params, "tags", tag);
     const url = buildUrl(params);
     fetchPartial(url, true);
   });
 
-  // -------- 뒤로/앞으로 --------
-  window.addEventListener("popstate", (e) => {
-    const url = (e.state && e.state.url) || window.location.href;
-    fetchPartial(url, false);
-  });
 })();
