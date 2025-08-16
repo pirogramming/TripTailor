@@ -183,7 +183,7 @@ def delete_route(request, route_id):
     from_page = request.GET.get("from", "")
 
     if from_page == "mypage":
-         redirect_url = f"{reverse('users:my_page')}?tab=routes"
+        redirect_url = f"{reverse('users:my_page')}?tab=routes"
     elif from_page == "public_list":
         redirect_url = reverse("routes:route_list")
     else:
