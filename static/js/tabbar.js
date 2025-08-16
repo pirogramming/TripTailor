@@ -116,30 +116,9 @@
     fetchPartial(url, true);
   });
 
-  // -------- +더보기 토글 --------
-  document.addEventListener("click", (e) => {
-    const more = e.target.closest(".tag-rail .chip.more");
-    if (!more) return;
-    e.preventDefault();
-    const rail = more.closest(".tag-rail");
-    const expanded = rail.getAttribute("data-expanded") === "true";
-    rail.setAttribute("data-expanded", String(!expanded));
-    more.setAttribute("aria-expanded", String(!expanded));
-    document.querySelectorAll(".tag-rail .track .extra").forEach((el) => {
-      el.style.display = expanded ? "none" : "inline-flex";
-    });
-  });
-
   // -------- 뒤로/앞으로 --------
   window.addEventListener("popstate", (e) => {
     const url = (e.state && e.state.url) || window.location.href;
     fetchPartial(url, false);
-  });
-
-  // -------- 초기화 --------
-  document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll(".tag-rail .track .extra").forEach((el) => {
-      el.style.display = "none";
-    });
   });
 })();
