@@ -226,32 +226,58 @@ form[method="get"] > div button[type="submit"]:hover {
 .place-card__region{font-size:13px;color:var(--muted)}
 .place-card__reason{font-size:14px}
 .place-card__summary{font-size:14px;color:#374151}
+.place-card__tip{font-size:14px;color:#374151}
 
 /* 태그 */
 .tag-list{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 4px;padding:0;list-style:none}
 .tag{font-size:12px;padding:6px 10px;border-radius:999px;background:#f8fafc;border:1px solid #e5e7eb;color:#334155}
 
-/* 좋아요 (로그인 시만 노출) */
-.like-form{margin:2px 0 0}
-.like-button{
-  padding:6px 10px;border:1px solid #f43f5e;border-radius:8px;background:#fff;color:#e11d48;
+/* ========== 공통 ========== */
+
+/* 버튼 영역(부모) */
+.card_btn{
+  display:flex;
+  gap:10px;
+  border-top:1px solid #eef2f7;
 }
-.like-button:hover{background:#fff0f3}
+
+/* 부모의 직계 자식(폼, 링크)을 반반으로 */
+.card_btn > *{
+  flex:1;            /* 반반 너비 */
+  min-width:0;       /* 줄바꿈/넘침 방지 */
+  display:flex;      /* 자식이 100% 채우도록 */
+}
+
+/* 자식 요소(실제 클릭 타겟)를 같은 높이로 100% 채움 */
+.card_btn .like-button,
+.card_btn > a.link{
+  width:100%;
+  height:40px;             /* 동일 높이 */
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-sizing:border-box;
+}
+
+/* ========== 개별 스타일 ========== */
+
+/* 좋아요 (로그인 시만 노출) */
+.like-button{
+  border:1px solid #f43f5e;
+  border-radius:8px;
+  background:#fff;
+  color:#e11d48;
+}
+.like-button:hover{ background:#fff0f3; }
 
 /* 상세보기 링크 */
 .link{
-  align-self:flex-start;margin-top:4px;
-  padding:6px 10px;border:1px solid var(--border-color);border-radius:8px;background:#fff;
+  border:1px solid var(--border-color);
+  border-radius:8px;
+  background:#fff;
 }
-.link:hover{background:var(--chip-active)}
+.link:hover{ background:var(--chip-active-bg); }
 
-/* 뒤로가기 */
-.back-link{
-  display:inline-block;margin:18px auto 40px;max-width:1100px;padding:0 10px;
-  color:#0f766e;text-decoration:underline;
-}
-
-.additional_ques {
-  border-left: 1px solid #eef2f7;
-  padding-left: 20px;
-}
+/* 기타 */
+.back-link{ display:inline-block; margin:18px auto 40px; max-width:1100px; padding:0 10px; color:#0f766e; text-decoration:underline; }
+.additional_ques{ border-left:1px solid #eef2f7; padding-left:20px; }
