@@ -188,7 +188,7 @@ def update_route(request, route_id):
 
 
 @login_required
-@require_POST
+@require_http_methods(["GET", "POST"])  
 def delete_route(request, route_id):
     route = get_object_or_404(Route, pk=route_id, creator=request.user)
     route.delete()
@@ -201,6 +201,9 @@ def delete_route(request, route_id):
     elif from_page == "public_list":
         redirect_url = reverse("routes:route_list")
     else:
-        redirect_url = "/"
+        redirect_url = "/routes/"
 
-    return JsonResponse({"ok": True, "redirect_url": redirect_url})
+    if request.method == "GET":
+        return redirect(redirect_url)
+    else:
+        return JsonResponse({"ok": True, "redirect_url": redirect_url})
