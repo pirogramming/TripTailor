@@ -467,6 +467,21 @@ form[method="get"] > div button[type="submit"]:hover {
   color: #374151;
   background: #fafafa;
   margin-bottom: 12px;
+  display: flex;
+  flex-flow: row;
+  gap: 10px;
+}
+
+.route-list div button{
+  border: 1px solid var(--border-color);
+  background-color: #fff;
+  height: 20px;
+  border-radius: 10px;
+  transition: 0.3s;
+}
+
+.route-list div button:hover {
+  background-color: var(--chip-active-bg);
 }
 
 .route-dropdown hr {
