@@ -401,6 +401,92 @@ def search(request):
 
     return render(request, 'search.html', context)
 
+def place_search(request):
+    """장소명으로 직접 검색하는 페이지"""
+    query = request.GET.get('q', '')
+    class_filter = request.GET.get('place_class', '')
+    
+    # 기본 목록
+    if query:
+        # 장소명, 주소, 지역으로 검색 (제주도 같은 지역명도 찾기 위해)
+        qs = Place.objects.filter(
+            Q(name__icontains=query) |
+            Q(address__icontains=query) |
+            Q(region__icontains=query)
+        ).distinct().order_by('-id')
+    else:
+        # 검색어가 없으면 전체 장소 목록 표시 (메인 화면과 동일)
+        qs = Place.objects.all().order_by('-id')
+    
+    # 대분류 필터
+    if class_filter and class_filter.isdigit():
+        qs = qs.filter(place_class=int(class_filter))
+    
+    # ✅ 태그 필터 (URL 예: ?tags=레트로&tags=야경&match=any)
+    selected, match_mode, _ = _parse_selected_tags(request)
+    if selected:
+        # 1차: 교집합
+        qs_all = qs
+        for tag in selected:
+            qs_all = qs_all.filter(tags__name=tag)
+        qs_all = qs_all.distinct()
+
+        if qs_all.exists():
+            qs = qs_all
+        else:
+            # 2차: 합집합
+            qs = qs.filter(tags__name__in=selected).distinct()
+    
+    # 태그/좋아요 메타데이터 추가
+    qs = qs.prefetch_related('tags')
+    qs = with_like_meta(qs, request.user)
+    
+    # 페이지네이션
+    paginator = Paginator(qs, 21)
+    page_obj = paginator.get_page(request.GET.get('page'))
+    
+    # page 제외 쿼리스트링
+    q = request.GET.copy()
+    q.pop('page', None)
+    base_qs = q.urlencode()
+    base_prefix = f"?{base_qs}&" if base_qs else "?"   # 템플릿에서 한 줄로 사용
+
+    # === 페이지 번호 윈도우(5개) ===
+    num_pages = page_obj.paginator.num_pages
+    cur = page_obj.number
+    window = 5
+    start = max(1, cur - 2)
+    end = min(num_pages, start + window - 1)
+    start = max(1, end - window + 1)
+
+    page_window = range(start, end + 1)
+    show_first = start > 1
+    show_last = end < num_pages
+    show_first_ellipsis = start > 2
+    show_last_ellipsis = end < (num_pages - 1)
+    
+    # 태그 목록 (필터용) - 메인 화면과 동일하게
+    tags = Tag.objects.order_by('name')
+    
+    context = {
+        'query': query,
+        'places': page_obj,
+        'tags': tags,
+        'is_place_search': True,  # 템플릿에서 구분용
+        'base_qs': base_qs,
+        'base_prefix': base_prefix,
+        'page_window': page_window,
+        'show_first': show_first,
+        'show_last': show_last,
+        'show_first_ellipsis': show_first_ellipsis,
+        'show_last_ellipsis': show_last_ellipsis,
+        'place_class': class_filter,  # 카테고리 필터 상태
+        'selected_tags': selected,   # 선택된 태그들
+        'match': match_mode,         # 태그 매칭 모드
+    }
+    
+    return render(request, 'places/place_search.html', context)
+
 def place_detail(request, pk):
     base = Place.objects.filter(pk=pk)
     if request.user.is_authenticated:
