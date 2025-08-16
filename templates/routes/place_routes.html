@@ -8,7 +8,7 @@
 <ul class="route-list">
   {% for route in routes %}
     <li class="route-card">
-      <a class="route-title" href="{% url 'routes:detail' route_id=route.id %}">{{ route.title }}</a>
+      <p class="route-title">{{ route.title }}</p>
       {% if route.summary %}
         <p class="route-summary">{{ route.summary }}</p>
       {% endif %}
