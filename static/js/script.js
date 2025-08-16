@@ -23,16 +23,31 @@
 
             // 더보기/접기 초기화
             (function initMore() {
-                if (!moreBtn) return;
-                const hidden = track.querySelectorAll('.chip.extra').length;
-                if (!hidden) moreBtn.style.display = 'none';
+                if (!moreBtn || rail.dataset.jsInit === '1') return;
+                rail.dataset.jsInit = '1';
+
+                const extraChips = track.querySelectorAll('.chip.extra');
+                if (!extraChips.length) {
+                    moreBtn.style.display = 'none';
+                    return;
+                }
+
+                // 초기 상태 설정
+                rail.setAttribute('data-expanded', 'false');
+                moreBtn.setAttribute('aria-expanded', 'false');
+                moreBtn.textContent = '+ 더보기';
+                
                 moreBtn.addEventListener('click', () => {
-                    const expanded = rail.dataset.expanded === 'true';
-                    rail.dataset.expanded = (!expanded).toString();
-                    moreBtn.textContent = expanded ? '+ 더보기' : '접기';
-                    moreBtn.setAttribute('aria-expanded', (!expanded).toString());
+                    const expanded = rail.getAttribute('data-expanded') === 'true';
+                    const next = !expanded;
+                    rail.setAttribute('data-expanded', String(next));
+                    moreBtn.setAttribute('aria-expanded', String(next));
+                    moreBtn.textContent = next ? '접기' : '+ 더보기';
                 });
+
+                console.log('[initMore] 더보기/접기 토글 초기화 완료');
             })();
+
 
             // 목록만 Ajax 교체
             async function fetchAndSwapList(nextParams) {

@@ -1,3 +1,18 @@
+/* 기본: 접힘 상태에서는 전부 숨김 */
+.tag-rail[data-expanded="false"] .chip.extra {
+  display: none;
+}
+
+/* 예외: 선택된 건 접혀도 보이게 */
+.tag-rail[data-expanded="false"] .chip.extra.active {
+  display: inline-flex;
+}
+
+/* 펼침 상태일 땐 전부 보이게 */
+.tag-rail[data-expanded="true"] .chip.extra {
+  display: inline-flex;
+}
+
 /* 전체 영역 */
 .tag-rail {
   display: flex;
@@ -17,6 +32,7 @@
 
 /* 태그 버튼 기본 스타일 */
 .chip {
+  display: inline-flex;
   padding: 6px 14px;
   font-size: 14px;
   line-height: 1.4;
@@ -50,9 +66,4 @@
   border-color: #ccc;
   color: #555;
   font-weight: 500;
-}
-
-/* 접힘 상태에서는 extra 숨기되, 선택된 건 계속 보이게 */
-.tag-rail[data-expanded="false"] .chip.extra:not(.active) {
-  display: none;
 }
