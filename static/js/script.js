@@ -59,6 +59,7 @@
                 }
             }
 
+
             // 칩 클릭 → URL 파라미터 갱신 → Ajax로 목록만 갱신
             track.addEventListener('click', async (e) => {
                 const chip = e.target.closest('.chip');

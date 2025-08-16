@@ -107,7 +107,7 @@
 
 <script src="{% static 'js/map.js' %}?v={% now 'U' %}"></script>
 <script
-src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAwXkCM9qv8KRUi2rUVGSlMcRpKRix_Tvs&callback=initMap&v=weekly&libraries=marker"
+src="https://maps.googleapis.com/maps/api/js?key={{GOOGLE_MAPS_API_KEY}}&callback=initMap&v=weekly&libraries=marker"
 defer
 ></script>
 <script src="{% static 'js/like.js' %}"></script>
