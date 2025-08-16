@@ -8,13 +8,13 @@
         <p class="review-content">{{ review.content }}</p>
         <p class="review-date">{{ review.created_at|date:"Y-m-d H:i" }}</p>
     
-        {% if review.photos.all %}
-            <div class="review-photos">
+        <div class="review-photos">
             {% for photo in review.photos.all %}
-                <img src="{{ photo.url }}" alt="리뷰 사진" width="150">
+                {% if photo.image %}  {# 파일이 있는 경우에만 .url 접근 #}
+                <img src="{{ photo.image.url }}" alt="리뷰 사진" width="150">
+                {% endif %}
             {% endfor %}
-            </div>
-        {% endif %}
+        </div>
     
         <a href="{% url 'places:place_detail' review.place.pk %}" class="review-place-link">장소 상세보기</a>
     </div>
