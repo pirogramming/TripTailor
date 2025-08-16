@@ -4,15 +4,32 @@
 <link rel="stylesheet" href="{% static 'css/main.css' %}?v={% now 'U' %}">
 <link rel="stylesheet" href="{% static 'css/tag.css' %}?v={% now 'U' %}">
 
+<h1 class="search-title">Trip Tailor</h1>
 <form method="get" action="">
-  <input
-    type="text"
-    name="prompt"
-    placeholder="여행지 조건을 입력해보세요!"
-    value="{{ prompt }}"
-  />
   {% if show_followup %}
-    <div>
+    <!-- 기존 질문(수정 불가, 말풍선 표시) -->
+    <div class="chat-log">
+      {# 여러 개의 과거 질문을 지원하려면 previous_prompts 전달 #}
+      {% if previous_prompts %}
+        {% for p in previous_prompts %}
+          <div class="bubble bubble-user">{{ p }}</div>
+        {% endfor %}
+      {% else %}
+        <div class="bubble bubble-user">{{ prompt }}</div>
+      {% endif %}
+    </div>
+
+    {# 서버로 기존 질문을 넘기기 위한 hidden 필드 #}
+    {% if previous_prompts %}
+      {% for p in previous_prompts %}
+        <input type="hidden" name="previous_prompts" value="{{ p }}">
+      {% endfor %}
+    {% else %}
+      <input type="hidden" name="prompt" value="{{ prompt }}">
+    {% endif %}
+
+    <!-- 보충 질문 영역 -->
+    <div class="additional_ques">
       <strong>🤔 {{ question }}</strong>
       <input type="text" name="followup" value="{{ followup }}" placeholder="답변을 입력하세요" />
       <button type="submit" aria-label="보충 답변 제출">
@@ -21,18 +38,26 @@
       </button>
     </div>
   {% else %}
+    <!-- 최초 검색 상태: 기존 입력창 그대로 -->
+    <input
+      type="text"
+      name="prompt"
+      placeholder="여행지 조건을 입력해보세요!"
+      value="{{ prompt }}"
+    />
     <button type="submit" aria-label="검색">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36"><path d="M23.707,22.293l-5.969-5.969a10.016,10.016,0,1,0-1.414,1.414l5.969,5.969a1,1,0,0,0,1.414-1.414ZM10,18a8,8,0,1,1,8-8A8.009,8.009,0,0,1,10,18Z"/></svg>
     </button>
   {% endif %}
 
-  {# 선택된 필터 유지용 히든 필드 #}
+  {# 선택된 필터 유지 #}
   {% if place_class %}<input type="hidden" name="place_class" value="{{ place_class }}">{% endif %}
   {% if match %}<input type="hidden" name="match" value="{{ match }}">{% endif %}
   {% for t in selected_tags %}
     <input type="hidden" name="tags" value="{{ t }}">
   {% endfor %}
 </form>
+
 
 <section class="tag-rail" data-expanded="false">
   <div class="track" id="tagTrack">
