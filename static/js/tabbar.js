@@ -88,6 +88,10 @@
       // 교체 후 필요한 초기화가 있으면 호출(예: like.js 재바인딩)
       window.initMap && window.initMap();
       // window.initLikeButtons && window.initLikeButtons();
+      if (window.google?.maps && typeof window.initMap === 'function') {
+        window.initMap(); // 지도 재초기화
+      }
+
     } catch (e) {
       location.href = url; // 실패 시 폴백
     } finally {
