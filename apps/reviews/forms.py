@@ -6,7 +6,7 @@ from .models import Review, ReviewPhoto
 class ReviewForm(forms.ModelForm):
     class Meta:
         model = Review
-        fields = ['rating','content']
+        fields = ['rating', 'content']
         widgets = {
             'rating': forms.NumberInput(attrs={
                 'step': '0.5', 
@@ -32,18 +32,19 @@ class ReviewForm(forms.ModelForm):
         except (ValueError, TypeError):
             return None 
 
+# 파일 업로드용 폼셋 (더 이상 URL 기반이 아님)
 ReviewPhotoFormSet = inlineformset_factory(
     Review,
     ReviewPhoto,
-    fields=['url'],
+    fields=['image'],
     extra=3,           # 기본 3칸 노출
     can_delete=True,
     max_num=5,         # 최대 5장
     validate_max=True,
     widgets={
-        'url': forms.URLInput(attrs={
-            'placeholder': '사진 URL (선택사항)',
-            'required': False
+        'image': forms.ClearableFileInput(attrs={
+            'accept': 'image/*',
+            'class': 'form-control'
         })
     }
 )

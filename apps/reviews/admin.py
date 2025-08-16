@@ -18,5 +18,5 @@ class ReviewAdmin(admin.ModelAdmin):
 
 @admin.register(ReviewPhoto)
 class ReviewPhotoAdmin(admin.ModelAdmin):
-    list_display = ('id', 'review', 'url')
-    search_fields = ('url',)
+    list_display = ('id', 'review', 'image')
+    search_fields = ('image',)
