@@ -72,7 +72,7 @@
     const data = await response.json();
     if (data.ok) {
       alert("루트가 생성되었어요!");
-      window.location.href = `/routes/${data.route.id}/`;  // detail로 이동
+      window.location.href = `/users/mypage?tab=routes`;  // detail로 이동
     } else {
       alert("오류: " + data.error);
     }
