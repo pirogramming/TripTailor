@@ -56,7 +56,7 @@
             <span class="route-author">👤 {{ route.creator.username }}</span>
             <div class="route-actions">
                 <a href="{% url 'routes:edit_route_page' route_id=route.id %}?from=mypage" class="btn-edit" title="루트 편집">✏️</a>
-                <a href="{% url 'routes:delete_route' route_id=route.id %}" class="btn-delete" title="루트 삭제">🗑️</a>
+                <a href="{% url 'routes:delete_route' route_id=route.id %}?from=mypage" class="btn-delete" title="루트 삭제">🗑️</a>
             </div>
             </footer>
         </article>
