@@ -19,17 +19,15 @@
     {% if r.photos.count %}
     <div class="review-photos">
       {% for photo in r.photos.all %}
-        {# ✅ URL(과거 방식) 우선, 없으면 image.url(파일 업로드) 사용 #}
-        {% with src=photo.url|default:photo.image.url %}
-          {% if src %}
-            <img
-              src="{{ src }}"
-              alt="댓글 이미지"
-              class="review-photo"
-              loading="lazy"
-              style="max-width: 100px; max-height: 100px; margin: 5px; border-radius: 5px; object-fit: cover;">
-          {% endif %}
-        {% endwith %}
+        {# ✅ 안전하게 이미지 접근: image 필드가 있고 파일이 있을 때만 사용 #}
+        {% if photo.image %}
+          <img
+            src="{{ photo.image.url }}"
+            alt="댓글 이미지"
+            class="review-photo"
+            loading="lazy"
+            style="max-width: 100px; max-height: 100px; margin: 5px; border-radius: 5px; object-fit: cover;">
+        {% endif %}
       {% endfor %}
     </div>
     {% endif %}
