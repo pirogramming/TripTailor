@@ -13,36 +13,6 @@
 
     // ---------- After DOM Ready ----------
     document.addEventListener('DOMContentLoaded', function () {
-        // ===== 좋아요 AJAX =====
-        document.querySelectorAll('.like-form').forEach(function (form) {
-            form.addEventListener('submit', function (e) {
-                e.preventDefault();
-                const button = form.querySelector('.like-button');
-                const actionUrl = form.getAttribute('action');
-                const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
-
-                fetch(actionUrl, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': csrfToken,
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.liked) {
-                            button.textContent = '❤️ 취소';
-                        } else {
-                            button.textContent = '🤍 좋아요';
-                        }
-                        // 필요시 좋아요 개수 등도 업데이트 가능
-                    })
-                    .catch(() => {
-                        alert('좋아요 처리 중 오류가 발생했습니다.');
-                    });
-            });
-        });
-
         // ===== TAGS: “더보기/접기 & Ajax 필터” (교체된 부분) =====
         (function initTagChipsAjax() {
             const rail = document.querySelector('.tag-rail');
