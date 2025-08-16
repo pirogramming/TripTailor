@@ -169,6 +169,10 @@ STATICFILES_DIRS = [
 # 배포 환경에서 collectstatic으로 모을 위치
 STATIC_ROOT = BASE_DIR / 'staticfiles'  # python manage.py collectstatic 시 사용
 
+# Media files (업로드된 파일)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

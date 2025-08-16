@@ -38,7 +38,6 @@ def create_route(request):
         creator=request.user,
         title=title,
         description=request.POST.get("description", "").strip(),
-        cover_photo_url=request.POST.get("cover_photo_url", "").strip(),
         location_summary=location_summary,
         is_public=is_public,  # ✅ 저장
     )
@@ -141,7 +140,7 @@ def update_route(request, route_id):
     route.title = request.POST.get("title", "").strip()
     route.location_summary = request.POST.get("location_summary", "").strip()
     route.description = request.POST.get("description", "").strip()
-    route.cover_photo_url = request.POST.get("cover_photo_url", "").strip()
+
     route.is_public = request.POST.get("is_public") == "true"
     route.save()
 

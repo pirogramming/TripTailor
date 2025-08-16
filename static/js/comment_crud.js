@@ -92,87 +92,43 @@
     }
 
     // -------------------------
-    // Photos: add/remove/preview
+    // Photos: file upload preview
     // -------------------------
     function initPhotoInputs() {
-        const addPhotoBtn = document.getElementById('add-photo-btn');
-        const photoInputs = document.getElementById('photo-inputs');
-        if (!photoInputs) return;
+        const input = document.getElementById('id_photos');
+        const previews = document.getElementById('photo-previews');
+        if (!input || !previews) return;
 
-        const maxPhotos = 5;
+        const MAX_FILES = 5;
 
-        function isValidUrl(str) {
-            try {
-                new URL(str);
-                return true;
-            } catch {
-                return false;
+        input.addEventListener('change', function() {
+            previews.innerHTML = '';
+            const files = Array.from(input.files);
+
+            // 최대 개수 체크
+            if (files.length > MAX_FILES) {
+                alert(`이미지는 최대 ${MAX_FILES}장까지 업로드할 수 있습니다.`);
+                input.value = '';
+                return;
             }
-        }
 
-        function handlePhotoUrlInput(event) {
-            const input = event.target;
-            const preview = input.parentElement.querySelector('.photo-preview');
-            const url = (input.value || '').trim();
+            files.forEach(file => {
+                if (!file.type.startsWith('image/')) return;
 
-            if (url && isValidUrl(url)) {
-                preview.innerHTML = `<img src="${url}" alt="미리보기" style="max-width: 100px; max-height: 100px; margin: 5px;">`;
-            } else {
-                preview.innerHTML = '';
-            }
-        }
-
-        function updateAddButton() {
-            if (!addPhotoBtn) return;
-            const currentPhotos = photoInputs.querySelectorAll('.photo-input-row');
-            if (currentPhotos.length >= maxPhotos) {
-                addPhotoBtn.disabled = true;
-                addPhotoBtn.textContent = '이미지 최대 개수 도달';
-            } else {
-                addPhotoBtn.disabled = false;
-                addPhotoBtn.textContent = '+ 이미지 추가';
-            }
-        }
-
-        function addRow() {
-            const currentPhotos = photoInputs.querySelectorAll('.photo-input-row');
-            if (currentPhotos.length >= maxPhotos) return;
-
-            const newRow = document.createElement('div');
-            newRow.className = 'photo-input-row';
-            newRow.innerHTML = `
-                <input type="url" name="photo_urls[]" class="form-control photo-url-input" placeholder="https://example.com/image${currentPhotos.length + 1}.jpg">
-                <button type="button" class="btn btn-sm btn-danger remove-photo-btn">삭제</button>
-                <div class="photo-preview"></div>
-            `;
-            photoInputs.appendChild(newRow);
-
-            const removeBtn = newRow.querySelector('.remove-photo-btn');
-            const urlInput = newRow.querySelector('.photo-url-input');
-
-            removeBtn.addEventListener('click', function () {
-                photoInputs.removeChild(newRow);
-                updateAddButton();
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const wrap = document.createElement('div');
+                    wrap.className = 'border rounded p-2 d-inline-flex flex-column align-items-center';
+                    wrap.style.width = '120px';
+                    wrap.innerHTML = `
+                        <img src="${e.target.result}" alt="미리보기" style="max-width:100%;max-height:100px;object-fit:cover;">
+                        <span class="small mt-1 text-truncate" style="max-width:100%;">${file.name}</span>
+                    `;
+                    previews.appendChild(wrap);
+                };
+                reader.readAsDataURL(file);
             });
-
-            urlInput.addEventListener('input', handlePhotoUrlInput);
-
-            updateAddButton();
-        }
-
-        // 기존 입력 필드 바인딩
-        const existingInputs = photoInputs.querySelectorAll('.photo-url-input');
-        existingInputs.forEach((input) => {
-            input.removeEventListener('input', handlePhotoUrlInput);
-            input.addEventListener('input', handlePhotoUrlInput);
         });
-
-        if (addPhotoBtn) {
-            addPhotoBtn.removeEventListener('click', addRow);
-            addPhotoBtn.addEventListener('click', addRow);
-        }
-
-        updateAddButton();
     }
 
     // -------------------------

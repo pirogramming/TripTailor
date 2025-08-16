@@ -50,7 +50,7 @@ class Review(models.Model):
 
 class ReviewPhoto(models.Model):
     review = models.ForeignKey(Review, related_name="photos", on_delete=models.CASCADE)
-    url = models.URLField(blank=True, null=True, verbose_name="사진 URL")
+    image = models.ImageField(upload_to='review_photos/', blank=True, null=True, verbose_name="사진")
 
     def __str__(self):
         return f"Photo of {self.review_id}"
