@@ -20,21 +20,23 @@
         <div id="profile-left">
             <img src="{% static 'images/profile-default.png' %}" alt="프로필 이미지" id="profile-avatar">
             <div id="profile-content">
-                <span class="username">{{user.username}}</span>
-                <span class="email">{{user.email}}</span>
+                <p class="content_name">USER</p>
+                <p class="username">{{user.username}}</p>
+                <p class="content_name">E-mail</p>
+                <p class="email">{{user.email}}</p>
             </div>            
         </div>
         <div id="profile-total">
-            <div id="total-likes">
-                <span>찜한 여행지</span>
+            <div id="total-likes" class="total-container">
+                <span class="total-name">찜한 여행지</span>
                 <span class="number">{{ total_likes }}</span>
             </div>
-            <div id="total-routes">
-                <span>여행 루트</span>
+            <div id="total-routes" class="total-container">
+                <span class="total-name">여행 루트</span>  
                 <span class="number">{{ routes_total }}</span>
             </div>
-            <div id="total-reviews">
-                <span>작성한 댓글수</span>
+            <div id="total-reviews" class="total-container">
+                <span class="total-name">작성한 댓글수</span>
                 <span class="number">{{ total_reviews }}</span>
             </div>
         </div>
