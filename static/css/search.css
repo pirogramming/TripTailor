@@ -8,178 +8,189 @@
     --bot: #f1f1f1;   /* 질문(왼쪽) 말풍선 */
     --me: #d9fdd3;    /* 내 답변(오른쪽) 말풍선 */
     --shadow: 0 6px 16px rgba(0, 0, 0, .08);
+    --border-color: #62B3B8;
+    --primary_send: #95f9fe;
+    --primary_send-hover: #63f1f9;
+    --primary: #62B3B8;
+    --primary-hover: #4e9fa4;
+    --background: #EFFEFF;
+    --white: #fff;
+    --text: #111;
+    --muted: #6b7280;
+    --chip-bg: #f3f4f6;
+    --chip-active-bg: #e0f7f8;
+    --shadow: 0 8px 20px rgba(0,0,0,.06);
+    --rhythm: 8px;
+    --lh: 1.5;
 }
 
-/* ================= 검색창: 카톡 입력바 느낌 (직사각형) ================= */
+/* =========================
+   Search Form (카톡 직사각형)
+   ========================= */
+
+
+.search-title {
+  font-family: 'Lemon', sans-serif;
+  margin: 60px;
+  color: var(--border-color);
+  font-size: 50px;
+  margin-top: 70px;
+}
+
 form[method="get"] {
-    width: 900px;
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-    padding: .75rem .9rem;
-    border: 1px solid var(--border-color);
-    border-radius: 12px; /* 둥근 알약 → 직사각형 */
-    background: #fff;
-    box-shadow: none;
-    transition: box-shadow .15s ease, border-color .15s ease;
-    margin: 6rem auto 1.5rem; /* 상단 여백 */
+  width: 900px;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .75rem .9rem;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: none;
+  transition: box-shadow .15s ease, border-color .15s ease;
+  /* margin: 6rem auto 1.5rem; */
 }
 
 form[method="get"]:hover,
 form[method="get"]:focus-within {
-    box-shadow: var(--shadow);
-    border-color: transparent;
+  box-shadow: var(--shadow);
+  border-color: transparent;
 }
 
+/* 입력창 */
 form[method="get"] input[type="text"] {
-    flex: 1;
-    height: 44px;
-    font-size: 16px;
-    border: 0;
-    outline: 0;
-    background: transparent;
-    padding: 0 .6rem;
+  flex: 1;
+  height: 44px;
+  font-size: 16px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  padding: 0 .6rem;
 }
 
+/* 플레이스홀더 */
 form[method="get"] input::placeholder {
-    color: #80868b;
+  color: #80868b;
 }
 
+/* 제출 버튼 */
 form[method="get"] > button {
-    border: 0;
-    background: transparent;
-    width: 44px;
-    height: 44px;
-    border-radius: 10px;
-    display: grid;
-    place-items: center;
-    cursor: pointer;
-    transition: background-color .15s ease;
+  border: 0;
+  background: transparent;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background-color .15s ease;
 }
 
 form[method="get"] > button:hover {
-    background: #f1f3f4;
+  background: #f1f3f4;
 }
 
 form[method="get"] > button:active {
-    background: #e8eaed;
+  background: #e8eaed;
 }
 
 form[method="get"] > button svg {
-    width: 24px;
-    height: 24px;
-    fill: #5f6368;
+  width: 24px;
+  height: 24px;
+  fill: #5f6368;
 }
 
-/* ================= 보충질문: 카톡 말풍선 ================= */
+/* 보충 질문 말풍선 */
 form[method="get"] > div {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
 }
 
-/* 왼쪽(질문) 말풍선 */
 form[method="get"] > div strong {
-    align-self: flex-start;
-    background: var(--bot);
-    color: #333;
-    padding: 10px 14px;
-    border-radius: 14px;
-    max-width: 80%;
-    line-height: 1.45;
-    position: relative;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
+  align-self: flex-start;
+  background: #f1f1f1;
+  color: #333;
+  padding: 10px 14px;
+  border-radius: 14px;
+  max-width: 80%;
+  line-height: 1.45;
+  position: relative;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
 }
 
 form[method="get"] > div strong::after {
-    content: "";
-    position: absolute;
-    left: -6px;
-    bottom: 6px;
-    width: 0;
-    height: 0;
-    border: 8px solid transparent;
-    border-right-color: var(--bot);
+  content: "";
+  position: absolute;
+  left: -6px;
+  bottom: 6px;
+  border: 8px solid transparent;
+  border-right-color: #f1f1f1;
 }
 
-/* 오른쪽(내 답변) 말풍선: 입력창을 풍선처럼 */
 form[method="get"] > div input[type="text"] {
-    align-self: flex-end;
-    background: var(--me);
-    border: 1px solid #c6e7b4;
-    border-radius: 14px;
-    padding: 10px 14px;
-    font-size: 15px;
-    max-width: 80%;
-    position: relative;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
+  align-self: flex-end;
+  background: var(--background);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 10px 14px;
+  font-size: 15px;
+  max-width: 100%;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
 }
 
-/* 전송 버튼: 말풍선 옆 칩 버튼 */
 form[method="get"] > div button[type="submit"] {
-    align-self: flex-end;
-    background: var(--primary);
-    color: #fff;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 20px;
-    font-size: 14px;
-    margin-top: 4px;
-    transition: background .2s ease;
+  align-self: flex-end;
+  background: var(--primary_send);
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  margin-top: 4px;
+  transition: background .2s ease;
 }
 
 form[method="get"] > div button[type="submit"]:hover {
-    background: var(--primary-hover);
+  background: var(--primary_send-hover);
 }
 
-/* ================= 이전 대화(히스토리)도 말풍선 ================= */
-.chat-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    max-width: 900px;
-    margin: 0 auto 1rem;
+.additional_ques {
+  border-left: 1px solid #eef2f7;
+  padding-left: 20px;
 }
 
-.msg {
-    max-width: 80%;
-    padding: 10px 14px;
-    border-radius: 14px;
-    position: relative;
-    line-height: 1.45;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
+/* 기존 질문 말풍선(읽기 전용) */
+.chat-log{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: .5rem;
+}
+.bubble{
+  max-width: 80%;
+  padding: 10px 14px;
+  border-radius: 14px;
+  line-height: 1.45;
+  box-shadow: 0 1px 2px rgba(0,0,0,.05);
+}
+.bubble-user{
+  align-self: flex-start;
+  background: #f1f1f1;
+  color: #333;
+  position: relative;
+}
+.bubble-user::after{
+  content:"";
+  position:absolute;
+  left:-6px; bottom:6px;
+  border:8px solid transparent;
+  border-right-color:#f1f1f1;
 }
 
-.msg--bot {
-    align-self: flex-start;
-    background: var(--bot);
-    color: #333;
-}
 
-.msg--bot::after {
-    content: "";
-    position: absolute;
-    left: -6px;
-    bottom: 6px;
-    border: 8px solid transparent;
-    border-right-color: var(--bot);
-}
-
-.msg--me {
-    align-self: flex-end;
-    background: var(--me);
-    border: 1px solid #c6e7b4;
-}
-
-.msg--me::after {
-    content: "";
-    position: absolute;
-    right: -6px;
-    bottom: 6px;
-    border: 8px solid transparent;
-    border-left-color: var(--me);
-}
 
 /* ============== 섹션 타이틀 ============== */
 .section-title{
@@ -238,4 +249,9 @@ form[method="get"] > div button[type="submit"]:hover {
 .back-link{
   display:inline-block;margin:18px auto 40px;max-width:1100px;padding:0 10px;
   color:#0f766e;text-decoration:underline;
+}
+
+.additional_ques {
+  border-left: 1px solid #eef2f7;
+  padding-left: 20px;
 }

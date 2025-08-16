@@ -54,6 +54,7 @@ nav{
 #hamburger-icon{
     display:flex; flex-direction:column; justify-content:center;
     width:25px; height:25px; cursor:pointer; gap:7px;
+    margin-right: 15px;
 }
 #hamburger-icon input{ display:none; }
 #hamburger-icon span{
@@ -91,7 +92,7 @@ nav{
     background:linear-gradient(180deg,#ffffff,#f8f9fa);
     border-left:1px solid var(--border-color);
     box-shadow:-8px 0 24px rgba(0,0,0,.08);
-    padding:16px; display:flex; flex-direction:column; z-index:100;
+    padding:16px; display:flex; flex-direction:column; z-index:99999999999999999999;
     transform:translateX(100%); transition:transform .32s var(--easing), box-shadow .32s var(--easing);
     will-change:transform;
 }
