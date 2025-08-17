@@ -35,7 +35,6 @@ orjson==3.11.1
 ormsgpack==1.10.0
 packaging==25.0
 pandas==2.3.1
-Pillow==11.0.0
 pgvector==0.4.1
 pillow==11.3.0
 psycopg2-binary==2.9.10
@@ -64,3 +63,4 @@ tzdata==2025.2
 urllib3==2.5.0
 xxhash==3.5.0
 zstandard==0.23.0
+gunicorn==21.2.0
