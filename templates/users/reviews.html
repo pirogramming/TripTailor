@@ -7,6 +7,15 @@
         <p class="review-rating">별점: {{ review.rating }} / 5.0</p>
         <p class="review-content">{{ review.content }}</p>
         <p class="review-date">{{ review.created_at|date:"Y-m-d H:i" }}</p>
+        
+        <!-- 수정/삭제 버튼 -->
+        <div class="review-actions">
+            <a href="{% url 'reviews:place_edit' review.place.pk review.pk %}?from_mypage=1">수정</a>
+            <form method="post" action="{% url 'reviews:delete_review' review.place.pk review.pk %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" onclick="return confirm('정말 삭제하시겠습니까?')">삭제</button>
+            </form>
+        </div>
     
         <div class="review-photos">
             {% for photo in review.photos.all %}

@@ -126,3 +126,17 @@ def my_reviews(request):
 class CustomPasswordResetView(PasswordResetView):
     form_class = CustomPasswordResetForm
     template_name = 'account/password_reset.html'
+
+
+@login_required
+def delete_review_ajax(request, place_id, review_id):
+    """AJAX로 댓글을 바로 삭제하는 뷰"""
+    if request.method == 'POST':
+        try:
+            review = get_object_or_404(Review, pk=review_id, user=request.user)
+            review.delete()
+            return JsonResponse({'success': True, 'message': '댓글이 삭제되었습니다.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f'삭제 중 오류가 발생했습니다: {str(e)}'})
+    
+    return JsonResponse({'success': False, 'message': '잘못된 요청입니다.'})

@@ -162,6 +162,9 @@ class PlaceReviewUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView)
         return super().form_valid(form)
 
     def get_success_url(self):
+        # 마이페이지에서 온 경우 마이페이지로 리다이렉션
+        if self.request.GET.get('from_mypage'):
+            return '/users/mypage/?tab=reviews'
         return reverse('places:place_detail', kwargs={'pk': self.object.place.id})
 
     def get_context_data(self, **kwargs):
@@ -172,6 +175,16 @@ class PlaceReviewUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView)
         context['current_photos'] = self.object.photos.all()
         
         return context
+    
+    def get_form_kwargs(self):
+        """폼에 기존 데이터를 초기값으로 설정"""
+        kwargs = super().get_form_kwargs()
+        if self.object:
+            kwargs['initial'] = {
+                'rating': self.object.rating,
+                'content': self.object.content,
+            }
+        return kwargs
 
 # HTMX를 위한 댓글 목록 뷰
 def place_review_list_htmx(request, place_id):
@@ -205,3 +218,15 @@ def delete_review_ajax(request, place_id, review_id):
             return JsonResponse({'success': False, 'message': f'삭제 중 오류가 발생했습니다: {str(e)}'})
     
     return JsonResponse({'success': False, 'message': '잘못된 요청입니다.'})
+
+@login_required
+def delete_review(request, place_id, review_id):
+    """일반 폼으로 댓글을 삭제하는 뷰 (마이페이지에서 사용)"""
+    if request.method == 'POST':
+        review = get_object_or_404(Review, pk=review_id, user=request.user)
+        review.delete()
+        from django.shortcuts import redirect
+        return redirect('/users/mypage/?tab=reviews')
+    
+    from django.shortcuts import redirect
+    return redirect('/users/mypage/')
