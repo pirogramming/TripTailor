@@ -374,3 +374,41 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+
+// =================================================================================
+//말풍선 크기 조절
+// =================================================================================
+
+(function(){
+  const selector = ".followup-bubble";
+
+  function autoGrow(el){
+    if(!el) return;
+
+    // 가로 먼저: 내용 폭 측정
+    el.style.width = "auto";
+    const container = el.parentElement; // .additional_ques
+    const maxRatio = window.matchMedia("(max-width: 600px)").matches ? 0.92 : 0.80;
+    const maxPx = Math.floor(container.getBoundingClientRect().width * maxRatio);
+    const nextW = Math.min(el.scrollWidth, maxPx);
+    el.style.width = nextW + "px";
+
+    // 세로: 내용 높이에 맞춰 확장(최대치까지)
+    el.style.height = "auto";
+    const nextH = Math.min(el.scrollHeight, parseInt(getComputedStyle(el).maxHeight));
+    el.style.height = nextH + "px";
+
+    // 최대 세로 넘으면 스크롤 표시
+    el.style.overflowY = (el.scrollHeight > nextH) ? "auto" : "hidden";
+  }
+
+  // 초기/입력 시 자동 확장
+  function bindAutoGrow(){
+    const ta = document.querySelector(selector);
+    if(!ta) return;
+    autoGrow(ta);
+    ta.addEventListener("input", () => autoGrow(ta));
+  }
+
+  document.addEventListener("DOMContentLoaded", bindAutoGrow);
+})();

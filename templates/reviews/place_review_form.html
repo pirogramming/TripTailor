@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block rating %}{% if form.instance.pk %}댓글 수정{% else %}댓글 작성{% endif %}{% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="{% static 'css/users/review_form.css' %}">
 <div class="place-review-form">
   <div class="place-info">
     <h1>{% if form.instance.pk %}댓글 수정{% else %}댓글 작성{% endif %}</h1>
