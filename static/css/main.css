@@ -214,7 +214,9 @@ form[method="get"] > div button[type="submit"]:hover {
    Tag Rail / Filter Bar
    ========================= */
 .tag-rail,
-.filter-bar {
+.filter-bar,
+/* 이색적 필터 추가 */
+.unique-filter-bar {
   max-width: 1100px;
   margin: 0 auto calc(var(--rhythm) * 2);
   padding: 0 12px;
@@ -627,6 +629,79 @@ form[method="get"] > div button[type="submit"]:hover {
 
 /* 마우스 클릭 후 포커스 링 제거 */
 .filter-bar input[type="radio"]:focus:not(:focus-visible) + span {
+  outline: none !important;
+}
+
+/* 여기부터 이색적 필터 관련 css */
+
+
+/* 체크박스 숨김 */
+.unique-filter-bar input[type="checkbox"] {
+  position: absolute !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* label: 컨테이너 */
+.unique-filter-label {
+  display: inline-flex !important;
+  align-items: center !important;
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  outline: none !important;
+  cursor: pointer !important;
+  box-shadow: none !important;
+  gap: 8px;
+}
+
+/* 실제 버튼 모양 */
+.unique-filter-text {
+  display: inline-block !important;
+  padding: 10px 16px !important;
+  border-radius: 10px !important;
+  border: 1px solid var(--border-color) !important;
+  background: #fff !important;
+  font-size: 14px !important;
+  color: inherit !important;
+  transition: background .3s, color .3s, border-color .3s !important;
+  position: relative;
+}
+
+/* 비선택 hover */
+.unique-filter-label:hover .unique-filter-text {
+  background: var(--chip-active-bg) !important;
+}
+
+/* 선택 상태 */
+.unique-filter-bar input[type="checkbox"]:checked + .unique-filter-text {
+  background: var(--primary) !important;
+  color: #fff !important;
+  border-color: var(--primary) !important;
+  font-weight: 600 !important;
+}
+
+/* 선택된 상태의 앞에 체크 아이콘 추가 */
+.unique-filter-bar input[type="checkbox"]:checked + .unique-filter-text::before {
+  content: '✓ ';
+  margin-right: 4px;
+}
+
+/* 선택 + hover */
+.unique-filter-bar input[type="checkbox"]:checked + .unique-filter-text:hover {
+  background: var(--primary-hover) !important;
+  border-color: var(--primary-hover) !important;
+}
+
+/* 키보드 포커스 */
+.unique-filter-bar input[type="checkbox"]:focus-visible + .unique-filter-text {
+  outline: 2px solid var(--primary) !important;
+  outline-offset: 2px !important;
+}
+
+/* 마우스 클릭 후 포커스 링 제거 */
+.unique-filter-bar input[type="checkbox"]:focus:not(:focus-visible) + .unique-filter-text {
   outline: none !important;
 }
 
