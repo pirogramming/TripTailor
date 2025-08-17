@@ -1,22 +1,69 @@
 {% extends "base.html" %}
+{% load static %}
 {% block content %}
-<h2>전체 루트</h2>
-<ul>
-  {% for route in routes %}
-    <li>
-      <a href="{% url 'routes:detail' route.pk %}">{{ route.title }}</a>
-      <span>{{ route.summary }}</span>
-      <span>by {{ route.user.username }}</span>
-    </li>
-  {% endfor %}
-</ul>
-<div class="pagination">
-  {% if routes.has_previous %}
-    <a href="?page={{ routes.previous_page_number }}">이전</a>
-  {% endif %}
-  <span>{{ routes.number }} / {{ routes.paginator.num_pages }}</span>
-  {% if routes.has_next %}
-    <a href="?page={{ routes.next_page_number }}">다음</a>
-  {% endif %}
+<link rel="stylesheet" href="{% static 'css/routes/whole_route.css' %}">
+
+<div class="route-page">
+  <h2 class="page-title">전체 루트</h2>
+
+  <div class="route-list">
+    {% for route in routes %}
+      <article class="route-card">
+        <header class="route-header">
+          <h3 class="route-title">
+            {{ route.title }}
+          </h3>
+          {% if route.status %}
+            <span class="route-badge badge-{{ route.status|default:'default' }}">
+              {{ route.status }}
+            </span>
+          {% endif %}
+        </header>
+
+        <div class="route-meta">
+          {% if route.created_at %}
+            <span class="meta-item">📅 {{ route.created_at|date:"Y-m-d" }}</span>
+          {% endif %}
+        </div>
+
+        {% if route.location_summary %}
+          <p class="route-summary">{{ route.location_summary }}</p>
+        {% endif %}
+
+        <div class="route-stops">
+          {% with stops=route.stops.all %}
+            {% if stops %}
+              {% for stop in stops %}
+                <a class="stop-card" href="{% url 'places:place_detail' pk=stop.place.id %}" title="{{ stop.place.name }}">
+                  {% if stop.place.thumbnail_url %}
+                    <div class="stop-thumb">
+                      <img src="{{ stop.place.thumbnail_url }}" alt="{{ stop.place.name }}">
+                    </div>
+                  {% endif %}
+                  <span class="stop-name">{{ stop.place.name }}</span>
+                </a>
+                {% if not forloop.last %}
+                  <span class="stop-arrow">→</span>
+                {% endif %}
+              {% endfor %}
+            {% else %}
+              <span class="no-stops">등록된 장소 없음</span>
+            {% endif %}
+          {% endwith %}
+        </div>
+
+        <footer class="route-footer">
+          <span class="route-author">👤 {{ route.creator.username }}</span>
+          <div class="route-actions">
+            {% if request.user == route.creator %}
+              <a href="{% url 'routes:edit_route_page' route_id=route.id %}?from=public_list" class="btn-edit" title="루트 편집">✏️</a>
+              <a href="{% url 'routes:delete_route' route_id=route.id %}" class="btn-delete" title="루트 삭제">🗑️</a>
+            {% endif %}
+          </div>
+        </footer>
+      </article>
+    {% endfor %}
+  </div>
 </div>
+<script src="{% static 'js/route_detail.js' %}"></script>
 {% endblock %}

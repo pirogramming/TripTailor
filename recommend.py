@@ -31,7 +31,7 @@ def _load_faiss_and_meta():
         return None, None
 
 # DB 검색 도우미
-def search_top_k_from_db(qvec, k=10):
+def search_top_k_from_db(qvec, k=20):
     # ← 함수 내부로 옮기기 (Django가 준비된 뒤 임포트)
     from apps.places.models import Place
     from apps.tags.models import Tag
@@ -92,31 +92,58 @@ extraction_prompt = PromptTemplate.from_template(
 )
 
 # 추천 프롬프트
+# 추천 프롬프트
 recommendation_prompt = PromptTemplate.from_template(
     """
-    다음 여행지 리스트 중에서만 선택하여 사용자에게 맞는 여행지 **정확히 3곳**을 추천해줘.
-    리스트에 없는 장소명은 절대 쓰지 마.
+    아래 '여행지 리스트' 중에서만 고르고, 사용자 조건에 맞는 여행지 **정확히 6곳**을 추천하라.
+    리스트에 없는 장소명은 절대 쓰지 마라.
 
-    여행지 리스트:
-    {trip_spot_list}
+    # 출력 형식(반드시 준수)
+    1. **[여행지명]**
+    - 이유: 두 문장, 80~150자. 첫 문장은 사용자 조건과의 적합성(지역/감정/활동 연결), 
+            두 번째 문장은 해당 장소의 주요 특징과 매력을 설명.
+    - 구체적인 팁: 방문 시간대, 동선, 준비물, 계절별 추천 활동 등 실질적으로 도움이 되는 팁을 1~2문장으로 제공.
 
-    사용자 정보:
+    2. **[여행지명]**
+    - 이유: 두 문장, 80~150자.
+    - 구체적인 팁: 1~2문장.
+
+    3. **[여행지명]**
+    - 이유: 두 문장, 80~150자.
+    - 구체적인 팁: 1~2문장.
+
+    4. **[여행지명]**
+    - 이유: 두 문장, 80~150자.
+    - 구체적인 팁: 1~2문장.
+
+    5. **[여행지명]**
+    - 이유: 두 문장, 80~150자.
+    - 구체적인 팁: 1~2문장.
+
+    6. **[여행지명]**
+    - 이유: 두 문장, 80~150자.
+    - 구체적인 팁: 1~2문장.
+
+    # 작성 규칙
+    - 태그(예: #힐링, #야경 등)는 절대 언급하지 말 것.
+    - 해시태그, 불필요한 마크다운, 이모지, 장식 문자를 사용하지 말 것.
+    - 장소명은 반드시 여행지 리스트에 있는 것만 사용.
+    - 설명은 자연스럽고 구체적으로 작성하되, 불필요한 수식어나 반복은 피할 것.
+
+    # 사용자 정보
     - 지역: {location}
     - 감정: {emotion}
     - 활동: {activity}
-    - 태그: {tags}
+    - 태그 조건: {tags} (참고용이며, 결과 문장에 직접 쓰지 말 것)
 
-    출력 형식(이 형식 외 아무 말도 쓰지 마):
-    1. **[여행지명]**
-    - 이유: 한 문장
-
-    2. **[여행지명]**
-    - 이유: 한 문장
-
-    3. **[여행지명]**
-    - 이유: 한 문장
+    # 여행지 리스트
+    {trip_spot_list}
     """
 )
+
+
+
+
 
 extraction_chain = extraction_prompt | llm
 recommendation_chain = recommendation_prompt | llm
@@ -212,16 +239,25 @@ def recommend_places(state: GraphState) -> GraphState:
     })
 
     response_text = getattr(rec, "content", str(rec))
-    raw_lines = response_text.strip().split("\n")
+    raw_lines = [ln.strip() for ln in response_text.splitlines() if ln.strip()]
 
     recommended_places = []
     for line in raw_lines:
-        if line.strip().startswith(("1.", "2.", "3.")):
-            start = line.find("**[") + 3
-            end = line.find("]**")
-            place_name = line[start:end] if start != -1 and end != -1 else ""
-            if place_name:
-                recommended_places.append(place_name)
+    # 1~6 번까지 모두 허용
+        if any(line.startswith(f"{i}.") for i in range(1, 7)):
+            # **[이름]** or **이름** 모두 대응
+            name = ""
+            if "**[" in line and "]**" in line:
+                start = line.find("**[") + 3
+                end = line.find("]**")
+                name = line[start:end].strip()
+            elif "**" in line:
+                # 대괄호 없는 **이름** 포맷 대응
+                s = line.find("**") + 2
+                e = line.find("**", s)
+                name = line[s:e].strip()
+            if name:
+                recommended_places.append(name)
 
     # 5) 태그 맵 (DB/FAISS 공통)
     place_info_map = {r["명칭"]: r["tags"] for r in rows}

@@ -41,7 +41,7 @@
     <!-- 토글로 나타나는 사이드바 -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar__header">
-            <img src="{% static 'img/profile-default.png' %}" alt="프로필" class="sidebar__avatar">
+            <img src="{% static 'images/profile-default.png' %}" alt="프로필" class="sidebar__avatar">
             <div class="sidebar__user-info">
                 <span class="sidebar__username">{{ user.username }}</span>
                 <span class="sidebar__email">{{ user.email }}</span>
@@ -51,11 +51,28 @@
         <hr class="sidebar__divider">
 
         <div class="sidebar__nav">
+            {% if is_place_search %}
+            <!-- 장소 검색 화면에서 보이는 메뉴 -->
+            <a href="{% url 'places:main' %}" class="sidebar__item">
+                <span class="sidebar__icon">✨</span>
+                여행지 추천받기
+            </a>
+            {% else %}
+            <!-- 메인 화면에서 보이는 메뉴 -->
+            <a href="{% url 'places:place_search' %}" class="sidebar__item">
+                <span class="sidebar__icon">🔍</span>
+                장소 검색하기
+            </a>
+            {% endif %}
             <a href="{% url 'routes:route_list' %}" class="sidebar__item">
                 <span class="sidebar__icon">📍</span>
                 전체 루트 보기
             </a>
-            <a href="{% url 'routes:route_list' %}" class="sidebar__item">
+            <a href="{% url 'routes:create_route_page' %}" class="sidebar__item">
+                <span class="sidebar__icon">➕</span>
+                새 루트 생성하기
+            </a>
+            <a href="{% url 'users:my_page' %}" class="sidebar__item">
                 <span class="sidebar__icon">👨‍💼</span>
                 마이 페이지
             </a>
@@ -78,6 +95,6 @@
         <span>ⓒ 2025 Trip Tailor</span>
     </footer>
 
-    <script src="{% static 'js/script.js' %}"></script>
+    <script src="{% static 'js/script.js' %}?v={% now 'U' %}"></script>
 </body>
 </html>

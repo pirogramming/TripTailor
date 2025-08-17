@@ -23,16 +23,31 @@
 
             // 더보기/접기 초기화
             (function initMore() {
-                if (!moreBtn) return;
-                const hidden = track.querySelectorAll('.chip.extra').length;
-                if (!hidden) moreBtn.style.display = 'none';
+                if (!moreBtn || rail.dataset.jsInit === '1') return;
+                rail.dataset.jsInit = '1';
+
+                const extraChips = track.querySelectorAll('.chip.extra');
+                if (!extraChips.length) {
+                    moreBtn.style.display = 'none';
+                    return;
+                }
+
+                // 초기 상태 설정
+                rail.setAttribute('data-expanded', 'false');
+                moreBtn.setAttribute('aria-expanded', 'false');
+                moreBtn.textContent = '+ 더보기';
+                
                 moreBtn.addEventListener('click', () => {
-                    const expanded = rail.dataset.expanded === 'true';
-                    rail.dataset.expanded = (!expanded).toString();
-                    moreBtn.textContent = expanded ? '+ 더보기' : '접기';
-                    moreBtn.setAttribute('aria-expanded', (!expanded).toString());
+                    const expanded = rail.getAttribute('data-expanded') === 'true';
+                    const next = !expanded;
+                    rail.setAttribute('data-expanded', String(next));
+                    moreBtn.setAttribute('aria-expanded', String(next));
+                    moreBtn.textContent = next ? '접기' : '+ 더보기';
                 });
+
+                console.log('[initMore] 더보기/접기 토글 초기화 완료');
             })();
+
 
             // 목록만 Ajax 교체
             async function fetchAndSwapList(nextParams) {
@@ -58,6 +73,7 @@
                     document.getElementById('list-loading')?.remove();
                 }
             }
+
 
             // 칩 클릭 → URL 파라미터 갱신 → Ajax로 목록만 갱신
             track.addEventListener('click', async (e) => {
@@ -107,7 +123,6 @@
                     const listBox = dropdown.querySelector('.route-list');
                     listBox.textContent = '불러오는 중...';
                     try {
-                        // ⚠️ 정적 .js 파일이면 아래 템플릿 태그를 문자열 URL로 바꾸세요.
                         const res = await fetch('/routes/mine/json/', { credentials: 'same-origin' });
                         const data = await res.json();
                         if (!data.routes.length) {
@@ -129,10 +144,13 @@
 
             // 루트 선택 → 장소 추가
             if (e.target.classList.contains('select-route-btn')) {
+                // 중복 방지: 이미 처리 중이면 return
+                if (e.target.dataset.clicked === 'true') return;
+                e.target.dataset.clicked = 'true';
+
                 const routeId = e.target.dataset.routeId;
                 const placeId = e.target.dataset.placeId;
-                // ⚠️ 정적 .js 파일이면 템플릿 태그 대신 `/routes/${routeId}/add/${placeId}/` 로 직접 구성
-                const endpoint = `/routes/${routeId}/add/${placeId}/`
+                const endpoint = `/routes/${routeId}/add/${placeId}/`;
                 try {
                     const res = await fetch(endpoint, {
                         method: 'POST',
@@ -143,25 +161,35 @@
                     alert(data.duplicated ? '이미 해당 루트에 있음' : '루트에 추가됨');
                 } catch (err) {
                     alert('추가 실패');
+                } finally {
+                    // 0.5초 후 다시 클릭 가능하게
+                    setTimeout(() => { e.target.dataset.clicked = 'false'; }, 500);
                 }
             }
 
             // 새 루트 생성 → 목록 갱신
             if (e.target.classList.contains('create-route-btn')) {
+                // 중복 방지: 이미 처리 중이면 return
+                if (e.target.dataset.clicked === 'true') return;
+                e.target.dataset.clicked = 'true';
+
                 const dropdown = e.target.closest('.route-dropdown');
                 const titleInput = dropdown.querySelector('.new-route-title');
                 const summaryInput = dropdown.querySelector('.new-route-summary');
                 const title = (titleInput.value || '').trim();
                 const summary = (summaryInput?.value || '').trim();
+                const isPublic = dropdown.querySelector('.new-route-public').checked;
+
                 if (!title) {
                     alert('제목을 입력하세요');
+                    e.target.dataset.clicked = 'false';
                     return;
                 }
                 try {
                     const fd = new FormData();
                     fd.append('title', title);
                     fd.append('location_summary', summary);
-                    // ⚠️ 정적 .js 파일이면 템플릿 태그 대신 '/routes/create/' 등으로 변경
+                    fd.append('is_public', isPublic ? 'true' : 'false');
                     const res = await fetch('/routes/create/', {
                         method: 'POST',
                         headers: { 'X-CSRFToken': csrftoken, 'X-Requested-With': 'XMLHttpRequest' },
@@ -182,6 +210,9 @@
                     }
                 } catch (err) {
                     alert('오류 발생');
+                } finally {
+                    // 0.5초 후 다시 클릭 가능하게
+                    setTimeout(() => { e.target.dataset.clicked = 'false'; }, 500);
                 }
             }
         });
@@ -198,6 +229,34 @@
                     window.location.assign(url.toString());
                 });
             });
+        })();
+
+        // ===== FILTER forms: 카테고리 필터와 이색적 필터 =====
+        (function initFilters() {
+            const filterForm = document.getElementById('filterForm');
+            const uniqueFilterForm = document.getElementById('uniqueFilterForm');
+
+            // 카테고리 필터 (place_class)
+            if (filterForm) {
+                const radios = filterForm.querySelectorAll('input[name="place_class"]');
+                radios.forEach(radio => {
+                    radio.addEventListener('change', () => {
+                        if (radio.checked) {
+                            filterForm.submit();
+                        }
+                    });
+                });
+            }
+
+            // 이색적 필터 (is_unique)
+            if (uniqueFilterForm) {
+                const uniqueCheckbox = uniqueFilterForm.querySelector('input[name="is_unique"]');
+                if (uniqueCheckbox) {
+                    uniqueCheckbox.addEventListener('change', () => {
+                        uniqueFilterForm.submit();
+                    });
+                }
+            }
         })();
 
         // ===== PLACE DETAIL: 네이버 블로그 후기 로딩 =====
@@ -314,3 +373,42 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+
+// =================================================================================
+//말풍선 크기 조절
+// =================================================================================
+
+(function(){
+  const selector = ".followup-bubble";
+
+  function autoGrow(el){
+    if(!el) return;
+
+    // 가로 먼저: 내용 폭 측정
+    el.style.width = "auto";
+    const container = el.parentElement; // .additional_ques
+    const maxRatio = window.matchMedia("(max-width: 600px)").matches ? 0.92 : 0.80;
+    const maxPx = Math.floor(container.getBoundingClientRect().width * maxRatio);
+    const nextW = Math.min(el.scrollWidth, maxPx);
+    el.style.width = nextW + "px";
+
+    // 세로: 내용 높이에 맞춰 확장(최대치까지)
+    el.style.height = "auto";
+    const nextH = Math.min(el.scrollHeight, parseInt(getComputedStyle(el).maxHeight));
+    el.style.height = nextH + "px";
+
+    // 최대 세로 넘으면 스크롤 표시
+    el.style.overflowY = (el.scrollHeight > nextH) ? "auto" : "hidden";
+  }
+
+  // 초기/입력 시 자동 확장
+  function bindAutoGrow(){
+    const ta = document.querySelector(selector);
+    if(!ta) return;
+    autoGrow(ta);
+    ta.addEventListener("input", () => autoGrow(ta));
+  }
+
+  document.addEventListener("DOMContentLoaded", bindAutoGrow);
+})();

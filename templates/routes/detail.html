@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% block content %}
 
 <h1 style="margin-bottom:.25rem;">{{ route.title }}</h1>
@@ -20,12 +21,6 @@
         {% if rp.tip %}
           <div style="color:#555; margin-top:4px;">팁: {{ rp.tip }}</div>
         {% endif %}
-
-        <form method="post" action="{% url 'routes:remove_place' route.id rp.place_id %}" style="display:inline-block; margin-left:8px;">
-          {% csrf_token %}
-          <button type="submit">삭제</button>
-        </form>
-
       </li>
     {% endfor %}
   </ol>
@@ -33,8 +28,27 @@
   <p style="color:#777;">아직 추가된 장소가 없어요. 여행지 목록에서 <em>“루트에 추가”</em>로 채워보세요!</p>
 {% endif %}
 
+{# ✅ 작성자에게만 수정 & 삭제 버튼 노출 #}
+{% if request.user == route.creator %}
+  <a href="{% url 'routes:edit_route_page' route.id %}?from={{ from_page }}">✏️ 수정</a>
+  <button id="delete-route-btn" style="margin-top: 20px; background-color: red; color: white;">
+    루트 삭제
+  </button>
+  <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+  <input type="hidden" id="route-id" value="{{ route.id }}">
+  <input type="hidden" id="from-page" value="{{ from_page }}">
+{% endif %}
+
 <p style="margin-top:16px;">
-  <a href="{% url 'users:my_page' %}">← 마이페이지로</a>
+  {% if from_page == "mypage" %}
+    <a href="{% url 'users:my_page' %}">← 마이페이지로</a>
+  {% elif from_page == "public_list" %}
+    <a href="{% url 'routes:route_list' %}">← 공개 루트 목록으로</a>
+  {% else %}
+    <a href="javascript:history.back()">← 이전 페이지로</a>
+  {% endif %}
 </p>
+
+<script src="{% static 'js/route_detail.js' %}"></script>
 
 {% endblock %}

@@ -1,0 +1,78 @@
+<div id="routes-container">
+    <div class="top-container">
+        <div class="text">나의 여행 루트</div>
+        <div class="button">
+            <a href="{% url 'routes:create_route_page' %}" class="btn">+ 새 루트 만들기</a>
+        </div>
+    </div>
+
+    <div class="route-list">
+        {% for route in routes_page %}
+        <article class="route-card">
+            <header class="route-header">
+            <h3 class="route-title">
+                {{ route.title }}
+            </h3>
+            {% if route.status %}
+                <span class="route-badge badge-{{ route.status|default:'default' }}">
+                {{ route.status }}
+                </span>
+            {% endif %}
+            </header>
+
+            <div class="route-meta">
+            {% if route.created_at %}
+                <span class="meta-item">📅 {{ route.created_at|date:"Y-m-d" }}</span>
+            {% endif %}
+            </div>
+
+            {% if route.location_summary %}
+            <p class="route-summary">{{ route.location_summary }}</p>
+            {% endif %}
+
+            <div class="route-stops">
+            {% with stops=route.stops.all %}
+                {% if stops %}
+                {% for stop in stops %}
+                    <a class="stop-card" href="{% url 'places:place_detail' pk=stop.place.id %}" title="{{ stop.place.name }}">
+                    {% if stop.place.thumbnail_url %}
+                        <div class="stop-thumb">
+                        <img src="{{ stop.place.thumbnail_url }}" alt="{{ stop.place.name }}">
+                        </div>
+                    {% endif %}
+                    <span class="stop-name">{{ stop.place.name }}</span>
+                    </a>
+                    {% if not forloop.last %}
+                    <span class="stop-arrow">→</span>
+                    {% endif %}
+                {% endfor %}
+                {% else %}
+                <span class="no-stops">등록된 장소 없음</span>
+                {% endif %}
+            {% endwith %}
+            </div>
+
+            <footer class="route-footer">
+            <span class="route-author">👤 {{ route.creator.username }}</span>
+            <div class="route-actions">
+                <a href="{% url 'routes:edit_route_page' route_id=route.id %}?from=mypage" class="btn-edit" title="루트 편집">✏️</a>
+                <a href="{% url 'routes:delete_route' route_id=route.id %}?from=mypage" class="btn-delete" title="루트 삭제">🗑️</a>
+            </div>
+            </footer>
+        </article>
+        {% endfor %}
+    </div>
+
+        
+
+
+    <div style="margin:8px 0;">
+        {% if routes_page.has_previous %}
+            <a href="?page_routes={{ routes_page.previous_page_number }}&page_likes={{ likes_page.number }}&page_reviews={{ reviews_page.number }}">이전</a>
+        {% endif %}
+        <span>페이지 {{ routes_page.number }} / {{ routes_page.paginator.num_pages }}</span>
+        {% if routes_page.has_next %}
+            <a href="?page_routes={{ routes_page.next_page_number }}&page_likes={{ likes_page.number }}&page_reviews={{ reviews_page.number }}">다음</a>
+        {% endif %}
+    </div>    
+</div>

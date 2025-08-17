@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load static %}
+{% block head %}
+  <link rel="stylesheet" href="{% static 'css/routes/edit_route.css' %}?v={% now 'U' %}">
+{% endblock %}
+
+{% block content %}
+<main>
+  <h1>루트 수정하기</h1>
+  <div id="form-container">
+    <form method="post" action="{% url 'routes:update_route' route.id %}" id="update-route-form">
+      {% csrf_token %}
+      <input type="hidden" name="from" value="{{ from_page }}">
+
+      <!-- 루트 제목 -->
+      <div class="form-group">
+        <label>루트 제목</label><br>
+        <input type="text" name="title" value="{{ route.title }}" required>
+      </div>
+
+      <!-- 요약 -->
+      <div class="form-group">
+        <label>지역 요약</label><br>
+        <input type="text" name="location_summary" value="{{ route.location_summary }}">
+      </div>
+
+      <!-- 설명 -->
+      <div class="form-group">
+        <label>설명</label><br>
+        <textarea name="description">{{ route.description }}</textarea>
+      </div>
+
+
+
+      <!-- 공개 여부 -->
+      <div>
+        <label class="checkbox-label">
+          <input type="checkbox" name="is_public" value="true" {% if route.is_public %}checked{% endif %}>
+          공개 루트로 설정
+        </label>
+      </div>
+
+      <!-- ✅ 장소 순서를 담을 hidden input -->
+      <input type="hidden" name="place_ids_json" id="place-ids-input">
+
+      <h3 style="margin-top:32px;">포함된 장소</h3>
+
+      <!-- ✅ form 밖이지만 submit할 때 순서 반영됨 -->
+      <ol id="sortable-list">
+        {% for rp in stops %}
+          <li data-place-id="{{ rp.place.id }}" style="margin: 8px 0; cursor: move;">
+            <span class="item-label">{{ rp.place.name }}</span>
+            <button type="button" class="delete-btn" data-place-id="{{ rp.place.id }}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-square" viewBox="0 0 16 16">
+                <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>
+                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+              </svg>
+            </button>
+          </li>
+        {% endfor %}
+      </ol>
+
+      <!-- 저장 버튼 -->
+      <button type="submit" class="submit"><span>저장</span></button>
+    </form>    
+  </div>
+</main>
+
+<!-- jQuery, jQuery UI, 사용자 스크립트 -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<script src="{% static 'js/edit_route.js' %}"></script>
+{% endblock %}

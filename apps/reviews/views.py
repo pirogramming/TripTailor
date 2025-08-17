@@ -1,21 +1,19 @@
-from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
+from django.views.generic import CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.shortcuts import redirect, render
-from django.urls import reverse_lazy
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
 import re
 import requests
 from django.http import JsonResponse, Http404
 from django.conf import settings
-from urllib.parse import quote
+
+
+from .models import Review, ReviewPhoto
+from .forms import ReviewForm
 from apps.places.models import Place
-
-from .forms import ReviewForm, ReviewPhotoFormSet
-from .models import Review
-
-# ✅ services 폴더 없이, management command에 정의된 클래스를 재사용
-from apps.reviews.management.commands.review_compare import ReviewPipelineService
 
 BLACKLIST_SUBSTR = (
     "smartstore.naver.com", "shopping.naver.com", "brand.naver.com",
@@ -108,186 +106,127 @@ def blog_reviews(request, place_id: int):
 
     return JsonResponse({"items": dedup[:10]})
 
-class ReviewListView(LoginRequiredMixin, ListView):
-    model = Review
-    template_name = 'reviews/review_list.html'
-    context_object_name = 'reviews'
-    paginate_by = 10
-    login_url = '/login/'  # 로그인 페이지 URL
-    # 로그인이 필요한 상태로 변경
-
-    def get_queryset(self):
-        qs = super().get_queryset().select_related('user', 'route').prefetch_related('photos')
-        route_id = self.request.GET.get('route')
-        user_id = self.request.GET.get('user')
-        if route_id:
-            qs = qs.filter(route_id=route_id)
-        if user_id:
-            qs = qs.filter(user_id=user_id)
-        return qs
-
-
-class ReviewDetailView(LoginRequiredMixin, DetailView):
-    model = Review
-    template_name = 'reviews/review_detail.html'
-    context_object_name = 'review'
-    login_url = '/login/'  # 로그인 페이지 URL
-    # 로그인이 필요한 상태로 변경
-
-
-class ReviewCreateView(LoginRequiredMixin, CreateView):
+class PlaceReviewCreateView(LoginRequiredMixin, CreateView):
     model = Review
     form_class = ReviewForm
-    template_name = 'reviews/review_form.html'
-    login_url = '/login/'  # 로그인 페이지 URL
+    template_name = 'reviews/place_review_form.html'
 
-    def get_initial(self):
-        initial = super().get_initial()
-        route_id = self.request.GET.get('route')
-        if route_id:
-            initial['route'] = route_id
-        return initial
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        form.instance.place_id = self.kwargs.get('place_id')
+        
+        # 댓글 저장
+        review = form.save()
+        
+        # 여러 이미지 파일 처리 (HTML form에서 name="photos"로 전송됨)
+        photo_files = self.request.FILES.getlist('photos')
+        for photo_file in photo_files:
+            if photo_file:
+                ReviewPhoto.objects.create(review=review, image=photo_file)
+        
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('places:place_detail', kwargs={'pk': self.kwargs.get('place_id')})
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if self.request.POST:
-            context['photo_formset'] = ReviewPhotoFormSet(self.request.POST, instance=self.object)
-        else:
-            context['photo_formset'] = ReviewPhotoFormSet()
+        context['place'] = get_object_or_404(Place, pk=self.kwargs.get('place_id'))
+        
         return context
 
-    def form_invalid(self, form):
-        context = self.get_context_data(form=form)
-        if hasattr(self, 'object') and self.object:
-            context['photo_formset'] = ReviewPhotoFormSet(self.request.POST, instance=self.object)
-        else:
-            context['photo_formset'] = ReviewPhotoFormSet(self.request.POST)
-        return self.render_to_response(context)
+class PlaceReviewUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Review
+    form_class = ReviewForm
+    template_name = 'reviews/place_review_form.html'
 
-    def form_valid(self, form):
-        try:
-            title = form.cleaned_data.get('title', '리뷰')
-            route = form.cleaned_data.get('route')  # None 가능
-            rating = form.cleaned_data.get('rating', 5.0)
-            summary = form.cleaned_data.get('summary', '리뷰')
-            content = form.cleaned_data.get('content', '')
-
-            review = form.save(commit=False)
-            review.user = self.request.user
-            review.title = title
-            review.route = route
-            review.rating = rating
-            review.summary = summary
-            review.content = content
-            review.save()
-
-            formset = ReviewPhotoFormSet(self.request.POST, instance=review)
-            if formset.is_valid():
-                formset.save()
-                messages.success(self.request, "리뷰가 등록되었습니다.")
-            else:
-                messages.warning(self.request, "리뷰는 저장되었지만 사진 처리에 문제가 있었습니다.")
-
-            # ✅ 파이프라인 실행
-            try:
-                pipeline_service = ReviewPipelineService()
-                pipeline_success = pipeline_service.process_review(review)
-                if pipeline_success:
-                    messages.info(self.request, "AI 파이프라인이 성공적으로 실행되었습니다.")
-                else:
-                    messages.info(self.request, "AI 파이프라인이 실행되었지만 업데이트가 필요하지 않았습니다.")
-            except Exception as e:
-                messages.warning(self.request, f"AI 파이프라인 실행 중 오류가 발생했습니다: {str(e)}")
-
-            return redirect('reviews:list')
-
-        except Exception as e:
-            messages.error(self.request, f"리뷰 저장 중 오류가 발생했습니다: {str(e)}")
-            return self.form_invalid(form)
-
-
-class AuthorRequiredMixin(UserPassesTestMixin):
     def test_func(self):
-        obj = self.get_object()
-        return obj.user_id == self.request.user.id
+        review = self.get_object()
+        return review.user == self.request.user
+    
+    def form_valid(self, form):
+        # 댓글 저장
+        review = form.save()
+        
+        # 삭제할 이미지 처리
+        delete_photo_ids = self.request.POST.getlist('delete_photo_ids')
+        if delete_photo_ids:
+            ReviewPhoto.objects.filter(id__in=delete_photo_ids, review=review).delete()
+        
+        # 새 이미지 파일 처리
+        photo_files = self.request.FILES.getlist('photos')
+        for photo_file in photo_files:
+            if photo_file:
+                ReviewPhoto.objects.create(review=review, image=photo_file)
+        
+        return super().form_valid(form)
 
-
-class ReviewUpdateView(LoginRequiredMixin, AuthorRequiredMixin, UpdateView):
-    model = Review
-    form_class = ReviewForm
-    template_name = 'reviews/review_form.html'
-    login_url = '/login/'  # 로그인 페이지 URL
+    def get_success_url(self):
+        # 마이페이지에서 온 경우 마이페이지로 리다이렉션
+        if self.request.GET.get('from_mypage'):
+            return '/users/mypage/?tab=reviews'
+        return reverse('places:place_detail', kwargs={'pk': self.object.place.id})
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if self.request.POST:
-            context['photo_formset'] = ReviewPhotoFormSet(self.request.POST, instance=self.object)
-        else:
-            context['photo_formset'] = ReviewPhotoFormSet(instance=self.object)
+        context['place'] = self.object.place
+        
+        # 현재 이미지들을 배열로 전달
+        context['current_photos'] = self.object.photos.all()
+        
         return context
+    
+    def get_form_kwargs(self):
+        """폼에 기존 데이터를 초기값으로 설정"""
+        kwargs = super().get_form_kwargs()
+        if self.object:
+            kwargs['initial'] = {
+                'rating': self.object.rating,
+                'content': self.object.content,
+            }
+        return kwargs
 
-    def form_valid(self, form):
+# HTMX를 위한 댓글 목록 뷰
+def place_review_list_htmx(request, place_id):
+    """HTMX로 댓글 목록을 반환하는 뷰"""
+    print(f"DEBUG: review_list_htmx 호출됨, place_id: {place_id}")
+    
+    place = get_object_or_404(Place, pk=place_id)
+    print(f"DEBUG: Place 찾음: {place.name}")
+    
+    reviews = Review.objects.filter(place=place).select_related('user').order_by('-created_at')
+    print(f"DEBUG: 댓글 개수: {reviews.count()}")
+    
+    for review in reviews:
+        print(f"DEBUG: 댓글 by {review.user.username}")
+    
+    return render(request, 'reviews/review_list_fragment.html', {
+        'reviews': reviews,
+        'place': place,
+        'user': request.user
+    })
+
+@login_required
+def delete_review_ajax(request, place_id, review_id):
+    """AJAX로 댓글을 바로 삭제하는 뷰"""
+    if request.method == 'POST':
         try:
-            title = form.data.get('title', '리뷰')
-            route_id = form.data.get('route')
-            rating = form.data.get('rating')
-            summary = form.data.get('summary')
-            content = form.data.get('content')
-
-            self.object.title = title
-            self.object.route_id = route_id or None
-
-            if rating:
-                try:
-                    rating_float = float(rating)
-                    rating_rounded = round(rating_float, 1)
-                except ValueError:
-                    rating_rounded = 5.0
-            else:
-                rating_rounded = 5.0
-
-            self.object.rating = rating_rounded
-            self.object.summary = summary or "리뷰"
-            self.object.content = content or ""
-            self.object.save()
-
-            formset = ReviewPhotoFormSet(self.request.POST, instance=self.object)
-            if formset.is_valid():
-                formset.save()
-                messages.success(self.request, "리뷰가 수정되었습니다.")
-            else:
-                messages.warning(self.request, "리뷰는 수정되었지만 사진 처리에 문제가 있었습니다.")
-
-            # ✅ 파이프라인 실행
-            try:
-                pipeline_service = ReviewPipelineService()
-                pipeline_success = pipeline_service.process_review(self.object)
-                if pipeline_success:
-                    messages.info(self.request, "AI 파이프라인이 성공적으로 실행되었습니다.")
-                else:
-                    messages.info(self.request, "AI 파이프라인이 실행되었지만 업데이트가 필요하지 않았습니다.")
-            except Exception as e:
-                messages.warning(self.request, f"AI 파이프라인 실행 중 오류가 발생했습니다: {str(e)}")
-
-            return redirect('reviews:list')
-
+            review = get_object_or_404(Review, pk=review_id, user=request.user)
+            review.delete()
+            return JsonResponse({'success': True, 'message': '댓글이 삭제되었습니다.'})
         except Exception as e:
-            messages.error(self.request, f"리뷰 수정 중 오류가 발생했습니다: {str(e)}")
-            return self.form_invalid(form)
+            return JsonResponse({'success': False, 'message': f'삭제 중 오류가 발생했습니다: {str(e)}'})
+    
+    return JsonResponse({'success': False, 'message': '잘못된 요청입니다.'})
 
-    def form_invalid(self, form):
-        context = self.get_context_data(form=form)
-        context['photo_formset'] = ReviewPhotoFormSet(self.request.POST, instance=self.object)
-        return self.render_to_response(context)
-
-
-class ReviewDeleteView(LoginRequiredMixin, AuthorRequiredMixin, DeleteView):
-    model = Review
-    template_name = 'reviews/review_delete.html'
-    success_url = reverse_lazy('reviews:list')
-    login_url = '/login/'  # 로그인 페이지 URL
-
-    def delete(self, request, *args, **kwargs):
-        messages.success(self.request, "리뷰가 삭제되었습니다.")
-        return super().delete(request, *args, **kwargs)
-
+@login_required
+def delete_review(request, place_id, review_id):
+    """일반 폼으로 댓글을 삭제하는 뷰 (마이페이지에서 사용)"""
+    if request.method == 'POST':
+        review = get_object_or_404(Review, pk=review_id, user=request.user)
+        review.delete()
+        from django.shortcuts import redirect
+        return redirect('/users/mypage/?tab=reviews')
+    
+    from django.shortcuts import redirect
+    return redirect('/users/mypage/')

@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'css/routes/create_route.css' %}?v={% now 'U' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lemon&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<main>
+  <h1>새 루트 만들기</h1>
+  <div id="form-container">
+    <form id="create-route-form">
+      {% csrf_token %}
+
+      <div class="form-group">
+        <label>루트 제목</label><br />
+        <input type="text" name="title" placeholder="루트 제목을 입력하세요" />
+      </div>
+
+      <div class="form-group">
+        <label>지역 요약</label><br />
+        <input type="text" name="location_summary" maxlength="200" placeholder="여행 지역을 간단히 요약해주세요"/>
+      </div>
+
+      <div class="form-group">
+        <label>설명</label><br />
+        <textarea name="description" placeholder="루트에 대한 자세한 설명을 입력하세요"></textarea>
+      </div>
+
+
+
+      <div>
+        <label class="checkbox-label">
+          <input type="checkbox" name="is_public" value="true" checked />
+          공개 루트로 설정
+        </label>
+      </div>
+
+      <button type="submit"><span>루트 생성</span></button>
+    </form>    
+  </div>
+
+</main>
+
+
+
+
+<script>
+  document.getElementById("create-route-form").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const form = e.target;
+    const formData = new FormData(form);
+
+    // 체크 안 돼 있으면 아예 안 보내지니까 false로 수동 지정
+    if (!form.querySelector('input[name="is_public"]').checked) {
+      formData.set("is_public", "false");
+    }
+
+    const response = await fetch("{% url 'routes:create_route' %}", {
+      method: "POST",
+      body: formData,
+      credentials: "same-origin",
+      headers: {
+        "X-CSRFToken": form.querySelector('[name=csrfmiddlewaretoken]').value,
+      },
+    });
+
+    const data = await response.json();
+    if (data.ok) {
+      alert("루트가 생성되었어요!");
+      window.location.href = `/users/mypage?tab=routes`;  // detail로 이동
+    } else {
+      alert("오류: " + data.error);
+    }
+  });
+</script>
+{% endblock %}

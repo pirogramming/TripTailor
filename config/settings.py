@@ -15,13 +15,12 @@ from decouple import config
 import os
 from dotenv import load_dotenv
 
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-load_dotenv(dotenv_path=BASE_DIR / '.env')
+load_dotenv(BASE_DIR / '.env')
 
-
+GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
 NAVER_CLIENT_ID = os.getenv("NAVER_CLIENT_ID")
 NAVER_CLIENT_SECRET = os.getenv("NAVER_CLIENT_SECRET")
 
@@ -92,16 +91,21 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                "apps.places.context_processors.public_settings",
             ],
         },
     },
 ]
 
 WSGI_APPLICATION = 'config.wsgi.application'
-
+TEMPLATES[0]["OPTIONS"]["context_processors"] += [
+    "apps.places.context_processors.public_settings",
+]
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+
+load_dotenv(BASE_DIR/'.env')
 
 DATABASES = {
     'default': {
@@ -166,6 +170,10 @@ STATICFILES_DIRS = [
 
 # 배포 환경에서 collectstatic으로 모을 위치
 STATIC_ROOT = BASE_DIR / 'staticfiles'  # python manage.py collectstatic 시 사용
+
+# Media files (업로드된 파일)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 
 # Default primary key field type

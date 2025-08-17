@@ -1,0 +1,75 @@
+#review-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin: 20px 0;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.review-item {
+    width: 60vw;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 16px;
+    background-color: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.review-title {
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+}
+
+.review-title a {
+    color: #2a7ae2;
+    text-decoration: none;
+}
+
+.review-title a:hover {
+    text-decoration: underline;
+}
+
+.review-rating {
+    font-weight: bold;
+    color: #ff9800;
+    margin-bottom: 6px;
+}
+
+.review-content {
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+
+.review-date {
+    font-size: 0.85rem;
+    color: #777;
+    margin-bottom: 10px;
+}
+
+.review-photos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.review-photos img {
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    object-fit: cover;
+}
+
+.review-place-link {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 6px 12px;
+    background-color: #2a7ae2;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.review-place-link:hover {
+    background-color: #1a5cb0;
+}

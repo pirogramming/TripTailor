@@ -1,11 +1,18 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from apps.places.models import PlaceLike
+from apps.places.models import PlaceLike, Place
 from django.db.models import Count, Prefetch
 from django.db.models import prefetch_related_objects
 from apps.routes.models import Route, RoutePlace
 from apps.reviews.models import Review
+
+from django.contrib.auth.views import PasswordResetView
+from django.contrib import messages
+from django.urls import reverse
+from .forms import CustomPasswordResetForm
+from django.contrib.auth import get_user_model
+
 
 def login_page(request):
     return render(request, 'users/login.html')
@@ -20,6 +27,17 @@ def main_page(request):
 
 @login_required
 def my_page(request):
+    tab = request.GET.get("tab", "likes")
+    ctx = {"tab": tab}
+
+    if tab == "likes":
+        ctx["items"] = PlaceLike.objects.filter(user=request.user).order_by("-created_at")[:30]
+    elif tab == "routes":
+        ctx["items"] = Route.objects.filter(creator=request.user).order_by("-created_at")[:30]
+    elif tab == "reviews":
+        ctx["items"] = Review.objects.filter(user=request.user).order_by("-created_at")[:30]
+
+
     # --- 좋아요한 장소
     likes_qs = (
         PlaceLike.objects
@@ -28,9 +46,13 @@ def my_page(request):
         .prefetch_related("place__tags")
         .order_by("-created_at")
     )
-    likes_paginator = Paginator(likes_qs, 5)
+    likes_paginator = Paginator(likes_qs, 6)
     likes_page = likes_paginator.get_page(request.GET.get("page_likes", 1))
     total_likes = likes_qs.count()
+
+    for lk in likes_page.object_list:
+        # lk는 PlaceLike, lk.place는 select_related로 미리 붙어 있음
+        lk.place.is_liked = True
 
     # --- 내가 만든 루트
     routes_qs = (
@@ -39,19 +61,19 @@ def my_page(request):
         .annotate(num_stops=Count("stops"))
         .order_by("-created_at")
     )
-    routes_paginator = Paginator(routes_qs, 5)
+    routes_paginator = Paginator(routes_qs, 6)
     routes_page = routes_paginator.get_page(request.GET.get("page_routes", 1))
     total_routes = routes_qs.count()
 
-    # --- 내가 작성한 리뷰 (루트가 있는 것만)
+    # --- 내가 작성한 리뷰 (내용이 있는 것만)
     reviews_qs = (
         Review.objects
-        .filter(user=request.user, route__isnull=False)  # 루트가 있는 리뷰만
-        .select_related("route")
+        .filter(user=request.user, content__isnull=False).exclude(content='')  # 내용이 있는 리뷰만
+        .select_related("place")
         .prefetch_related("photos")
         .order_by("-created_at")
     )
-    reviews_paginator = Paginator(reviews_qs, 5)
+    reviews_paginator = Paginator(reviews_qs, 6)
     reviews_page = reviews_paginator.get_page(request.GET.get("page_reviews", 1))
     total_reviews = reviews_qs.count()
 
@@ -68,7 +90,9 @@ def my_page(request):
             Prefetch("stops", queryset=preview_qs, to_attr="prefetched_stops"),
         )
 
-    return render(request, "users/mypage.html", {
+    return render(request, "users/mypage.html",{
+        "tab": tab,
+        
         # 좋아요 섹션
         "likes_page": likes_page,
         "total_likes": total_likes,
@@ -98,3 +122,21 @@ def my_reviews(request):
         "page_obj": page_obj,
         "total": reviews_qs.count(),
     })
+
+class CustomPasswordResetView(PasswordResetView):
+    form_class = CustomPasswordResetForm
+    template_name = 'account/password_reset.html'
+
+
+@login_required
+def delete_review_ajax(request, place_id, review_id):
+    """AJAX로 댓글을 바로 삭제하는 뷰"""
+    if request.method == 'POST':
+        try:
+            review = get_object_or_404(Review, pk=review_id, user=request.user)
+            review.delete()
+            return JsonResponse({'success': True, 'message': '댓글이 삭제되었습니다.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f'삭제 중 오류가 발생했습니다: {str(e)}'})
+    
+    return JsonResponse({'success': False, 'message': '잘못된 요청입니다.'})

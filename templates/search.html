@@ -3,25 +3,56 @@
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/search.css' %}">
 <form method="get" action="">
-    <input
-        type="text"
-        name="prompt"
-        placeholder="여행지 조건을 입력해보세요!"
-        value="{{ prompt }}"
-    />
-    {% if show_followup %}
-    <div>
-        <strong>🤔 {{ question }}</strong>
-        <input type="text" name="followup" placeholder="답변을 입력하세요" />
-        <button type="submit">
-            <svg xmlns="http://www.w3.org/2000/svg" id="Outline" viewBox="0 0 24 24" width="20" height="20"><path d="M23.119.882a2.966,2.966,0,0,0-2.8-.8l-16,3.37a4.995,4.995,0,0,0-2.853,8.481L3.184,13.65a1,1,0,0,1,.293.708v3.168a2.965,2.965,0,0,0,.3,1.285l-.008.007.026.026A3,3,0,0,0,5.157,20.2l.026.026.007-.008a2.965,2.965,0,0,0,1.285.3H9.643a1,1,0,0,1,.707.292l1.717,1.717A4.963,4.963,0,0,0,15.587,24a5.049,5.049,0,0,0,1.605-.264,4.933,4.933,0,0,0,3.344-3.986L23.911,3.715A2.975,2.975,0,0,0,23.119.882ZM4.6,12.238,2.881,10.521a2.94,2.94,0,0,1-.722-3.074,2.978,2.978,0,0,1,2.5-2.026L20.5,2.086,5.475,17.113V14.358A2.978,2.978,0,0,0,4.6,12.238Zm13.971,7.17a3,3,0,0,1-5.089,1.712L11.762,19.4a2.978,2.978,0,0,0-2.119-.878H6.888L21.915,3.5Z"/></svg>
-        </button>
+  {% if show_followup %}
+    <!-- 기존 질문(수정 불가, 말풍선 표시) -->
+    <div class="chat-log">
+      {# 여러 개의 과거 질문을 지원하려면 previous_prompts 전달 #}
+      {% if previous_prompts %}
+        {% for p in previous_prompts %}
+          <div class="bubble bubble-user">{{ p }}</div>
+        {% endfor %}
+      {% else %}
+        <div class="bubble bubble-user">{{ prompt }}</div>
+      {% endif %}
     </div>
+
+    {# 서버로 기존 질문을 넘기기 위한 hidden 필드 #}
+    {% if previous_prompts %}
+      {% for p in previous_prompts %}
+        <input type="hidden" name="previous_prompts" value="{{ p }}">
+      {% endfor %}
     {% else %}
-    <button type="submit">
-        <svg xmlns="http://www.w3.org/2000/svg" id="Outline" viewBox="0 0 24 24" width="40" height="40"><path d="M23.707,22.293l-5.969-5.969a10.016,10.016,0,1,0-1.414,1.414l5.969,5.969a1,1,0,0,0,1.414-1.414ZM10,18a8,8,0,1,1,8-8A8.009,8.009,0,0,1,10,18Z"/></svg>
-    </button>
+      <input type="hidden" name="prompt" value="{{ prompt }}">
     {% endif %}
+
+    <!-- 보충 질문 영역 -->
+    <div class="additional_ques">
+      <strong>🤔 {{ question }}</strong>
+      <input type="text" name="followup" value="{{ followup }}" placeholder="답변을 입력하세요" />
+      <button type="submit" aria-label="보충 답변 제출">
+        <!-- 아이콘 생략(원문 그대로) -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20"><path d="M23.119.882a2.966,2.966,0,0,0-2.8-.8l-16,3.37a4.995,4.995,0,0,0-2.853,8.481L3.184,13.65a1,1,0,0,1,.293.708v3.168a2.965,2.965,0,0,0,.3,1.285l-.008.007.026.026A3,3,0,0,0,5.157,20.2l.026.026.007-.008a2.965,2.965,0,0,0,1.285.3H9.643a1,1,0,0,1,.707.292l1.717,1.717A4.963,4.963,0,0,0,15.587,24a5.049,5.049,0,0,0,1.605-.264,4.933,4.933,0,0,0,3.344-3.986L23.911,3.715A2.975,2.975,0,0,0,23.119.882ZM4.6,12.238,2.881,10.521a2.94,2.94,0,0,1-.722-3.074,2.978,2.978,0,0,1,2.5-2.026L20.5,2.086,5.475,17.113V14.358A2.978,2.978,0,0,0,4.6,12.238Zm13.971,7.17a3,3,0,0,1-5.089,1.712L11.762,19.4a2.978,2.978,0,0,0-2.119-.878H6.888L21.915,3.5Z"/></svg>
+      </button>
+    </div>
+  {% else %}
+    <!-- 최초 검색 상태: 기존 입력창 그대로 -->
+    <input
+      type="text"
+      name="prompt"
+      placeholder="여행지 조건을 입력해보세요!"
+      value="{{ prompt }}"
+    />
+    <button type="submit" aria-label="검색">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36"><path d="M23.707,22.293l-5.969-5.969a10.016,10.016,0,1,0-1.414,1.414l5.969,5.969a1,1,0,0,0,1.414-1.414ZM10,18a8,8,0,1,1,8-8A8.009,8.009,0,0,1,10,18Z"/></svg>
+    </button>
+  {% endif %}
+
+  {# 선택된 필터 유지 #}
+  {% if place_class %}<input type="hidden" name="place_class" value="{{ place_class }}">{% endif %}
+  {% if match %}<input type="hidden" name="match" value="{{ match }}">{% endif %}
+  {% for t in selected_tags %}
+    <input type="hidden" name="tags" value="{{ t }}">
+  {% endfor %}
 </form>
 
 {% if recommended_places and not show_followup %}
@@ -32,31 +63,40 @@
     <div class="recommend-list" id="places-container">
         {% for rec in recommended_places %}
         <div class="place-card">
-            <div class="place-card__map">
-            </div>
+            <div
+            id="map-{{rec.place.id}}"
+            class="place-item__map"
+            data-lat="{{rec.place.lat}}"
+            data-lng="{{rec.place.lng}}"
+            ></div>
             <div class="place-card__body">
                 <h3 class="place-card__title">{{ rec.place.name }}</h3>
                 <p class="place-card__region">{{ rec.place.region }}</p>
-                <p class="place-card__reason">{{ rec.reason }}</p>
+                <p class="place-card__summary">{{ rec.reason }}</p>
+                <p class="place-card__tip">{{ rec.tip }}</p>
+                {% if not rec.reason and not rec.tip %} 
                 <p class="place-card__summary">{{ rec.place.summary|truncatechars:200|default:"설명 없음" }}</p>
+                {% endif %}
                 <ul class="tag-list">
                     {% for tag in rec.place.tags.all %}
                     <li class="tag">#{{ tag.name }}</li>
                     {% endfor %}
                 </ul>
                 {% if user.is_authenticated %}
-                <form method="post" action="{% url 'places:place_like' rec.place.pk %}" class="like-form">
-                    {% csrf_token %}
-                    <button type="submit" class="like-button">
-                        {% if rec.place.is_liked %}
-                            ❤️ 취소
-                        {% else %}
-                            🤍 좋아요
-                        {% endif %}
-                    </button>
-                </form>
-                {% endif %}
-                <a href="{% url 'places:place_detail' rec.place.pk %}" class="link">자세히 보기</a>
+                <div class="card_btn">
+                    <form method="post" action="{% url 'places:place_like' rec.place.pk %}" class="like-form">
+                        {% csrf_token %}
+                        <button type="submit" class="like-button">
+                            {% if rec.place.is_liked %}
+                                ❤️ 찜취소
+                            {% else %}
+                                🤍 찜하기
+                            {% endif %}
+                        </button>
+                    </form>
+                    {% endif %}
+                    <a href="{% url 'places:place_detail' rec.place.pk %}" class="link">자세히 보기</a>
+                </div>
             </div>
         </div>
         {% endfor %}
@@ -64,4 +104,12 @@
 </div>
 {% endif %}
 <a href="{% url 'places:main' %}" class="back-link">← 메인으로 돌아가기</a>
+
+<script src="{% static 'js/map.js' %}?v={% now 'U' %}"></script>
+<script
+  src="https://maps.googleapis.com/maps/api/js?key={{GOOGLE_MAPS_API_KEY}}&v=weekly&loading=async&callback=initMap"
+  async
+  defer
+></script>
+<script src="{% static 'js/like.js' %}"></script>
 {% endblock %}
