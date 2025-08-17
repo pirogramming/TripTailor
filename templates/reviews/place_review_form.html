@@ -17,25 +17,19 @@
     
     <div class="form-group mb-3">
       <label for="id_rating">평점 *</label>
-      <select name="rating" id="id_rating" class="form-control" required>
-        <option value="">평점 선택</option>
-        <option value="5.0" {% if form.rating.value == "5.0" %}selected{% endif %}>5.0</option>
-        <option value="4.5" {% if form.rating.value == "4.5" %}selected{% endif %}>4.5</option>
-        <option value="4.0" {% if form.rating.value == "4.0" %}selected{% endif %}>4.0</option>
-        <option value="3.5" {% if form.rating.value == "3.5" %}selected{% endif %}>3.5</option>
-        <option value="3.0" {% if form.rating.value == "3.0" %}selected{% endif %}>3.0</option>
-        <option value="2.5" {% if form.rating.value == "2.5" %}selected{% endif %}>2.5</option>
-        <option value="2.0" {% if form.rating.value == "2.0" %}selected{% endif %}>2.0</option>
-        <option value="1.5" {% if form.rating.value == "1.5" %}selected{% endif %}>1.5</option>
-        <option value="1.0" {% if form.rating.value == "1.0" %}selected{% endif %}>1.0</option>
-        <option value="0.5" {% if form.rating.value == "0.5" %}selected{% endif %}>0.5</option>
-        <option value="0.0" {% if form.rating.value == "0.0" %}selected{% endif %}>0.0</option>
-      </select>
+      {{ form.rating }}
+      {% if form.rating.errors %}
+        <div class="text-danger">{{ form.rating.errors }}</div>
+      {% endif %}
     </div>
+    
     
     <div class="form-group mb-3">
       <label for="id_content">내용 *</label>
-      <textarea name="content" id="id_content" class="form-control" rows="4" required placeholder="상세한 후기를 작성해주세요">{{ form.content.value|default:'' }}</textarea>
+      {{ form.content }}
+      {% if form.content.errors %}
+        <div class="text-danger">{{ form.content.errors }}</div>
+      {% endif %}
     </div>
 
     <!-- ✅ 파일 업로드(다중) + 미리보기 + 최대 5장 -->

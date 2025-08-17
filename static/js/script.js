@@ -231,6 +231,34 @@
             });
         })();
 
+        // ===== FILTER forms: 카테고리 필터와 이색적 필터 =====
+        (function initFilters() {
+            const filterForm = document.getElementById('filterForm');
+            const uniqueFilterForm = document.getElementById('uniqueFilterForm');
+
+            // 카테고리 필터 (place_class)
+            if (filterForm) {
+                const radios = filterForm.querySelectorAll('input[name="place_class"]');
+                radios.forEach(radio => {
+                    radio.addEventListener('change', () => {
+                        if (radio.checked) {
+                            filterForm.submit();
+                        }
+                    });
+                });
+            }
+
+            // 이색적 필터 (is_unique)
+            if (uniqueFilterForm) {
+                const uniqueCheckbox = uniqueFilterForm.querySelector('input[name="is_unique"]');
+                if (uniqueCheckbox) {
+                    uniqueCheckbox.addEventListener('change', () => {
+                        uniqueFilterForm.submit();
+                    });
+                }
+            }
+        })();
+
         // ===== PLACE DETAIL: 네이버 블로그 후기 로딩 =====
         (function initBlogReviews() {
             const btn = document.getElementById('load-blog-reviews');

@@ -12,6 +12,9 @@ urlpatterns = [
     # AJAX 삭제
     path('place/<int:place_id>/<int:review_id>/delete/', views.delete_review_ajax, name='delete_review_ajax'),
     
+    # 일반 폼 삭제 (마이페이지용)
+    path('place/<int:place_id>/<int:review_id>/delete-form/', views.delete_review, name='delete_review'),
+    
     # HTMX 댓글 목록
     path('htmx/<int:place_id>/', views.place_review_list_htmx, name='htmx_list'),
     path("blogs/<int:place_id>/", views.blog_reviews, name="blog_reviews"),
