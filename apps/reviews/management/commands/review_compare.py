@@ -244,19 +244,19 @@ class PlaceReviewProcessor:
                         place.tags.add(tag)
                         
                         if created:
-                            print(f"   🆕 새 태그 생성 및 추가: {tag_name}")
+                            print(f"새 태그 생성 및 추가: {tag_name}")
                         else:
-                            print(f"   ✅ 기존 태그 추가: {tag_name}")
+                            print(f"기존 태그 추가: {tag_name}")
                 
                 place.save()
                 print(f"🏷️ 장소 '{place.name}' 태그 업데이트 완료")
                 return True
             else:
-                print("⏭️ 추가할 새 태그 없음 - 기존 태그와 일치")
+                print(" 추가할 새 태그 없음 - 기존 태그와 일치")
                 return False
 
         except Exception as e:
-            print(f"❌ 태그 업데이트 실패: {e}")
+            print(f"태그 업데이트 실패: {e}")
             return False
 
     def process_place_when_review_added(self, place_id: int) -> bool:
@@ -267,7 +267,7 @@ class PlaceReviewProcessor:
         3) 태그 비교 및 업데이트
         """
         try:
-            print(f"\n🔄 댓글 추가로 인한 장소 분석 시작: Place ID {place_id}")
+            print(f"\n 댓글 추가로 인한 장소 분석 시작: Place ID {place_id}")
             
             # 1단계: 장소의 모든 리뷰 수집
             place, reviews = self.get_place_all_reviews(place_id)
@@ -279,24 +279,24 @@ class PlaceReviewProcessor:
                 print("❌ 처리할 댓글이 없습니다.")
                 return False
             
-            print(f"📊 총 {reviews.count()}개의 댓글 발견")
+            print(f" 총 {reviews.count()}개의 댓글 발견")
             
             # 2단계: ClovaX를 통한 종합 요약 (200-700자)
-            print("\n🤖 ClovaX로 댓글 종합 요약 중...")
+            print("\n ClovaX로 댓글 종합 요약 중...")
             summary = self.summarize_all_place_reviews(reviews)
-            print(f"📝 요약 결과 ({len(summary)}자): {summary[:100]}...")
+            print(f" 요약 결과 ({len(summary)}자): {summary[:100]}...")
             
             # 3단계: 태그 분석 및 업데이트
-            print("\n🏷️ 요약 기반 태그 분석 및 업데이트...")
+            print("\n 요약 기반 태그 분석 및 업데이트...")
             tag_updated = self.compare_and_update_place_tags(place, summary)
             
             # 4단계: 장소 summary 필드도 업데이트 (선택사항)
             if hasattr(place, 'summary'):
                 place.summary = summary
                 place.save(update_fields=['summary'])
-                print("💾 장소 요약 필드 업데이트 완료")
+                print(" 장소 요약 필드 업데이트 완료")
             
-            print(f"\n🎉 장소 '{place.name}' 댓글 기반 분석 완료!")
+            print(f"\n  장소 '{place.name}' 댓글 기반 분석 완료!")
             print(f"   - 요약 길이: {len(summary)}자")
             print(f"   - 태그 업데이트: {'✅' if tag_updated else '⏭️ 변경없음'}")
             
