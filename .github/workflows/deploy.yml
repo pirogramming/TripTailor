@@ -30,7 +30,7 @@ jobs:
       - name: Build image (personal namespace)
         run: |
           set -e
-          NS="ghcr.io/Jinecastle03/triptailor"
+          NS="ghcr.io/jinecastle03/triptailor"
           SHORT_SHA="$(echo "$GITHUB_SHA" | cut -c1-7)"
           echo "Building $NS:$SHORT_SHA and $NS:latest"
           docker build -t "$NS:$SHORT_SHA" -t "$NS:latest" .
@@ -38,7 +38,7 @@ jobs:
       - name: Push image
         run: |
           set -e
-          NS="ghcr.io/Jinecastle03/triptailor"
+          NS="ghcr.io/jinecastle03/triptailor"
           SHORT_SHA="$(echo "$GITHUB_SHA" | cut -c1-7)"
           docker push "$NS:$SHORT_SHA"
           docker push "$NS:latest"

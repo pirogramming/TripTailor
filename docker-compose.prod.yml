@@ -1,6 +1,6 @@
 services:
   web:
-    image: ghcr.io/Jinecastle03/triptailor:latest
+    image: ghcr.io/jinecastle03/triptailor:latest
     pull_policy: always
     container_name: triptailor_web
     env_file:
