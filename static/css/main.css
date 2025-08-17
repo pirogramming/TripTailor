@@ -147,17 +147,81 @@ form[method="get"] > div strong::after {
   border-right-color: #f1f1f1;
 }
 
-form[method="get"] > div input[type="text"] {
-  align-self: flex-end;
+/* 보충 질문 입력창 (말풍선처럼 동작) */
+/* 컨테이너: 오른쪽 정렬 */
+.additional_ques{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-left: 1px solid #eef2f7;
+  padding-left: 20px;
+  align-items: flex-end;         /* 👉 내부 아이템을 오른쪽으로 */
+}
+
+/* 타이틀 말풍선(좌측) */
+.additional_ques > strong{
+  align-self: flex-start;
+  display: inline-block;
+  max-width: min(80%, 72ch);
+  background: #f1f1f1;
+  color: #333;
+  padding: 10px 14px;
+  border-radius: 14px;
+  line-height: 1.45;
+  position: relative;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.additional_ques > strong::after{
+  content:"";
+  position:absolute; left:-6px; bottom:6px;
+  border:8px solid transparent; border-right-color:#f1f1f1;
+}
+
+/* ✅ 오른쪽 입력 말풍선 */
+.followup-bubble{
+  align-self: flex-end;          /* 오른쪽으로 붙이기 */
+  display: inline-block;
+  width: auto;                   /* 가로 유동 */
+  min-width: 120px;              /* 시작은 한 줄짜리 작은 풍선 */
+  max-width: 80%;                /* 가로 최대폭 */
+  min-height: 40px;              /* 한 줄 높이 */
+  max-height: 220px;             /* 세로 최대(넘으면 스크롤) */
+
+  padding: 10px 14px;
   background: var(--background);
   border: 1px solid var(--border-color);
   border-radius: 14px;
-  padding: 10px 14px;
+  line-height: 1.5;
   font-size: 15px;
-  max-width: 100%;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
+  box-shadow: 0 1px 2px rgba(0,0,0,.05);
+
+  resize: none;                  /* 드래그 금지 */
+  overflow: hidden;              /* 자동확장용 */
+  white-space: pre-wrap;         /* 줄바꿈 유지 */
+  overflow-wrap: anywhere;       /* 긴 단어 분해 */
+  transition: width .05s ease, height .05s ease;
+  position: relative;
 }
 
+/* 꼬리 */
+.followup-bubble::after{
+  content:"";
+  position:absolute; right:-6px; bottom:6px;
+  border:8px solid transparent; border-left-color: var(--background);
+}
+
+/* 포커스 */
+.followup-bubble:focus,
+.followup-bubble:focus-visible{
+  outline: none;
+  border-color: var(--border-color);
+}
+
+/* 모바일에서 가로 상한 완화 */
+@media (max-width: 600px){
+  .followup-bubble{ max-width: 92%; }
+}
 form[method="get"] > div button[type="submit"] {
   align-self: flex-end;
   background: var(--primary_send);
@@ -309,12 +373,12 @@ form[method="get"] > div button[type="submit"]:hover {
   border: 1px solid #e5e7eb;
   border-radius: 14px;
   box-shadow: var(--shadow);
-  transition: transform .12s ease, box-shadow .12s ease;
-  z-index: 999;
+  transition: box-shadow .12s ease;   /* transform 제거 */
+  position: relative;                 /* 팝업 기준점 */
+  z-index: auto;                      /* 기본값 */
 }
 
 .place-item:hover {
-  transform: translateY(-2px);
   box-shadow: 0 12px 28px rgba(0,0,0,.10);
 }
 
@@ -324,8 +388,11 @@ form[method="get"] > div button[type="submit"]:hover {
   width: 100%;
   background: linear-gradient(135deg,#f8fafc,#eef2f7);
   flex-shrink: 0;
-  width: 100%;
   border-radius: 14px 14px 0 0;
+  position: relative;
+  z-index: 1;            /* 지도는 항상 밑에 */
+  overflow: hidden;      /* 라운드 내로 잘리게 */
+  min-height: 220px;     /* 높이 0 방지 */
 }
 
 /* Header */
@@ -363,7 +430,6 @@ form[method="get"] > div button[type="submit"]:hover {
   background: #fff;
   font-size: 13px;
 }
-
 .place-item__link:hover { background: var(--chip-active-bg); }
 
 /* 50% 버튼 분할 */
@@ -382,7 +448,6 @@ form[method="get"] > div button[type="submit"]:hover {
   background: #fff;
   border: 1px solid #e5e7eb;
 }
-
 .like-button { border-color: #f43f5e; color: #e11d48; }
 .like-button:hover { background: #fff0f3; }
 .add-to-route-btn { border-color: var(--border-color); }
@@ -398,7 +463,6 @@ form[method="get"] > div button[type="submit"]:hover {
   border-top: 1px solid #eef2f7;
   margin: 0;
 }
-
 .tag {
   display: inline-block;
   font-size: 12px;
@@ -417,7 +481,7 @@ form[method="get"] > div button[type="submit"]:hover {
   position: absolute;
   top: calc(100% + 10px);
   right: 14px;
-  z-index: 30;
+  z-index: 10001;  /* 지도보다 항상 위 */
   display: none;
   width: min(360px, 86vw);
   padding: 14px;
@@ -427,12 +491,13 @@ form[method="get"] > div button[type="submit"]:hover {
   box-shadow: 0 18px 40px rgba(0,0,0,.14);
   animation: rd-pop .12s ease-out;
 }
-
 @keyframes rd-pop {
   from { transform: translateY(-4px); opacity: 0; }
   to   { transform: translateY(0);    opacity: 1; }
 }
 
+/* 팝업 열릴 때 카드 자체를 위로 */
+.place-item.show-dropdown { z-index: 10000; }
 .place-item.show-dropdown .route-dropdown { display: block; }
 
 /* 꼬리 */
@@ -445,7 +510,6 @@ form[method="get"] > div button[type="submit"]:hover {
   border-style: solid;
   border-color: transparent transparent #e5e7eb transparent;
 }
-
 .route-dropdown::after {
   content: "";
   position: absolute;
@@ -471,18 +535,14 @@ form[method="get"] > div button[type="submit"]:hover {
   flex-flow: row;
   gap: 10px;
 }
-
-.route-list div button{
+.route-list div button {
   border: 1px solid var(--border-color);
   background-color: #fff;
   height: 20px;
   border-radius: 10px;
   transition: 0.3s;
 }
-
-.route-list div button:hover {
-  background-color: var(--chip-active-bg);
-}
+.route-list div button:hover { background-color: var(--chip-active-bg); }
 
 .route-dropdown hr {
   border: 0;
@@ -491,10 +551,7 @@ form[method="get"] > div button[type="submit"]:hover {
   margin: 12px 0;
 }
 
-.create-route-form {
-  z-index: 99999;
-}
-
+.create-route-form { z-index: 99999; }
 .route-dropdown .create-route-form input {
   width: 100%;
   padding: 11px 12px;
@@ -503,7 +560,6 @@ form[method="get"] > div button[type="submit"]:hover {
   border-radius: 10px;
   font-size: 14px;
 }
-
 .route-dropdown .create-route-form label {
   display: flex;
   align-items: center;
@@ -512,7 +568,6 @@ form[method="get"] > div button[type="submit"]:hover {
   color: #475569;
   margin-bottom: 8px;
 }
-
 .create-route-btn {
   width: 100%;
   height: 38px;
@@ -522,7 +577,6 @@ form[method="get"] > div button[type="submit"]:hover {
   color: #fff;
   font-size: 14px;
 }
-
 .create-route-btn:hover {
   background: var(--primary-hover);
   border-color: var(--primary-hover);
