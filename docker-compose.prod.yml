@@ -1,18 +1,17 @@
-version: "3.8"
-
 services:
   web:
     image: ghcr.io/Jinecastle03/triptailor:latest
     pull_policy: always
     container_name: triptailor_web
     env_file:
-      - .env # 서버에만 존재
+      - .env # 서버 /srv/triptailor/.env
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     restart: always
     volumes:
       - static_volume:/app/staticfiles
-      # (선택) FAISS/메타 파일을 호스트에 두고 읽고 싶다면:
+      # (선택) 벡터/메타 파일을 호스트에 두고 읽고 싶다면:
       # - /srv/triptailor/data:/app/data:ro
     networks: [ webnet ]
 
@@ -26,12 +25,18 @@ services:
       POSTGRES_PASSWORD: triptailor_pass
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
     networks: [ webnet ]
 
   nginx:
     image: nginx:1.25
     container_name: triptailor_nginx
-    depends_on: [ web ]
+    depends_on:
+      - web
     ports:
       - "80:80"
       # - "443:443"   # SSL 쓰면 열기
