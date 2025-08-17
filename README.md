@@ -35,10 +35,12 @@ AI와 데이터 기반으로 여행을 **쉽고 즐겁게 계획**할 수 있는
 
 ## 👥 Contributors
 
+
 | 진혜성<br/>[@Jinecastle03](https://github.com/Jinecastle03) | 김동하<br/>[@eastha10](https://github.com/eastha10) | 박주은<br/>[@jueun036](https://github.com/jueun036) | 양보윤<br/>[@yxngbxyxn1003](https://github.com/yxngbxyxn1003) | 허지원<br/>[@jwheo22](https://github.com/jwheo22) |
 | --- | --- | --- | --- | --- |
-| <img src="https://i.ibb.co/5xg0mG2D/image.jpg" style="width:180px;height:180px;object-fit:contain;display:block;background:#f9f9f9;border:1px solid #ddd;"> | <img src="https://i.ibb.co/PbxhzYf/image.jpg" style="width:180px;height:180px;object-fit:contain;display:block;background:#f9f9f9;border:1px solid #ddd;"> | <img src="https://i.ibb.co/GyNnrdY/image.jpg" style="width:180px;height:180px;object-fit:contain;display:block;background:#f9f9f9;border:1px solid #ddd;"> | <img src="https://i.ibb.co/CstFyMHB/201116314.jpg" style="width:180px;height:180px;object-fit:contain;display:block;background:#f9f9f9;border:1px solid #ddd;"> | <img src="https://i.ibb.co/NdVVKwK1/image.jpg" style="width:180px;height:180px;object-fit:contain;display:block;background:#f9f9f9;border:1px solid #ddd;"> |
-| PM , BE , AI | FE , AI | BE , AI | BE , AI | FE , AI |
+| <img src="https://i.ibb.co/pBBw3jw9/jpg.jpg" alt="진혜성"> | <img src="https://i.ibb.co/wZSLj0Bp/image.jpg" alt="김동하"> | <img src="https://i.ibb.co/HLB3XRgS/image.jpg" alt="박주은"> | <img src="https://i.ibb.co/PZ1QFqrS/image.jpg" alt="양보윤"> | <img src="https://i.ibb.co/PvqY3sQq/image.jpg" alt="허지원"> |
+| PM , BE , AI , Infra | FE , AI | BE , AI | BE , AI | FE , AI |
+
 
 
 ---
@@ -107,4 +109,5 @@ TripTailor/
 └─ triptailor_full_metadata.csv
 
   ```
+
 
