@@ -1,0 +1,223 @@
+:root {
+  --border-color: #62B3B8;
+  --primary_send: #95f9fe;
+  --primary_send-hover: #63f1f9;
+  --primary: #62B3B8;
+  --primary-hover: #4e9fa4;
+  --background: #EFFEFF;
+  --white: #fff;
+  --text: #111;
+  --muted: #6b7280;
+  --chip-bg: #f3f4f6;
+  --chip-active-bg: #e0f7f8;
+  --shadow: 0 8px 20px rgba(0,0,0,.06);
+  --rhythm: 8px;
+  --lh: 1.5;
+}
+
+/* ============= Base ============= */
+.place-review-form {
+  max-width: 900px;
+  margin: 48px auto 80px;
+  padding: 24px;
+  background: var(--white);
+  border: 1px solid rgba(98,179,184,.25);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  color: var(--text);
+  line-height: var(--lh);
+}
+.place-review-form h1{
+  margin: 0 0 6px;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: .2px;
+  color: var(--text);
+}
+.place-review-form .place-info p{
+  margin: 2px 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+.place-review-form .place-info strong{ color: var(--text); }
+
+/* ============= Form controls ============= */
+.form-group{
+  margin: 18px 0;
+}
+.form-group label{
+  display: inline-block;
+  margin-bottom: 8px;
+  font-weight: 700;
+  color: var(--text);
+}
+.form-control{
+  width: 95%;
+  padding: 12px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+  font-size: 14px;
+  color: var(--text);
+  transition: box-shadow .15s ease, border-color .15s ease, background-color .15s ease;
+}
+.form-control::placeholder{ color:#94a3b8; }
+.form-control:focus{
+  outline: none;
+  border-color: var(--border-color);
+  box-shadow: 0 0 0 3px rgba(98,179,184,.18);
+  background: #fff;
+}
+
+/* Select(평점) */
+select.form-control{
+  appearance: none;
+  background:
+    linear-gradient(180deg, #fff, #fff) padding-box,
+    linear-gradient(180deg, #e5e7eb, #e5e7eb) border-box;
+  background-image:
+    linear-gradient(180deg, #fff, #fff),
+    linear-gradient(180deg, #e5e7eb, #e5e7eb),
+    url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 24 24' fill='%236b7280' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 10l5 5 5-5H7z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  background-position: 0 0, 0 0, right 12px center;
+  background-size: auto, auto, 20px 20px;
+  padding-right: 42px;
+}
+
+/* Textarea 높이 */
+#id_content{
+  min-height: 140px;
+  resize: vertical;
+}
+
+/* 도움말 텍스트 */
+.form-text{
+  display: inline-block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* ============= 업로드/미리보기 ============= */
+#id_photos.form-control{
+  padding: 10px 12px;
+  background: #fff;
+}
+#photo-previews{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+#photo-previews .preview-item,
+#photo-previews .border{
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 8px;
+  width: 120px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+#photo-previews img{
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* 기존 이미지 블록(수정 화면) */
+.d-flex.flex-wrap.gap-2.mt-2{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+label.border.rounded.p-2.d-inline-flex.flex-column.align-items-center{
+  border: 1px solid #e5e7eb !important;
+  border-radius: 12px !important;
+  background: #fff !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+  transition: border-color .15s ease, box-shadow .15s ease, transform .1s ease;
+}
+label.border.rounded.p-2.d-inline-flex.flex-column.align-items-center:hover{
+  border-color: var(--border-color) !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,.08);
+  transform: translateY(-1px);
+}
+label.border.rounded.p-2.d-inline-flex.flex-column.align-items-center img{
+  border-radius: 8px;
+}
+
+/* 삭제 체크박스 + 캡션 */
+label.border.rounded.p-2.d-inline-flex.flex-column.align-items-center input[type="checkbox"]{
+  margin-top: 8px;
+  accent-color: var(--primary);
+}
+label.border.rounded.p-2.d-inline-flex.flex-column.align-items-center .small{
+  color: var(--muted) !important;
+}
+
+/* ============= 버튼 ============= */
+.btn{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: #fff;
+  color: var(--text);
+  font-weight: 600;
+  transition: background-color .15s ease, border-color .15s ease, color .15s ease, box-shadow .15s ease, transform .05s ease;
+  text-decoration: none;
+}
+.btn:hover{
+  background: var(--chip-active-bg);
+  box-shadow: 0 4px 12px rgba(0,0,0,.06);
+}
+.btn:active{ transform: translateY(1px); }
+
+/* Primary / Secondary */
+.btn-primary{
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+.btn-primary:hover{
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+.btn-secondary{
+  background: #fff;
+  color: var(--text);
+}
+
+/* 상단/하단 액션 정렬 */
+.d-flex.justify-content-between{
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* ============= 유틸 ============= */
+.mb-3{ margin-bottom: 18px; }
+.mt-2{ margin-top: 8px; }
+.mt-3{ margin-top: 12px; }
+.gap-2{ gap: 8px; }
+
+/* ============= 반응형 ============= */
+@media (max-width: 720px){
+  .place-review-form{ padding: 18px; border-radius: 14px; }
+  .d-flex.justify-content-between{ flex-direction: column-reverse; }
+  .btn{ width: 100%; height: 44px; }
+}
+
+/* ============= 포커스 접근성 ============= */
+.form-control:focus,
+.btn:focus-visible,
+label.border.rounded.p-2.d-inline-flex.flex-column.align-items-center:focus-within{
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(98,179,184,.18);
+  border-color: var(--border-color);
+}

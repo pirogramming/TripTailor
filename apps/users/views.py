@@ -7,6 +7,13 @@ from django.db.models import prefetch_related_objects
 from apps.routes.models import Route, RoutePlace
 from apps.reviews.models import Review
 
+from django.contrib.auth.views import PasswordResetView
+from django.contrib import messages
+from django.urls import reverse
+from .forms import CustomPasswordResetForm
+from django.contrib.auth import get_user_model
+
+
 def login_page(request):
     return render(request, 'users/login.html')
 
@@ -115,3 +122,7 @@ def my_reviews(request):
         "page_obj": page_obj,
         "total": reviews_qs.count(),
     })
+
+class CustomPasswordResetView(PasswordResetView):
+    form_class = CustomPasswordResetForm
+    template_name = 'account/password_reset.html'
