@@ -39,7 +39,7 @@ def my_page(request):
         .prefetch_related("place__tags")
         .order_by("-created_at")
     )
-    likes_paginator = Paginator(likes_qs, 5)
+    likes_paginator = Paginator(likes_qs, 6)
     likes_page = likes_paginator.get_page(request.GET.get("page_likes", 1))
     total_likes = likes_qs.count()
 
@@ -54,7 +54,7 @@ def my_page(request):
         .annotate(num_stops=Count("stops"))
         .order_by("-created_at")
     )
-    routes_paginator = Paginator(routes_qs, 5)
+    routes_paginator = Paginator(routes_qs, 6)
     routes_page = routes_paginator.get_page(request.GET.get("page_routes", 1))
     total_routes = routes_qs.count()
 
@@ -66,7 +66,7 @@ def my_page(request):
         .prefetch_related("photos")
         .order_by("-created_at")
     )
-    reviews_paginator = Paginator(reviews_qs, 5)
+    reviews_paginator = Paginator(reviews_qs, 6)
     reviews_page = reviews_paginator.get_page(request.GET.get("page_reviews", 1))
     total_reviews = reviews_qs.count()
 
