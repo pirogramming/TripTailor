@@ -16,7 +16,7 @@ services:
     networks: [ webnet ]
 
   db:
-    image: ankane/pgvector:pg16
+    image: pgvector/pgvector:pg15
     container_name: triptailor_db
     restart: always
     environment:
