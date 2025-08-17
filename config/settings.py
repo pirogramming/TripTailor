@@ -18,7 +18,8 @@ from dotenv import load_dotenv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-load_dotenv(BASE_DIR / '.env')
+if os.getenv("DJANGO_LOAD_DOTENV", "false").lower() in ("1", "true", "yes"):
+    load_dotenv(BASE_DIR / ".env")
 
 GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
 NAVER_CLIENT_ID = os.getenv("NAVER_CLIENT_ID")
@@ -30,10 +31,11 @@ NAVER_CLIENT_SECRET = os.getenv("NAVER_CLIENT_SECRET")
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-%#h%v23qd$@m_v2)hf3!xj$^eaz+*t$mwzps)2n*fo8ev)05^$'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+SECRET_KEY = os.getenv("SECRET_KEY", "dev-only-insecure-key")
+DEBUG = os.getenv("DEBUG", "False").lower() in ("1", "true", "yes")
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",") if os.getenv("ALLOWED_HOSTS") else []
 
-ALLOWED_HOSTS = []
+# SECURITY WARNING: don't run with debug turned on in production!
 
 AUTH_USER_MODEL = 'users.User'
 
@@ -105,14 +107,29 @@ TEMPLATES[0]["OPTIONS"]["context_processors"] += [
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-load_dotenv(BASE_DIR/'.env')
+db_engine = os.getenv("DB_ENGINE", "sqlite3").lower()
 
-DATABASES = {
-    'default': {
-        'ENGINE': os.getenv('DB_ENGINE'),
-        'NAME': BASE_DIR / os.getenv('DB_NAME'),
+if db_engine in ("postgresql", "postgres", "psql", "postgresql_psycopg2"):
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv("DB_NAME", "triptailor"),
+            "USER": os.getenv("DB_USER", "triptailor_user"),
+            "PASSWORD": os.getenv("DB_PASSWORD", "triptailor_pass"),
+            "HOST": os.getenv("DB_HOST", "db"),
+            "PORT": os.getenv("DB_PORT", "5432"),
+            "CONN_MAX_AGE": int(os.getenv("DB_CONN_MAX_AGE", "60")),
+        }
     }
-}
+else:
+    # SQLite 폴백: DB_NAME이 비어있어도 안전하게 동작
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / os.getenv("DB_NAME", "db.sqlite3"),
+        }
+    }
+
 
 # DATABASES = {
 #     'default': {
@@ -182,7 +199,6 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 #로그인 관련 셋팅
-SITE_ID = 1
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 SOCIALACCOUNT_AUTO_SIGNUP = True
