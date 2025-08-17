@@ -2,7 +2,7 @@ name: CI/CD
 
 on:
   push:
-    branches: [ "main" ]          # 배포 기준 브랜치
+    branches: [ "feature/jhs" ]          # 배포 기준 브랜치
   workflow_dispatch:
 
 jobs:
