@@ -15,13 +15,19 @@
     box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
+.review-header {
+    display: flex;
+    justify-content: space-between;
+}
+
 .review-title {
     font-size: 1.2rem;
     margin-bottom: 8px;
 }
 
 .review-title a {
-    color: #2a7ae2;
+    color: #62B3B8;
+    font-weight: 500;
     text-decoration: none;
 }
 

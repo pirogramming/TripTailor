@@ -1,10 +1,18 @@
 <div id="review-list">
     {% for review in reviews_page %}
     <div class="review-item">
-        <h3 class="review-title">
-            <a href="{% url 'places:place_detail' review.place.pk %}">{{ review.place.name }}</a>
-        </h3>
-        <p class="review-rating">별점: {{ review.rating }} / 5.0</p>
+        <div class="review-header">
+            <h3 class="review-title">
+                <a href="{% url 'places:place_detail' review.place.pk %}">{{ review.place.name }}</a>
+            </h3>
+            <div class="review-top">
+                <p class="review-rating">
+
+                </p>
+            </div>            
+        </div>
+
+        
         <p class="review-content">{{ review.content }}</p>
         <p class="review-date">{{ review.created_at|date:"Y-m-d H:i" }}</p>
     
