@@ -26,7 +26,7 @@ Triptailor 는 (설명 작성)
 | 진혜성<br/>[@Jinecastle03](https://github.com/Jinecastle03) | 김동하<br/>[@eastha10](https://github.com/eastha10) | 박주은<br/>[@jueun036](https://github.com/jueun036) | 양보윤<br/>[@yxngbxyxn1003](https://github.com/yxngbxyxn1003) | 허지원<br/>[@jwheo22](https://github.com/jwheo22) |
 | --- | --- | --- | --- | --- |
 | <img src="https://i.ibb.co/5xg0mG2D/image.jpg" width="200" height="200" style="object-fit:cover;display:block;"> | <img src="https://i.ibb.co/PbxhzYf/image.jpg" width="200" height="200" style="object-fit:cover;display:block;"> | <img src="https://i.ibb.co/GyNnrdY/image.jpg" width="200" height="200" style="object-fit:cover;display:block;"> | <img src="https://i.ibb.co/CstFyMHB/201116314.jpg" width="200" height="200" style="object-fit:cover;display:block;"> | <img src="https://i.ibb.co/DP3TwZpH/image.jpg" width="200" height="200" style="object-fit:cover;display:block;"> |
-| PM , BE , AI , 배포 | FE , AI | BE , AI | BE , AI | FE , AI |
+| PM , BE , AI | FE , AI | BE , AI | BE , AI | FE , AI |
 
 
 
