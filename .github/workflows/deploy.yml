@@ -1,0 +1,53 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ "main" ]          # 배포 기준 브랜치
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GHCR_USERNAME }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Set image tag
+        id: vars
+        run: echo "TAG=ghcr.io/${GITHUB_REPOSITORY,,}:$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_OUTPUT
+
+      - name: Build image
+        run: docker build -t ${{ steps.vars.outputs.TAG }} -t ghcr.io/${GITHUB_REPOSITORY,,}:latest .
+
+      - name: Push image
+        run: |
+          docker push ${{ steps.vars.outputs.TAG }}
+          docker push ghcr.io/${GITHUB_REPOSITORY,,}:latest
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            set -e
+            cd /srv/triptailor
+            docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} -p ${{ secrets.GHCR_TOKEN }}
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d
+            docker image prune -f
