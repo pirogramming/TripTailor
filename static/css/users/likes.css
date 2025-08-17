@@ -1,3 +1,10 @@
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+
+
 .place-list{
   max-width:1100px;
   margin:0 auto;
@@ -18,10 +25,14 @@
   border:1px solid #e5e7eb;
   border-radius:14px;
   box-shadow:var(--shadow);
-  transition: transform .12s ease, box-shadow .12s ease;
+  transition: box-shadow .12s ease;
+  position:relative;
+  z-index: auto;
   width: 20vw;
 }
-.place-item:hover{ transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0,0,0,.10); }
+.place-item:hover{ 
+  box-shadow: 0 12px 28px rgba(0,0,0,.10); 
+}
 
 /* Media: square */
 .place-item__map{
@@ -29,6 +40,11 @@
   width:100%;
   background: linear-gradient(135deg,#f8fafc,#eef2f7);
   flex-shrink:0;
+  border-radius: 14px 14px 0 0;
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  min-height: 220px;
 }
 
 /* Header(정보 + 버튼) */
@@ -51,8 +67,11 @@
   height:36px;
   border:1px solid var(--border-color);
   border-radius:10px;
-  display:flex; align-items:center; justify-content:center;
-  background:#fff; font-size:13px;
+  display:flex; 
+  align-items:center; 
+  justify-content:center;
+  background:#fff; 
+  font-size:13px;
 }
 .place-item__link:hover{ background: var(--chip-active-bg); }
 
@@ -64,9 +83,13 @@
 .add-to-route-btn{
   width:100%;
   height:40px;
-  display:flex; align-items:center; justify-content:center;
-  border-radius:10px; font-size:14px;
-  background:#fff; border:1px solid #e5e7eb;
+  display:flex; 
+  align-items:center; 
+  justify-content:center;
+  border-radius:10px; 
+  font-size:14px;
+  background:#fff; 
+  border:1px solid #e5e7eb;
 }
 .like-button{ border-color:#f43f5e; color:#e11d48; }
 .like-button:hover{ background:#fff0f3; }
@@ -98,7 +121,7 @@
   position:absolute;
   top: calc(100% + 10px); /* 헤더 하단 기준 */
   right: 14px;
-  z-index: 30;
+  z-index: 10001;
   display:none;                 /* 기본 닫힘 */
   width: min(360px, 86vw);
   padding:14px;
@@ -112,19 +135,27 @@
   from { transform: translateY(-4px); opacity:.0; }
   to   { transform: translateY(0);    opacity:1; }
 }
+
+.place-item.show-dropdown {z-index: 10000; }
 .place-item.show-dropdown .route-dropdown{ display:block; }
 
 /* 꼬리 */
 .route-dropdown::before{
   content:"";
-  position:absolute; top:-10px; right:18px;
-  border-width:0 10px 10px 10px; border-style:solid;
+  position:absolute; 
+  top:-10px; 
+  right:18px;
+  border-width:0 10px 10px 10px; 
+  border-style:solid;
   border-color: transparent transparent #e5e7eb transparent;
 }
 .route-dropdown::after{
   content:"";
-  position:absolute; top:-9px; right:18px;
-  border-width:0 10px 10px 10px; border-style:solid;
+  position:absolute; 
+  top:-9px; 
+  right:18px;
+  border-width:0 10px 10px 10px; 
+  border-style:solid;
   border-color: transparent transparent #fff transparent;
 }
 
@@ -139,10 +170,29 @@
   color:#374151;
   background:#fafafa;
   margin-bottom:12px;
+  display: flex;
+  flex-flow: row;
+  gap: 10px;
 }
+
+.route-list div button {
+  border: 1px solid var(--border-color);
+  background-color: #fff;
+  height: 20px;
+  border-radius: 10px;
+  transition: 0.3s;
+}
+.route-list div button:hover { background-color: var(--chip-active-bg); }
+
 .route-dropdown hr{
-  border:0; height:1px; background:#f1f5f9; margin:12px 0;
+  border:0; 
+  height:1px; 
+  background:#f1f5f9; 
+  margin:12px 0;
 }
+
+.create-route-form { z-index: 99999; }
+
 .route-dropdown .create-route-form input{
   width:100%;
   padding:11px 12px;
@@ -152,8 +202,12 @@
   font-size:14px;
 }
 .route-dropdown .create-route-form label{
-  display:flex; align-items:center; gap:6px;
-  font-size:13px; color:#475569; margin-bottom:8px;
+  display:flex; 
+  align-items:center; 
+  gap:6px;
+  font-size:13px; 
+  color:#475569; 
+  margin-bottom:8px;
 }
 .create-route-btn{
   width:100%;
@@ -161,6 +215,24 @@
   border:1px solid var(--border-color);
   border-radius:10px;
   background: var(--primary);
-  color:#fff; font-size:14px;
+  color:#fff; 
+  font-size:14px;
+  z-index: 20000;
+  position: relative;
+  
 }
-.create-route-btn:hover{ background: var(--primary-hover); border-color: var(--primary-hover); }
+.create-route-btn:hover{ 
+  background: var(--primary-hover); 
+  border-color: var(--primary-hover); 
+}
+
+
+.route-dropdown,
+.route-dropdown .create-route-form,
+.route-dropdown .create-route-form input,
+.route-dropdown .create-route-form textarea,
+.route-dropdown .create-route-btn {
+  min-width: 0;
+  box-sizing: border-box;  /* 중복이지만 안전하게 한번 더 */
+  width: 100%;
+}
