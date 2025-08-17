@@ -6,9 +6,14 @@
                 <a href="{% url 'places:place_detail' review.place.pk %}">{{ review.place.name }}</a>
             </h3>
             <div class="review-top">
-                <p class="review-rating">
-
-                </p>
+                <p class="review-rating">{{review.rating}}</p>
+                <div class="review-actions">
+                    <a href="{% url 'reviews:place_edit' review.place.pk review.pk %}?from_mypage=1">수정</a>
+                    <form method="post" action="{% url 'reviews:delete_review' review.place.pk review.pk %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" onclick="return confirm('정말 삭제하시겠습니까?')">삭제</button>
+                    </form>
+                </div>                
             </div>            
         </div>
 
@@ -17,13 +22,7 @@
         <p class="review-date">{{ review.created_at|date:"Y-m-d H:i" }}</p>
         
         <!-- 수정/삭제 버튼 -->
-        <div class="review-actions">
-            <a href="{% url 'reviews:place_edit' review.place.pk review.pk %}?from_mypage=1">수정</a>
-            <form method="post" action="{% url 'reviews:delete_review' review.place.pk review.pk %}" style="display: inline;">
-                {% csrf_token %}
-                <button type="submit" onclick="return confirm('정말 삭제하시겠습니까?')">삭제</button>
-            </form>
-        </div>
+
     
         <div class="review-photos">
             {% for photo in review.photos.all %}
@@ -39,18 +38,47 @@
 {% endfor %}
 </div>
 
-
-
+{% if reviews_page.paginator.num_pages > 1 %}
 <div class="pagination">
-{% if reviews_page.has_previous %}
-    <a href="?page_reviews=1&page_likes={{ likes_page.number }}&page_routes={{ routes_page.number }}">처음</a>
-    <a href="?page_reviews={{ reviews_page.previous_page_number }}&page_likes={{ likes_page.number }}&page_routes={{ routes_page.number }}">이전</a>
-{% endif %}
 
-<span>{{ reviews_page.number }} / {{ reviews_page.paginator.num_pages }}</span>
+  {# 이전 버튼 #}
+  {% if reviews_page.has_previous %}
+    <a href="?tab=reviews&page_reviews={{ reviews_page.previous_page_number }}&page_likes={{ likes_page.number }}&page_routes={{ routes_page.number }}">이전</a>
+  {% endif %}
 
-{% if reviews_page.has_next %}
-    <a href="?page_reviews={{ reviews_page.next_page_number }}&page_likes={{ likes_page.number }}&page_routes={{ routes_page.number }}">다음</a>
-    <a href="?page_reviews={{ reviews_page.paginator.num_pages }}&page_likes={{ likes_page.number }}&page_routes={{ routes_page.number }}">마지막</a>
-{% endif %}
+  {# 첫 페이지 + ... #}
+  {% if reviews_page.number > 3 %}
+    <a href="?tab=reviews&page_reviews=1&page_likes={{ likes_page.number }}&page_routes={{ routes_page.number }}">1</a>
+    {% if reviews_page.number > 4 %}
+      <span>…</span>
+    {% endif %}
+  {% endif %}
+
+  {# 현재 페이지 주변 (±2) #}
+  {% for num in reviews_page.paginator.page_range %}
+    {% if num >= reviews_page.number|add:"-2" and num <= reviews_page.number|add:"2" %}
+      {% if num == reviews_page.number %}
+        <span class="current">{{ num }}</span>
+      {% else %}
+        <a href="?tab=reviews&page_reviews={{ num }}&page_likes={{ likes_page.number }}&page_routes={{ routes_page.number }}">{{ num }}</a>
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+
+  {# ... + 마지막 페이지 #}
+  {% if reviews_page.number < reviews_page.paginator.num_pages|add:"-2" %}
+    {% if reviews_page.number < reviews_page.paginator.num_pages|add:"-3" %}
+      <span>…</span>
+    {% endif %}
+    <a href="?tab=reviews&page_reviews={{ reviews_page.paginator.num_pages }}&page_likes={{ likes_page.number }}&page_routes={{ routes_page.number }}">
+      {{ reviews_page.paginator.num_pages }}
+    </a>
+  {% endif %}
+
+  {# 다음 버튼 #}
+  {% if reviews_page.has_next %}
+    <a href="?tab=reviews&page_reviews={{ reviews_page.next_page_number }}&page_likes={{ likes_page.number }}&page_routes={{ routes_page.number }}">다음</a>
+  {% endif %}
+
 </div>
+{% endif %}

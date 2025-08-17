@@ -20,6 +20,10 @@
     justify-content: space-between;
 }
 
+.review-top {
+    display: flex;
+}
+
 .review-title {
     font-size: 1.2rem;
     margin-bottom: 8px;
@@ -38,7 +42,6 @@
 .review-rating {
     font-weight: bold;
     color: #ff9800;
-    margin-bottom: 6px;
 }
 
 .review-content {
@@ -79,3 +82,32 @@
 .review-place-link:hover {
     background-color: #1a5cb0;
 }
+
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin: 28px 0;
+}
+
+.pagination a,
+.pagination span {
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 14px;
+}
+
+.pagination .current {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+  .btn{display:inline-block;padding:8px 12px;margin-right:8px;border:1px solid var(--border-color);border-radius:8px;background:#fff}
+  .btn.active{background:var(--border-color);color:#fff;border-color:var(--border-color)}
+  .pagination{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:24px 0}
+  .pagination a,.pagination span{padding:6px 10px;border:1px solid var(--border-color);border-radius:6px;background:#fff}
+  .pagination .current{background:var(--border-color);color:#fff}
