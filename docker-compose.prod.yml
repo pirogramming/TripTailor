@@ -16,7 +16,7 @@ services:
     networks: [ webnet ]
 
   db:
-    image: ankane/pgvector:pg15 # ✅ pgvector 포함된 Postgres 15
+    image: ankane/pgvector:pg15.3 # ✅ pgvector 포함된 Postgres 15
     container_name: triptailor_db
     restart: always
     environment:
