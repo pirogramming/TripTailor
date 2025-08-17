@@ -59,6 +59,8 @@ jobs:
             cd /srv/triptailor
             echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
             docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d db
+            docker compose -f docker-compose.prod.yml exec db psql -U triptailor_user -d triptailor -c "CREATE EXTENSION IF NOT EXISTS vector;"
             docker compose -f docker-compose.prod.yml up -d
             docker compose -f docker-compose.prod.yml exec web python manage.py migrate --noinput
             docker compose -f docker-compose.prod.yml exec web python manage.py collectstatic --noinput
