@@ -2,7 +2,7 @@ name: CI/CD
 
 on:
   push:
-    branches: [ "feature/jhs" ]   # 운영은 main으로 전환 권장
+    branches: [ "main" ]   # 운영은 main으로 전환 권장
   workflow_dispatch:
 
 concurrency:

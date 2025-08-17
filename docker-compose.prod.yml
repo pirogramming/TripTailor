@@ -11,8 +11,7 @@ services:
     restart: always
     volumes:
       - static_volume:/app/staticfiles
-      # (선택) 벡터/메타 파일을 호스트에 두고 읽고 싶다면:
-      # - /srv/triptailor/data:/app/data:ro
+      - /srv/triptailor/data:/app/data:ro
     networks: [ webnet ]
 
   db:
