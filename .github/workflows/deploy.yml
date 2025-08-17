@@ -2,8 +2,12 @@ name: CI/CD
 
 on:
   push:
-    branches: [ "feature/jhs" ]          # 배포 기준 브랜치
+    branches: [ "feature/jhs" ]   # 배포 기준 브랜치 (운영은 main 권장)
   workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-and-push:
@@ -22,17 +26,24 @@ jobs:
           username: ${{ secrets.GHCR_USERNAME }}
           password: ${{ secrets.GHCR_TOKEN }}
 
-      - name: Set image tag
+      - name: Set image tags (personal namespace)
         id: vars
-        run: echo "TAG=ghcr.io/${GITHUB_REPOSITORY,,}:$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_OUTPUT
+        run: |
+          echo "NS=ghcr.io/Jinecastle03/triptailor" >> $GITHUB_OUTPUT
+          echo "SHA_TAG=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_OUTPUT
+          echo "FULL_TAG=${{ steps.vars.outputs.NS }}:${{ steps.vars.outputs.SHA_TAG }}" >> $GITHUB_OUTPUT
 
       - name: Build image
-        run: docker build -t ${{ steps.vars.outputs.TAG }} -t ghcr.io/${GITHUB_REPOSITORY,,}:latest .
+        run: |
+          docker build \
+            -t ${{ steps.vars.outputs.FULL_TAG }} \
+            -t ${{ steps.vars.outputs.NS }}:latest \
+            .
 
       - name: Push image
         run: |
-          docker push ${{ steps.vars.outputs.TAG }}
-          docker push ghcr.io/${GITHUB_REPOSITORY,,}:latest
+          docker push ${{ steps.vars.outputs.FULL_TAG }}
+          docker push ${{ steps.vars.outputs.NS }}:latest
 
   deploy:
     needs: build-and-push
@@ -44,10 +55,21 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
+          script_stop: true
           script: |
             set -e
             cd /srv/triptailor
-            docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} -p ${{ secrets.GHCR_TOKEN }}
+
+            # GHCR 로그인 (stdin 사용)
+            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
+
+            # 최신 이미지 가져오고 실행
             docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml up -d
+
+            # 마이그레이션 & 정적파일 수집
+            docker compose -f docker-compose.prod.yml exec web python manage.py migrate --noinput
+            docker compose -f docker-compose.prod.yml exec web python manage.py collectstatic --noinput
+
+            # 안 쓰는 이미지 정리
             docker image prune -f

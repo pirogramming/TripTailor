@@ -2,9 +2,8 @@ version: "3.8"
 
 services:
   web:
-    image: ghcr.io/pirogramming/triptailor:latest
-    # 만약 피로그래밍 레포에 권한이 없을 경우
-    # ghcr.io/Jinecastle03/triptailor:latest
+    image: ghcr.io/Jinecastle03/triptailor:latest
+    pull_policy: always
     container_name: triptailor_web
     env_file:
       - .env # 서버에만 존재
