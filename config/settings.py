@@ -30,8 +30,6 @@ NAVER_CLIENT_SECRET = os.getenv("NAVER_CLIENT_SECRET")
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-%#h%v23qd$@m_v2)hf3!xj$^eaz+*t$mwzps)2n*fo8ev)05^$'
-
 SECRET_KEY = os.getenv("SECRET_KEY", "dev-only-insecure-key")
 DEBUG = os.getenv("DEBUG", "False").lower() in ("1", "true", "yes")
 def _split_env_list(key):
@@ -244,8 +242,6 @@ DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
 EMAIL_TIMEOUT = 10
 
 # allauth 관련 (이메일 기반 로그인일 때 권장)
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_UNIQUE_EMAIL = True
 
 #추가
 SOCIALACCOUNT_PROVIDERS ={
