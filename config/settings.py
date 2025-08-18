@@ -23,7 +23,7 @@ load_dotenv(BASE_DIR / ".env")
 
 GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
 FONT_AWESOME_KEY = os.getenv("FONT_AWESOME_KEY")
-NAVER_CLIENT_ID = os.getenv("NAVER_CLIENT_ID")
+NAVER_CLIENT_ID = os.getenv("NAVER_CLIENT_ID_PW")
 NAVER_CLIENT_SECRET = os.getenv("NAVER_CLIENT_SECRET")
 
 # Quick-start development settings - unsuitable for production
