@@ -47,7 +47,6 @@ AI와 데이터 기반으로 여행을 **쉽고 즐겁게 계획**할 수 있는
 
 ---
 
-## 🛠️ Tech Stack
 
 ## 📌 Stack  
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white) 
@@ -75,8 +74,6 @@ AI와 데이터 기반으로 여행을 **쉽고 즐겁게 계획**할 수 있는
 [![Gunicorn](https://img.shields.io/badge/Gunicorn-499848?logo=gunicorn&logoColor=white&style=for-the-badge)](https://gunicorn.org/)
 [![Nginx](https://img.shields.io/badge/NGINX-009639?logo=nginx&logoColor=white&style=for-the-badge)](https://nginx.org/)
 
-
---
 
 ## ⚙️ Features
 
