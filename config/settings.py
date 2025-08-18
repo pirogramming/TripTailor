@@ -17,9 +17,7 @@ from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-if os.getenv("DJANGO_LOAD_DOTENV", "false").lower() in ("1", "true", "yes"):
-    load_dotenv(BASE_DIR / ".env")
+load_dotenv(BASE_DIR / ".env")
 
 GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
 FONT_AWESOME_KEY = os.getenv("FONT_AWESOME_KEY")
@@ -300,3 +298,4 @@ SOCIALACCOUNT_PROVIDERS ={
 "access_type": "online", #추가
 'prompt': 'select_account',#추가 간편로그인을 지원해줌
 }}}
+
