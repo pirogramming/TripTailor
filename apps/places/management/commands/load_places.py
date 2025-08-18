@@ -25,6 +25,14 @@ def norm(s: str) -> str:
     return re.sub(r"[\s\(\)\[\]\-_/·•~!@#$%^&*=+|:;\"'<>?,.]+", "", s).lower()
 
 
+def to_bool(v) -> bool:
+        if v is None:
+            return False
+        if isinstance(v, (int, float)):
+            return v != 0
+        s = str(v).strip().lower()
+        return s in {"1", "true", "t", "y", "yes", "on"}
+
 class Command(BaseCommand):
     help = "CSV(필수) + (선택) FAISS index에서 Place 및 임베딩을 DB에 적재 (진행률/ETA/막대 표시)."
 
@@ -144,7 +152,8 @@ class Command(BaseCommand):
                     lng = row.get("경도") or row.get("lng")
                     summary = row.get("summary", "")
                     external_id = row.get("external_id", None)
-                    is_unique = str(row.get("is_unique", "0")).strip() in ["1", "True", "true"]
+                    is_unique = to_bool(row.get("is_unique", 0))
+
                     raw_cls = row.get("class", "0")
 
                     # 필수 필드 검증
