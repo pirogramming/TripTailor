@@ -180,11 +180,6 @@
                 const summary = (summaryInput?.value || '').trim();
                 const isPublic = dropdown.querySelector('.new-route-public').checked;
 
-                if (!title) {
-                    alert('제목을 입력하세요');
-                    e.target.dataset.clicked = 'false';
-                    return;
-                }
                 try {
                     const fd = new FormData();
                     fd.append('title', title);
