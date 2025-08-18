@@ -29,6 +29,11 @@ urlpatterns = [
     path('users/', include('apps.users.urls', namespace='users')), # users 앱 URL 추가
     path('login/', auth_views.LoginView.as_view(template_name='users/login.html'), name='login'),
     path("routes/", include(("apps.routes.urls", "routes"), namespace="routes")),
+    path(
+        'password/reset/confirm/<uidb64>/<token>/',
+        auth_views.PasswordResetConfirmView.as_view(),
+        name='password_reset_confirm'
+    ),
 ]
 
 # 개발 환경에서 미디어 파일 서빙
