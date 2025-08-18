@@ -1,0 +1,67 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ "main" ]   # 운영은 main으로 전환 권장
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GHCR_USERNAME }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
+      # 🔧 outputs 없이 셸 변수로 처리 (여기가 핵심)
+      - name: Build image (personal namespace)
+        run: |
+          set -e
+          NS="ghcr.io/jinecastle03/triptailor"
+          SHORT_SHA="$(echo "$GITHUB_SHA" | cut -c1-7)"
+          echo "Building $NS:$SHORT_SHA and $NS:latest"
+          docker build -t "$NS:$SHORT_SHA" -t "$NS:latest" .
+
+      - name: Push image
+        run: |
+          set -e
+          NS="ghcr.io/jinecastle03/triptailor"
+          SHORT_SHA="$(echo "$GITHUB_SHA" | cut -c1-7)"
+          docker push "$NS:$SHORT_SHA"
+          docker push "$NS:latest"
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script_stop: true
+          script: |
+            set -e
+            cd /srv/triptailor
+            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d db
+            docker compose -f docker-compose.prod.yml exec db psql -U triptailor_user -d triptailor -c "CREATE EXTENSION IF NOT EXISTS vector;"
+            docker compose -f docker-compose.prod.yml up -d
+            docker compose -f docker-compose.prod.yml exec web python manage.py migrate --noinput
+            docker compose -f docker-compose.prod.yml exec web python manage.py collectstatic --noinput
+            docker image prune -f

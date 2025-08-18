@@ -1,0 +1,59 @@
+.author {
+    color: #6b7280;
+    font-weight: 600;
+}
+
+.date {
+    color: #6b7280;
+    font-size: 0.7rem;
+}
+
+.review-item {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.review-meta {
+    display: flex;
+    gap: 1vw;
+}
+
+.review-header {
+    display: flex;
+    gap: 2vw;
+}
+
+/* 모달 기본 숨김 */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.9);
+  text-align: center;
+}
+
+/* 닫기 버튼 */
+.modal .close {
+  position: absolute;
+  top: 15px; right: 35px;
+  color: #fff;
+  font-size: 40px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* 큰 이미지 */
+.modal-content {
+  margin-top: 50px;
+  max-width: 90%;
+  max-height: 80%;
+  object-fit: contain; 
+}

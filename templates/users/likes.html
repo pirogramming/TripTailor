@@ -1,5 +1,6 @@
-
+{% load static %}
 {% if likes_page %}
+<link rel="stylesheet" href="{% static 'css/users/likes.css' %}?v={% now 'U' %}">
 <div>
     <ul class="place-list">
         {% for like in likes_page %}
@@ -34,8 +35,9 @@
                     <div class="create-route-form">
                     <input type="text" class="new-route-title" placeholder="새 루트 제목" style="width:100%; margin-bottom:.25rem;">
                     <input type="text" class="new-route-summary" placeholder="루트 요약(선택, 200자 이내)" style="width:100%; margin-bottom:.25rem;">
-                    <label style="display:block; margin-bottom:.25rem;">
-                        <input type="checkbox" class="new-route-public" checked>공개 루트로 만들기
+                    <label style="display:inline-flex; align-items:center; gap:6px; cursor:pointer; font-size:14px;">
+                        <input type="checkbox" class="new-route-public" checked>
+                        <span>공개 루트로 만들기</span> 
                     </label>
                     <button type="button" class="create-route-btn">＋ 새 루트 만들기</button>
                     </div>
@@ -56,15 +58,61 @@
 
 
 </div>
-<div class="paginateion">
+<!-- <div class="pagination">
     {% if likes_page.has_previous %}
         <a href="?page_likes={{ likes_page.previous_page_number }}&page_routes={{ routes_page.number }}&page_reviews={{ reviews_page.number }}">이전</a>
     {% endif %}
-    <span>{{ likes_page.number }} / {{ likes_page.paginator.num_pages }}</span>
+    <span>{{ likes_page.number }}</span> 
+    <span>{{ likes_page.paginator.num_pages }}</span> 
     {% if likes_page.has_next %}
         <a href="?page_likes={{ likes_page.next_page_number }}&page_routes={{ routes_page.number }}&page_reviews={{ reviews_page.number }}">다음</a>
     {% endif %}
+</div> -->
+{% if likes_page.paginator.num_pages > 1 %}
+<div class="pagination">
+
+  {# 이전 버튼 #}
+  {% if likes_page.has_previous %}
+    <a href="?page_likes={{ likes_page.previous_page_number }}&page_routes={{ routes_page.number }}&page_reviews={{ reviews_page.number }}">이전</a>
+  {% endif %}
+
+  {# 첫 페이지 + ... #}
+  {% if likes_page.number > 3 %}
+    <a href="?page_likes=1&page_routes={{ routes_page.number }}&page_reviews={{ reviews_page.number }}">1</a>
+    {% if likes_page.number > 4 %}
+      <span>…</span>
+    {% endif %}
+  {% endif %}
+
+  {# 현재 페이지 주변 번호 #}
+  {% for num in likes_page.paginator.page_range %}
+    {% if num >= likes_page.number|add:"-2" and num <= likes_page.number|add:"2" %}
+      {% if num == likes_page.number %}
+        <span class="current">{{ num }}</span>
+      {% else %}
+        <a href="?page_likes={{ num }}&page_routes={{ routes_page.number }}&page_reviews={{ reviews_page.number }}">{{ num }}</a>
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+
+  {# ... + 마지막 페이지 #}
+  {% if likes_page.number < likes_page.paginator.num_pages|add:"-2" %}
+    {% if likes_page.number < likes_page.paginator.num_pages|add:"-3" %}
+      <span>…</span>
+    {% endif %}
+    <a href="?page_likes={{ likes_page.paginator.num_pages }}&page_routes={{ routes_page.number }}&page_reviews={{ reviews_page.number }}">
+      {{ likes_page.paginator.num_pages }}
+    </a>
+  {% endif %}
+
+  {# 다음 버튼 #}
+  {% if likes_page.has_next %}
+    <a href="?page_likes={{ likes_page.next_page_number }}&page_routes={{ routes_page.number }}&page_reviews={{ reviews_page.number }}">다음</a>
+  {% endif %}
+
 </div>
+{% endif %}
+
 
 {% else %}
 <p>아직 좋아요한 장소가 없어요.</p>

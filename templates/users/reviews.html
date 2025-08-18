@@ -1,29 +1,65 @@
 <div id="review-list">
     {% for review in reviews_page %}
     <div class="review-item">
-        <h3 class="review-title">
-            <a href="{% url 'places:place_detail' review.place.pk %}">{{ review.place.name }}</a>
-        </h3>
-        <p class="review-rating">별점: {{ review.rating }} / 5.0</p>
-        <p class="review-content">{{ review.content }}</p>
-        <p class="review-date">{{ review.created_at|date:"Y-m-d H:i" }}</p>
-        
-        <!-- 수정/삭제 버튼 -->
-        <div class="review-actions">
-            <a href="{% url 'reviews:place_edit' review.place.pk review.pk %}?from_mypage=1">수정</a>
-            <form method="post" action="{% url 'reviews:delete_review' review.place.pk review.pk %}" style="display: inline;">
-                {% csrf_token %}
-                <button type="submit" onclick="return confirm('정말 삭제하시겠습니까?')">삭제</button>
-            </form>
+        <div class="review-header">
+            <h3 class="review-title">
+                <a href="{% url 'places:place_detail' review.place.pk %}">{{ review.place.name }}</a>
+            </h3>
+            <div class="review-top">
+                {% comment %} <p class="review-rating">{{review.rating}}</p> {% endcomment %}
+                <p class="review-rating">
+                    {# review.rating: 0.0 ~ 5.0 가정 #}
+                    {% for _ in "12345" %}
+                    {# scaled = floor(review.rating * 2)  → 0..10 정수 #}
+                    {% widthratio review.rating 1 2 as scaled %}
+                    {# two_i = 2 * 현재별번호(1..5) → 2,4,6,8,10 #}
+                    {% widthratio forloop.counter 1 2 as two_i %}
+
+                    {% if scaled|add:"0" >= two_i|add:"0" %}
+                        <i class="fa-solid fa-star"></i>               {# 꽉 별 #}
+                    {% elif scaled|add:"0" >= two_i|add:"-1" %}
+                        <i class="fa-solid fa-star-half-stroke"></i>   {# 반 별 #}
+                    {% else %}
+                        <i class="fa-regular fa-star"></i>             {# 빈 별 #}
+                    {% endif %}
+                    {% endfor %}
+                </p>
+
+                <div class="review-actions">
+                    <a href="{% url 'reviews:place_edit' review.place.pk review.pk %}?from_mypage=1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                        <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                        <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
+                        </svg>
+                    </a>
+                    <form method="post" action="{% url 'reviews:delete_review' review.place.pk review.pk %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" onclick="return confirm('정말 삭제하시겠습니까?')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                            <path d="M6.5 1h3a.5.5 0 0 1.5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
+                            </svg> 
+                        </button>
+                    </form>
+                </div>                
+            </div>            
         </div>
+
+        
+        <p class="review-content">{{ review.content }}</p>
+
     
         <div class="review-photos">
             {% for photo in review.photos.all %}
                 {% if photo.image %}  {# 파일이 있는 경우에만 .url 접근 #}
-                <img src="{{ photo.image.url }}" alt="리뷰 사진" width="150">
+                <img src="{{ photo.image.url }}" alt="리뷰 사진" width="150" class="thumbnail" onclick="openModal(this)">
                 {% endif %}
             {% endfor %}
         </div>
+        <div id="imageModal" class="modal" onclick="closeModal()">
+          <span class="close">&times;</span>
+          <img class="modal-content" id="modalImg">
+        </div>
+        <p class="review-date">{{ review.created_at|date:"Y-m-d H:i" }}</p>        
     
     </div>
     {% empty %}
@@ -31,18 +67,60 @@
 {% endfor %}
 </div>
 
-
-
+{% if reviews_page.paginator.num_pages > 1 %}
 <div class="pagination">
-{% if reviews_page.has_previous %}
-    <a href="?page_reviews=1&page_likes={{ likes_page.number }}&page_routes={{ routes_page.number }}">처음</a>
-    <a href="?page_reviews={{ reviews_page.previous_page_number }}&page_likes={{ likes_page.number }}&page_routes={{ routes_page.number }}">이전</a>
-{% endif %}
 
-<span>{{ reviews_page.number }} / {{ reviews_page.paginator.num_pages }}</span>
+  {# 이전 버튼 #}
+  {% if reviews_page.has_previous %}
+    <a href="?tab=reviews&page_reviews={{ reviews_page.previous_page_number }}&page_likes={{ likes_page.number }}&page_routes={{ routes_page.number }}">이전</a>
+  {% endif %}
 
-{% if reviews_page.has_next %}
-    <a href="?page_reviews={{ reviews_page.next_page_number }}&page_likes={{ likes_page.number }}&page_routes={{ routes_page.number }}">다음</a>
-    <a href="?page_reviews={{ reviews_page.paginator.num_pages }}&page_likes={{ likes_page.number }}&page_routes={{ routes_page.number }}">마지막</a>
-{% endif %}
+  {# 첫 페이지 + ... #}
+  {% if reviews_page.number > 3 %}
+    <a href="?tab=reviews&page_reviews=1&page_likes={{ likes_page.number }}&page_routes={{ routes_page.number }}">1</a>
+    {% if reviews_page.number > 4 %}
+      <span>…</span>
+    {% endif %}
+  {% endif %}
+
+  {# 현재 페이지 주변 (±2) #}
+  {% for num in reviews_page.paginator.page_range %}
+    {% if num >= reviews_page.number|add:"-2" and num <= reviews_page.number|add:"2" %}
+      {% if num == reviews_page.number %}
+        <span class="current">{{ num }}</span>
+      {% else %}
+        <a href="?tab=reviews&page_reviews={{ num }}&page_likes={{ likes_page.number }}&page_routes={{ routes_page.number }}">{{ num }}</a>
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+
+  {# ... + 마지막 페이지 #}
+  {% if reviews_page.number < reviews_page.paginator.num_pages|add:"-2" %}
+    {% if reviews_page.number < reviews_page.paginator.num_pages|add:"-3" %}
+      <span>…</span>
+    {% endif %}
+    <a href="?tab=reviews&page_reviews={{ reviews_page.paginator.num_pages }}&page_likes={{ likes_page.number }}&page_routes={{ routes_page.number }}">
+      {{ reviews_page.paginator.num_pages }}
+    </a>
+  {% endif %}
+
+  {# 다음 버튼 #}
+  {% if reviews_page.has_next %}
+    <a href="?tab=reviews&page_reviews={{ reviews_page.next_page_number }}&page_likes={{ likes_page.number }}&page_routes={{ routes_page.number }}">다음</a>
+  {% endif %}
+
 </div>
+{% endif %}
+
+<script src="https://kit.fontawesome.com/{{ FONT_AWESOME_KEY }}.js" crossorigin="anonymous"></script>
+<script>
+function openModal(img) {
+  const modal = document.getElementById("imageModal");
+  const modalImg = document.getElementById("modalImg");
+  modal.style.display = "block";
+  modalImg.src = img.src;
+}
+function closeModal() {
+  document.getElementById("imageModal").style.display = "none";
+}
+</script>

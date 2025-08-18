@@ -84,12 +84,11 @@
 
   <!-- 댓글 섹션 -->
   <section class="card review-card">
-    <h3 class="section-title">댓글</h3>
+    <h3 class="section-title">댓글 작성</h3>
 
     <!-- 댓글 작성 폼 -->
     {% if user.is_authenticated %}
     <div class="review-form-section">
-      <h4 class="review-form__title">댓글 작성</h4>
       <form method="post" action="{% url 'reviews:place_create' place.id %}" class="review-form" id="review-form" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="form-grid">
@@ -137,6 +136,8 @@
     {% endif %}
 
     <!-- 댓글 목록 -->
+    <h3 class="section-title">댓글</h3>
+
     <div id="review-list" data-place-id="{{ place.id }}" class="review-list">
       <div class="loading-reviews">댓글 목록을 불러오는 중...</div>
       <!-- comment_crud.js가 여기에 목록을 렌더링 -->

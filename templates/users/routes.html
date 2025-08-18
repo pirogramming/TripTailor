@@ -67,12 +67,39 @@
 
 
     <div style="margin:8px 0;">
+        {% if routes_page.paginator.num_pages > 1 %}
+        <div class="pagination">
+
         {% if routes_page.has_previous %}
-            <a href="?page_routes={{ routes_page.previous_page_number }}&page_likes={{ likes_page.number }}&page_reviews={{ reviews_page.number }}">이전</a>
+            <a href="?tab=routes&page_routes={{ routes_page.previous_page_number }}&page_likes={{ likes_page.number }}&page_reviews={{ reviews_page.number }}">이전</a>
         {% endif %}
-        <span>페이지 {{ routes_page.number }} / {{ routes_page.paginator.num_pages }}</span>
+
+        {% if routes_page.number > 3 %}
+            <a href="?tab=routes&page_routes=1&page_likes={{ likes_page.number }}&page_reviews={{ reviews_page.number }}">1</a>
+            {% if routes_page.number > 4 %}<span>…</span>{% endif %}
+        {% endif %}
+
+        {% for num in routes_page.paginator.page_range %}
+            {% if num >= routes_page.number|add:"-2" and num <= routes_page.number|add:"2" %}
+            {% if num == routes_page.number %}
+                <span class="current">{{ num }}</span>
+            {% else %}
+                <a href="?tab=routes&page_routes={{ num }}&page_likes={{ likes_page.number }}&page_reviews={{ reviews_page.number }}">{{ num }}</a>
+            {% endif %}
+            {% endif %}
+        {% endfor %}
+
+        {% if routes_page.number < routes_page.paginator.num_pages|add:"-2" %}
+            {% if routes_page.number < routes_page.paginator.num_pages|add:"-3" %}<span>…</span>{% endif %}
+            <a href="?tab=routes&page_routes={{ routes_page.paginator.num_pages }}&page_likes={{ likes_page.number }}&page_reviews={{ reviews_page.number }}">{{ routes_page.paginator.num_pages }}</a>
+        {% endif %}
+
         {% if routes_page.has_next %}
-            <a href="?page_routes={{ routes_page.next_page_number }}&page_likes={{ likes_page.number }}&page_reviews={{ reviews_page.number }}">다음</a>
+            <a href="?tab=routes&page_routes={{ routes_page.next_page_number }}&page_likes={{ likes_page.number }}&page_reviews={{ reviews_page.number }}">다음</a>
         {% endif %}
+
+        </div>
+        {% endif %}
+
     </div>    
 </div>
