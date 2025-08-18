@@ -6,6 +6,8 @@
 2025 Pirogramming : **Triptailor**  
 <br/><br/>
 
+링크 : https://triptailor.kro.kr/
+
 ## 🚀 Triptailor
 
 > “여행지를 어떻게 선택하시나요?”  
@@ -63,10 +65,16 @@ AI와 데이터 기반으로 여행을 **쉽고 즐겁게 계획**할 수 있는
 ![Notion](https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=notion&logoColor=white) 
 ![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)  
 
+📌 **Servers**
+[![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white&style=for-the-badge)](https://www.docker.com/)
+[![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF?logo=githubactions&logoColor=white&style=for-the-badge)](https://github.com/features/actions)
+[![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?logo=ubuntu&logoColor=white&style=for-the-badge)](https://ubuntu.com/)
+[![Gunicorn](https://img.shields.io/badge/Gunicorn-499848?logo=gunicorn&logoColor=white&style=for-the-badge)](https://gunicorn.org/)
+[![Nginx](https://img.shields.io/badge/NGINX-009639?logo=nginx&logoColor=white&style=for-the-badge)](https://nginx.org/)
+
 ---
 
 ## ⚙️ Features
-
 
 
   ---
@@ -104,9 +112,7 @@ TripTailor/
 ├─ manage.py
 ├─ README.md
 ├─ recommend.py
-├─ requirements.txt
-├─ triptailor_cosine_v2.index
-└─ triptailor_full_metadata.csv
+└─ requirements.txt
 
   ```
 
