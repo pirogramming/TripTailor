@@ -1,14 +1,17 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/review_list.css' %}">
+
 <ul class="review-list">
   {% for r in reviews %}
   <li class="review-item">
     <div class="review-header">
+      <div class="review-user">
+        <div class="author">{{ r.user.username }}</div>
+        <span class="date">{{ r.created_at|date:"Y-m-d H:i" }}</span>        
+      </div>
       <div class="review-meta">
         <span class="rating">⭐ {{ r.rating }}</span>
-      </div>
-      <div class="review-info">
-        <span class="author">by {{ r.user.username }}</span>
-        <span class="date">{{ r.created_at|date:"Y-m-d H:i" }}</span>
-      </div>
+      </div>        
     </div>
 
     <div class="review-content">
@@ -30,6 +33,10 @@
         {% endif %}
       {% endfor %}
     </div>
+        <div id="imageModal" class="modal" onclick="closeModal()">
+          <span class="close">&times;</span>
+          <img class="modal-content" id="modalImg">
+        </div>
     {% endif %}
 
     {% if user == r.user %}
@@ -44,3 +51,15 @@
   <li class="no-reviews">등록된 댓글이 없습니다.</li>
   {% endfor %}
 </ul>
+
+<script>
+function openModal(img) {
+  const modal = document.getElementById("imageModal");
+  const modalImg = document.getElementById("modalImg");
+  modal.style.display = "block";
+  modalImg.src = img.src;
+}
+function closeModal() {
+  document.getElementById("imageModal").style.display = "none";
+}
+</script>

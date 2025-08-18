@@ -17,8 +17,6 @@ from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-
 load_dotenv(BASE_DIR / ".env")
 
 GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
@@ -303,7 +301,6 @@ SOCIALACCOUNT_PROVIDERS ={
 'prompt': 'select_account',#추가 간편로그인을 지원해줌
 }}}
 
-
 # HTTPS 뒤 Nginx(리버스프록시)에서 종료되는 환경: X-Forwarded-Proto 신뢰
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
@@ -331,3 +328,4 @@ CSRF_COOKIE_SAMESITE = os.getenv("CSRF_COOKIE_SAMESITE", "Lax")
 # Django 4.0+는 CSRF_TRUSTED_ORIGINS에 scheme 포함이 필수
 CSRF_TRUSTED_ORIGINS = _split_env_list("CSRF_TRUSTED_ORIGINS")
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
+
