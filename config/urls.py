@@ -19,6 +19,7 @@ from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
+from apps.users.views import AdminPasswordResetConfirmView
 
 
 urlpatterns = [
@@ -30,11 +31,9 @@ urlpatterns = [
     path('login/', auth_views.LoginView.as_view(template_name='users/login.html'), name='login'),
     path("routes/", include(("apps.routes.urls", "routes"), namespace="routes")),
     path(
-        "password/reset/confirm/<uidb64>/<token>/",
-        auth_views.PasswordResetConfirmView.as_view(
-            template_name="users/password_reset_confirm.html"
-        ),
-        name="password_reset_confirm",   # ← 전역 이름을 만들어줌
+        'password/reset/confirm/<uidb64>/<token>/',
+        AdminPasswordResetConfirmView.as_view(),  # ← admin 템플릿 사용
+        name='password_reset_confirm',
     ),
 ]
 

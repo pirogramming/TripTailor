@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from apps.places.models import PlaceLike, Place
@@ -6,6 +6,9 @@ from django.db.models import Count, Prefetch
 from django.db.models import prefetch_related_objects
 from apps.routes.models import Route, RoutePlace
 from apps.reviews.models import Review
+from django.contrib.auth import views as auth_views
+# users/views.py 맨 위 import 보강
+from django.http import JsonResponse
 
 from django.contrib.auth.views import PasswordResetView
 from django.contrib import messages
@@ -124,12 +127,27 @@ def my_reviews(request):
     })
 
 class CustomPasswordResetView(PasswordResetView):
+    # 전송 폼 템플릿 (이미 account 폴더를 쓰고 있다면 유지)
+    template_name = "account/password_reset.html"
     form_class = CustomPasswordResetForm
-    template_name = 'account/password_reset.html'
+
+    # 전송 성공 후 이동할 곳 → 우리가 만든 done 뷰 (users 네임스페이스)
     success_url = reverse_lazy("users:password_reset_done")
+
     def form_valid(self, form):
-        messages.success(self.request, "비밀번호 재설정 메일을 보냈어요. 메일함을 확인해 주세요.")
+        messages.success(self.request, "비밀번호 재설정 메일을 보냈어요. 메일함(스팸함 포함)을 확인해 주세요.")
         return super().form_valid(form)
+
+class AdminPasswordResetConfirmView(auth_views.PasswordResetConfirmView):
+    template_name = "admin/password_reset_confirm.html"
+
+
+class AdminPasswordResetDoneView(auth_views.PasswordResetDoneView):
+    template_name = "account/password_reset_done.html"
+
+
+class AdminPasswordResetCompleteView(auth_views.PasswordResetCompleteView):
+    template_name = "admin/password_reset_complete.html"
 
 
 @login_required
