@@ -1,5 +1,6 @@
-
+{% load static %}
 {% if likes_page %}
+<link rel="stylesheet" href="{% static 'css/users/likes.css' %}?v={% now 'U' %}">
 <div>
     <ul class="place-list">
         {% for like in likes_page %}
@@ -36,7 +37,7 @@
                     <input type="text" class="new-route-summary" placeholder="루트 요약(선택, 200자 이내)" style="width:100%; margin-bottom:.25rem;">
                     <label style="display:inline-flex; align-items:center; gap:6px; cursor:pointer; font-size:14px;">
                         <input type="checkbox" class="new-route-public" checked>
-                        공개 루트로 만들기
+                        <span>공개 루트로 만들기</span> 
                     </label>
                     <button type="button" class="create-route-btn">＋ 새 루트 만들기</button>
                     </div>
