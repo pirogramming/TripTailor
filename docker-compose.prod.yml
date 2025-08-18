@@ -30,20 +30,19 @@ services:
       timeout: 3s
       retries: 20
     networks: [ webnet ]
-
-  nginx:
-    image: nginx:1.25
-    container_name: triptailor_nginx
-    depends_on:
-      - web
-    ports:
-      - "80:80"
-      # - "443:443"   # SSL 쓰면 열기
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - static_volume:/app/staticfiles:ro
-    restart: always
-    networks: [ webnet ]
+  # nginx:
+  #   image: nginx:1.25
+  #   container_name: triptailor_nginx
+  #   depends_on:
+  #     - web
+  #   ports:
+  #     - "80:80"
+  #     # - "443:443"   # SSL 쓰면 열기
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+  #     - static_volume:/app/staticfiles:ro
+  #   restart: always
+  #   networks: [ webnet ]
 
 volumes:
   postgres_data:
