@@ -9,7 +9,7 @@ from apps.reviews.models import Review
 
 from django.contrib.auth.views import PasswordResetView
 from django.contrib import messages
-from django.urls import reverse
+from django.urls import reverse_lazy
 from .forms import CustomPasswordResetForm
 from django.contrib.auth import get_user_model
 
@@ -126,6 +126,10 @@ def my_reviews(request):
 class CustomPasswordResetView(PasswordResetView):
     form_class = CustomPasswordResetForm
     template_name = 'account/password_reset.html'
+    success_url = reverse_lazy("password_reset_done")
+    def form_valid(self, form):
+        messages.success(self.request, "비밀번호 재설정 메일을 보냈어요. 메일함을 확인해 주세요.")
+        return super().form_valid(form)
 
 
 @login_required

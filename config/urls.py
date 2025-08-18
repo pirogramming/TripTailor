@@ -39,6 +39,14 @@ urlpatterns = [
         auth_views.PasswordResetDoneView.as_view(),
         name='password_reset_done'
     ),
+    path(
+        "password/reset/done/",
+        auth_views.PasswordResetDoneView.as_view(
+            template_name="users/password_reset_done.html"
+        ),
+        name="password_reset_done",
+    ),
+
 ]
 
 # 개발 환경에서 미디어 파일 서빙
