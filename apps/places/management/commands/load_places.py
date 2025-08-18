@@ -24,6 +24,25 @@ def norm(s: str) -> str:
     s = s or ""
     return re.sub(r"[\s\(\)\[\]\-_/·•~!@#$%^&*=+|:;\"'<>?,.]+", "", s).lower()
 
+_num_re = re.compile(r'^[\+\-]?\d+(\.\d+)?$')
+
+
+def to_bool(v) -> bool:
+    if v is None:
+        return False
+    # 숫자형은 그대로 판단
+    if isinstance(v, (int, float)):
+        return float(v) != 0.0
+    # 문자열/그 외 → 정규화
+    s = str(v).strip().lower()
+    # 숫자 문자열(정수/소수) 처리: "1", "1.0", "0.0", "+2", "-0.0" 등
+    if _num_re.match(s):
+        try:
+            return float(s) != 0.0
+        except Exception:
+            return False
+    # 그 외 truthy 토큰
+    return s in {"1", "true", "t", "y", "yes", "on"}
 
 class Command(BaseCommand):
     help = "CSV(필수) + (선택) FAISS index에서 Place 및 임베딩을 DB에 적재 (진행률/ETA/막대 표시)."
@@ -144,7 +163,8 @@ class Command(BaseCommand):
                     lng = row.get("경도") or row.get("lng")
                     summary = row.get("summary", "")
                     external_id = row.get("external_id", None)
-                    is_unique = str(row.get("is_unique", "0")).strip() in ["1", "True", "true"]
+                    is_unique_raw = row.get("is_unique") or row.get("unique") or row.get("isunique") or 0
+                    is_unique = to_bool(is_unique_raw)
                     raw_cls = row.get("class", "0")
 
                     # 필수 필드 검증
@@ -201,6 +221,11 @@ class Command(BaseCommand):
                             address=address,
                             defaults=defaults,
                         )
+                        db_val = Place.objects.filter(pk=place.pk).values_list("is_unique", flat=True).first()
+                        if db_val != is_unique:
+                            self.stderr.write(self.style.WARNING(
+                                f"[is_unique MISMATCH] name={name} addr={address} parsed={is_unique} db={db_val}"
+                            ))
                         created += int(was_created)
                         updated += int(not was_created)
 
