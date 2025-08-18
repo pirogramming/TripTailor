@@ -40,6 +40,13 @@
 
         <button type="submit" class="submit"><span>이메일로 로그인</span></button>
       </form>
+      {% if messages %}
+        <ul class="messages">
+          {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
       <div id="social">
         <div>간편 로그인</div>
         <div class="social_login_box">
