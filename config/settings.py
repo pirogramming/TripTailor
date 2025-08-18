@@ -17,23 +17,28 @@ from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-load_dotenv(BASE_DIR / '.env')
+load_dotenv(BASE_DIR / ".env")
 
 GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
-NAVER_CLIENT_ID = os.getenv("NAVER_CLIENT_ID")
+FONT_AWESOME_KEY = os.getenv("FONT_AWESOME_KEY")
+NAVER_CLIENT_ID = os.getenv("NAVER_CLIENT_ID_PW")
 NAVER_CLIENT_SECRET = os.getenv("NAVER_CLIENT_SECRET")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-%#h%v23qd$@m_v2)hf3!xj$^eaz+*t$mwzps)2n*fo8ev)05^$'
+SECRET_KEY = os.getenv("SECRET_KEY", "dev-only-insecure-key")
+DEBUG = os.getenv("DEBUG", "False").lower() in ("1", "true", "yes")
+def _split_env_list(key):
+    raw = os.getenv(key, "")
+    if not raw:
+        return []
+    return [x.strip() for x in raw.replace("\n", ",").split(",") if x.strip()]
+
+ALLOWED_HOSTS = _split_env_list("ALLOWED_HOSTS")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
 
 AUTH_USER_MODEL = 'users.User'
 
@@ -92,6 +97,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 "apps.places.context_processors.public_settings",
+                "apps.reviews.context_processors.fontawesome_key",
             ],
         },
     },
@@ -105,14 +111,29 @@ TEMPLATES[0]["OPTIONS"]["context_processors"] += [
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-load_dotenv(BASE_DIR/'.env')
+db_engine = os.getenv("DB_ENGINE", "sqlite3").lower()
 
-DATABASES = {
-    'default': {
-        'ENGINE': os.getenv('DB_ENGINE'),
-        'NAME': BASE_DIR / os.getenv('DB_NAME'),
+if db_engine in ("postgresql", "postgres", "psql", "postgresql_psycopg2"):
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv("DB_NAME", "triptailor"),
+            "USER": os.getenv("DB_USER", "triptailor_user"),
+            "PASSWORD": os.getenv("DB_PASSWORD", "triptailor_pass"),
+            "HOST": os.getenv("DB_HOST", "db"),
+            "PORT": os.getenv("DB_PORT", "5432"),
+            "CONN_MAX_AGE": int(os.getenv("DB_CONN_MAX_AGE", "60")),
+        }
     }
-}
+else:
+    # SQLite 폴백: DB_NAME이 비어있어도 안전하게 동작
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / os.getenv("DB_NAME", "db.sqlite3"),
+        }
+    }
+
 
 # DATABASES = {
 #     'default': {
@@ -182,7 +203,6 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 #로그인 관련 셋팅
-SITE_ID = 1
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 SOCIALACCOUNT_AUTO_SIGNUP = True
@@ -220,8 +240,6 @@ DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
 EMAIL_TIMEOUT = 10
 
 # allauth 관련 (이메일 기반 로그인일 때 권장)
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_UNIQUE_EMAIL = True
 
 #추가
 SOCIALACCOUNT_PROVIDERS ={
@@ -282,3 +300,32 @@ SOCIALACCOUNT_PROVIDERS ={
 "access_type": "online", #추가
 'prompt': 'select_account',#추가 간편로그인을 지원해줌
 }}}
+
+# HTTPS 뒤 Nginx(리버스프록시)에서 종료되는 환경: X-Forwarded-Proto 신뢰
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+# HSTS(https 정상 동작 확인 후 켜기!)
+SECURE_HSTS_SECONDS = int(os.getenv("SECURE_HSTS_SECONDS", "0"))  # 처음엔 0으로 두고 https 확인 뒤 31536000 권장
+SECURE_HSTS_INCLUDE_SUBDOMAINS = os.getenv("SECURE_HSTS_INCLUDE_SUBDOMAINS", "false").lower() in ("1","true","yes")
+SECURE_HSTS_PRELOAD = os.getenv("SECURE_HSTS_PRELOAD", "false").lower() in ("1","true","yes")
+
+# HTTPS 리다이렉트 (인증서 적용 후 True)
+SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", "false").lower() in ("1","true","yes")
+
+# 각종 보안 헤더
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = "same-origin"
+X_FRAME_OPTIONS = "DENY"
+
+# 쿠키
+SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "false").lower() in ("1","true","yes")
+CSRF_COOKIE_SECURE = os.getenv("CSRF_COOKIE_SECURE", "false").lower() in ("1","true","yes")
+
+SESSION_COOKIE_SAMESITE = os.getenv("SESSION_COOKIE_SAMESITE", "Lax")
+CSRF_COOKIE_SAMESITE = os.getenv("CSRF_COOKIE_SAMESITE", "Lax")
+
+# Django 4.0+는 CSRF_TRUSTED_ORIGINS에 scheme 포함이 필수
+CSRF_TRUSTED_ORIGINS = _split_env_list("CSRF_TRUSTED_ORIGINS")
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
+

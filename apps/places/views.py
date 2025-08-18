@@ -405,6 +405,8 @@ def place_search(request):
     """장소명으로 직접 검색하는 페이지"""
     query = request.GET.get('q', '')
     class_filter = request.GET.get('place_class', '')
+    # is_unique 필터 추가
+    is_unique_filter = request.GET.get('is_unique', '')
     
     # 기본 목록
     if query:
@@ -421,6 +423,10 @@ def place_search(request):
     # 대분류 필터
     if class_filter and class_filter.isdigit():
         qs = qs.filter(place_class=int(class_filter))
+    
+    # 이색적 필터
+    if is_unique_filter == '1':
+        qs = qs.filter(is_unique=True)
     
     # ✅ 태그 필터 (URL 예: ?tags=레트로&tags=야경&match=any)
     selected, match_mode, _ = _parse_selected_tags(request)
@@ -483,6 +489,7 @@ def place_search(request):
         'place_class': class_filter,  # 카테고리 필터 상태
         'selected_tags': selected,   # 선택된 태그들
         'match': match_mode,         # 태그 매칭 모드
+        'is_unique': is_unique_filter,  # 이색적 필터 상태
     }
     
     return render(request, 'places/place_search.html', context)

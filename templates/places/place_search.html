@@ -63,6 +63,23 @@
 
     {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
     {% if match %}<input type="hidden" name="match" value="{{ match }}">{% endif %}
+    {% if is_unique %}<input type="hidden" name="is_unique" value="{{ is_unique }}">{% endif %}
+    {% for t in selected_tags %}
+      <input type="hidden" name="tags" value="{{ t }}">
+    {% endfor %}
+  </form>
+</div>
+
+<div class="unique-filter-bar">
+  <form id="uniqueFilterForm">
+    <label class="unique-filter-label">
+      <input type="checkbox" name="is_unique" value="1" {% if is_unique == '1' %}checked{% endif %}>
+      <span class="unique-filter-text">이색적</span>
+    </label>
+
+    {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+    {% if place_class %}<input type="hidden" name="place_class" value="{{ place_class }}">{% endif %}
+    {% if match %}<input type="hidden" name="match" value="{{ match }}">{% endif %}
     {% for t in selected_tags %}
       <input type="hidden" name="tags" value="{{ t }}">
     {% endfor %}
