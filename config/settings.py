@@ -104,9 +104,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'config.wsgi.application'
-TEMPLATES[0]["OPTIONS"]["context_processors"] += [
-    "apps.places.context_processors.public_settings",
-]
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
@@ -208,12 +205,17 @@ LOGOUT_REDIRECT_URL = '/'
 
 
 # 이메일 로그인 관련 설정
-ACCOUNT_LOGIN_METHODS = {"email"}
-ACCOUNT_SIGNUP_FIELDS = ["username*", "email*", "password1*", "password2*"]
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_SIGNUP_FIELDS = [] 
 ACCOUNT_UNIQUE_EMAIL = True #이메일 중복 허용 불가
 SOCIALACCOUNT_AUTO_SIGNUP = True
 SOCIALACCOUNT_LOGIN_ON_GET = True 
 SOCIALACCOUNT_ADAPTER = 'apps.users.adapter.MySocialAccountAdapter'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False         # (소셜 자동가입 시 username 때문에 폼 안 뜨게)
+ACCOUNT_EMAIL_VERIFICATION = "none"       # 개발 중엔 끔(운영 전환 시 "mandatory")
+SOCIALACCOUNT_EMAIL_REQUIRED = True
+SOCIALACCOUNT_QUERY_EMAIL = True
 
 AUTHENTICATION_BACKENDS = (
     #추가 장고에서 사용자의 이름을 기준으로 로그인하도록 설정
@@ -255,7 +257,8 @@ SOCIALACCOUNT_PROVIDERS ={
 # 제공하는 값이 다르기 때문에 가져올 데이터를 설정한 이후 추가/삭제 해보면 됩니다.
 # SCOPE값에 제공하지 않는 값을 넣거나 하는 이유로 오류가 나올 수 있음
 "SCOPE": [
-
+    "profile_nickname",
+    "account_email",
 ],
 #추가
 "AUTH_PARAMS": {
@@ -329,4 +332,9 @@ CSRF_COOKIE_SAMESITE = os.getenv("CSRF_COOKIE_SAMESITE", "Lax")
 # Django 4.0+는 CSRF_TRUSTED_ORIGINS에 scheme 포함이 필수
 CSRF_TRUSTED_ORIGINS = _split_env_list("CSRF_TRUSTED_ORIGINS")
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
+
+# settings.py
+ACCOUNT_FORMS = {
+    "signup": "apps.users.forms.EmailSignupForm",
+}
 
