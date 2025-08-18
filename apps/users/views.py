@@ -139,7 +139,7 @@ class CustomPasswordResetView(PasswordResetView):
         return super().form_valid(form)
 
 class AdminPasswordResetConfirmView(auth_views.PasswordResetConfirmView):
-    template_name = "admin/password_reset_confirm.html"
+    template_name = "registration/password_reset_confirm.html"
 
 
 class AdminPasswordResetDoneView(auth_views.PasswordResetDoneView):
@@ -147,7 +147,7 @@ class AdminPasswordResetDoneView(auth_views.PasswordResetDoneView):
 
 
 class AdminPasswordResetCompleteView(auth_views.PasswordResetCompleteView):
-    template_name = "admin/password_reset_complete.html"
+    template_name = "registration/password_reset_complete.html"
 
 
 @login_required
