@@ -147,7 +147,9 @@ class AdminPasswordResetDoneView(auth_views.PasswordResetDoneView):
 
 
 class AdminPasswordResetCompleteView(auth_views.PasswordResetCompleteView):
-    template_name = "registration/password_reset_complete.html"
+    template_name = "registration/password_reset_confirm.html"
+    # ✅ 완료 페이지를 네임스페이스로 지정
+    success_url = reverse_lazy("users:password_reset_complete")
 
 
 @login_required
