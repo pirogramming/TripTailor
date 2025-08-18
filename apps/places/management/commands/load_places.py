@@ -152,8 +152,7 @@ class Command(BaseCommand):
                     lng = row.get("경도") or row.get("lng")
                     summary = row.get("summary", "")
                     external_id = row.get("external_id", None)
-                    is_unique = to_bool(row.get("is_unique", 0))
-
+                    is_unique = to_bool(row.get("is_unique") or row.get("unique") or row.get("isunique") or 0)
                     raw_cls = row.get("class", "0")
 
                     # 필수 필드 검증
@@ -210,6 +209,11 @@ class Command(BaseCommand):
                             address=address,
                             defaults=defaults,
                         )
+                        db_val = Place.objects.filter(pk=place.pk).values_list("is_unique", flat=True).first()
+                        if db_val != is_unique:
+                            self.stderr.write(self.style.WARNING(
+                                f"[is_unique MISMATCH] name={name} addr={address} parsed={is_unique} db={db_val}"
+                            ))
                         created += int(was_created)
                         updated += int(not was_created)
 
