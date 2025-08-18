@@ -211,7 +211,7 @@ SOCIALACCOUNT_ADAPTER = 'apps.users.adapter.MySocialAccountAdapter'
 
 # 이메일 로그인 관련 설정
 ACCOUNT_LOGIN_METHODS = {"email"}
-ACCOUNT_SIGNUP_FIELDS = ["email*"]
+ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 ACCOUNT_UNIQUE_EMAIL = True #이메일 중복 허용 불가
 
 AUTHENTICATION_BACKENDS = (
