@@ -212,7 +212,7 @@ SOCIALACCOUNT_AUTO_SIGNUP = True
 SOCIALACCOUNT_LOGIN_ON_GET = True 
 SOCIALACCOUNT_ADAPTER = 'apps.users.adapter.MySocialAccountAdapter'
 ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = False         # (소셜 자동가입 시 username 때문에 폼 안 뜨게)
+ACCOUNT_USERNAME_REQUIRED = True         # (소셜 자동가입 시 username 때문에 폼 안 뜨게)
 ACCOUNT_EMAIL_VERIFICATION = "none"       # 개발 중엔 끔(운영 전환 시 "mandatory")
 SOCIALACCOUNT_EMAIL_REQUIRED = True
 SOCIALACCOUNT_QUERY_EMAIL = True
@@ -337,4 +337,3 @@ ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 ACCOUNT_FORMS = {
     "signup": "apps.users.forms.EmailSignupForm",
 }
-
