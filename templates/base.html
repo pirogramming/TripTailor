@@ -53,13 +53,13 @@
         <div class="sidebar__nav">
             {% if is_place_search %}
             <!-- 장소 검색 화면에서 보이는 메뉴 -->
-            <a href="{% url 'places:main' %}" class="sidebar__item">
+            <a href="{% url 'places:place_search' %}" class="sidebar__item">
                 <span class="sidebar__icon">✨</span>
                 여행지 추천받기
             </a>
             {% else %}
             <!-- 메인 화면에서 보이는 메뉴 -->
-            <a href="{% url 'places:place_search' %}" class="sidebar__item">
+            <a href="{% url 'places:main' %}" class="sidebar__item">
                 <span class="sidebar__icon">🔍</span>
                 장소 검색하기
             </a>

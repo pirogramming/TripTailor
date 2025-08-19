@@ -10,7 +10,7 @@
   --muted: #6b7280;
   --chip-bg: #f3f4f6;
   --chip-active-bg: #e0f7f8;
-  --shadow: 0 8px 20px rgba(0,0,0,.06);
+  --shadow: 0 8px 20px rgba(0, 0, 0, .06);
   --rhythm: 8px;
   --lh: 1.5;
 }
@@ -26,7 +26,6 @@
 body {
   margin: 0;
   font-family: 'Noto Sans KR', sans-serif;
-  background-color: var(--background);
   color: var(--text);
   position: relative;
 }
@@ -92,7 +91,7 @@ form[method="get"] input::placeholder {
 }
 
 /* 제출 버튼 */
-form[method="get"] > button {
+form[method="get"]>button {
   border: 0;
   background: transparent;
   width: 44px;
@@ -104,29 +103,29 @@ form[method="get"] > button {
   transition: background-color .15s ease;
 }
 
-form[method="get"] > button:hover {
+form[method="get"]>button:hover {
   background: #f1f3f4;
 }
 
-form[method="get"] > button:active {
+form[method="get"]>button:active {
   background: #e8eaed;
 }
 
-form[method="get"] > button svg {
+form[method="get"]>button svg {
   width: 24px;
   height: 24px;
   fill: #5f6368;
 }
 
 /* 보충 질문 말풍선 */
-form[method="get"] > div {
+form[method="get"]>div {
   display: flex;
   flex-direction: column;
   gap: 10px;
   width: 100%;
 }
 
-form[method="get"] > div strong {
+form[method="get"]>div strong {
   align-self: flex-start;
   background: #f1f1f1;
   color: #333;
@@ -138,7 +137,7 @@ form[method="get"] > div strong {
   box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
 }
 
-form[method="get"] > div strong::after {
+form[method="get"]>div strong::after {
   content: "";
   position: absolute;
   left: -6px;
@@ -149,17 +148,18 @@ form[method="get"] > div strong::after {
 
 /* 보충 질문 입력창 (말풍선처럼 동작) */
 /* 컨테이너: 오른쪽 정렬 */
-.additional_ques{
+.additional_ques {
   display: flex;
   flex-direction: column;
   gap: 10px;
   border-left: 1px solid #eef2f7;
   padding-left: 20px;
-  align-items: flex-end;         /* 👉 내부 아이템을 오른쪽으로 */
+  align-items: flex-end;
+  /* 👉 내부 아이템을 오른쪽으로 */
 }
 
 /* 타이틀 말풍선(좌측) */
-.additional_ques > strong{
+.additional_ques>strong {
   align-self: flex-start;
   display: inline-block;
   max-width: min(80%, 72ch);
@@ -172,21 +172,31 @@ form[method="get"] > div strong::after {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
-.additional_ques > strong::after{
-  content:"";
-  position:absolute; left:-6px; bottom:6px;
-  border:8px solid transparent; border-right-color:#f1f1f1;
+
+.additional_ques>strong::after {
+  content: "";
+  position: absolute;
+  left: -6px;
+  bottom: 6px;
+  border: 8px solid transparent;
+  border-right-color: #f1f1f1;
 }
 
 /* ✅ 오른쪽 입력 말풍선 */
-.followup-bubble{
-  align-self: flex-end;          /* 오른쪽으로 붙이기 */
+.followup-bubble {
+  align-self: flex-end;
+  /* 오른쪽으로 붙이기 */
   display: inline-block;
-  width: auto;                   /* 가로 유동 */
-  min-width: 120px;              /* 시작은 한 줄짜리 작은 풍선 */
-  max-width: 80%;                /* 가로 최대폭 */
-  min-height: 40px;              /* 한 줄 높이 */
-  max-height: 220px;             /* 세로 최대(넘으면 스크롤) */
+  width: auto;
+  /* 가로 유동 */
+  min-width: 120px;
+  /* 시작은 한 줄짜리 작은 풍선 */
+  max-width: 80%;
+  /* 가로 최대폭 */
+  min-height: 40px;
+  /* 한 줄 높이 */
+  max-height: 220px;
+  /* 세로 최대(넘으면 스크롤) */
 
   padding: 10px 14px;
   background: var(--background);
@@ -194,35 +204,45 @@ form[method="get"] > div strong::after {
   border-radius: 14px;
   line-height: 1.5;
   font-size: 15px;
-  box-shadow: 0 1px 2px rgba(0,0,0,.05);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
 
-  resize: none;                  /* 드래그 금지 */
-  overflow: hidden;              /* 자동확장용 */
-  white-space: pre-wrap;         /* 줄바꿈 유지 */
-  overflow-wrap: anywhere;       /* 긴 단어 분해 */
+  resize: none;
+  /* 드래그 금지 */
+  overflow: hidden;
+  /* 자동확장용 */
+  white-space: pre-wrap;
+  /* 줄바꿈 유지 */
+  overflow-wrap: anywhere;
+  /* 긴 단어 분해 */
   transition: width .05s ease, height .05s ease;
   position: relative;
 }
 
 /* 꼬리 */
-.followup-bubble::after{
-  content:"";
-  position:absolute; right:-6px; bottom:6px;
-  border:8px solid transparent; border-left-color: var(--background);
+.followup-bubble::after {
+  content: "";
+  position: absolute;
+  right: -6px;
+  bottom: 6px;
+  border: 8px solid transparent;
+  border-left-color: var(--background);
 }
 
 /* 포커스 */
 .followup-bubble:focus,
-.followup-bubble:focus-visible{
+.followup-bubble:focus-visible {
   outline: none;
   border-color: var(--border-color);
 }
 
 /* 모바일에서 가로 상한 완화 */
-@media (max-width: 600px){
-  .followup-bubble{ max-width: 92%; }
+@media (max-width: 600px) {
+  .followup-bubble {
+    max-width: 92%;
+  }
 }
-form[method="get"] > div button[type="submit"] {
+
+form[method="get"]>div button[type="submit"] {
   align-self: flex-end;
   background: var(--primary_send);
   color: #fff;
@@ -234,7 +254,7 @@ form[method="get"] > div button[type="submit"] {
   transition: background .2s ease;
 }
 
-form[method="get"] > div button[type="submit"]:hover {
+form[method="get"]>div button[type="submit"]:hover {
   background: var(--primary_send-hover);
 }
 
@@ -244,32 +264,36 @@ form[method="get"] > div button[type="submit"]:hover {
 }
 
 /* 기존 질문 말풍선(읽기 전용) */
-.chat-log{
+.chat-log {
   display: flex;
   flex-direction: column;
   gap: 8px;
   width: 100%;
   margin-bottom: .5rem;
 }
-.bubble{
+
+.bubble {
   max-width: 80%;
   padding: 10px 14px;
   border-radius: 14px;
   line-height: 1.45;
-  box-shadow: 0 1px 2px rgba(0,0,0,.05);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
 }
-.bubble-user{
+
+.bubble-user {
   align-self: flex-start;
   background: #f1f1f1;
   color: #333;
   position: relative;
 }
-.bubble-user::after{
-  content:"";
-  position:absolute;
-  left:-6px; bottom:6px;
-  border:8px solid transparent;
-  border-right-color:#f1f1f1;
+
+.bubble-user::after {
+  content: "";
+  position: absolute;
+  left: -6px;
+  bottom: 6px;
+  border: 8px solid transparent;
+  border-right-color: #f1f1f1;
 }
 
 
@@ -357,11 +381,15 @@ form[method="get"] > div button[type="submit"]:hover {
 }
 
 @media (max-width: 960px) {
-  .place-list { grid-template-columns: repeat(2, 1fr); }
+  .place-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 600px) {
-  .place-list { grid-template-columns: 1fr; }
+  .place-list {
+    grid-template-columns: 1fr;
+  }
 }
 
 
@@ -375,33 +403,40 @@ form[method="get"] > div button[type="submit"]:hover {
   border: 1px solid #e5e7eb;
   border-radius: 14px;
   box-shadow: var(--shadow);
-  transition: box-shadow .12s ease;   /* transform 제거 */
-  position: relative;                 /* 팝업 기준점 */
-  z-index: auto;                      /* 기본값 */
+  transition: box-shadow .12s ease;
+  /* transform 제거 */
+  position: relative;
+  /* 팝업 기준점 */
+  z-index: auto;
+  /* 기본값 */
 }
 
 .place-item:hover {
-  box-shadow: 0 12px 28px rgba(0,0,0,.10);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, .10);
 }
 
 /* Media: square */
 .place-item__map {
   aspect-ratio: 1 / 1;
   width: 100%;
-  background: linear-gradient(135deg,#f8fafc,#eef2f7);
+  background: linear-gradient(135deg, #f8fafc, #eef2f7);
   flex-shrink: 0;
   border-radius: 14px 14px 0 0;
   position: relative;
-  z-index: 1;            /* 지도는 항상 밑에 */
-  overflow: hidden;      /* 라운드 내로 잘리게 */
-  min-height: 220px;     /* 높이 0 방지 */
+  z-index: 1;
+  /* 지도는 항상 밑에 */
+  overflow: hidden;
+  /* 라운드 내로 잘리게 */
+  min-height: 220px;
+  /* 높이 0 방지 */
 }
 
 /* Header */
 .place-item__head {
   position: relative;
   display: grid;
-  grid-template-columns: 1fr 1fr; /* 버튼 50%/50% */
+  grid-template-columns: 1fr 1fr;
+  /* 버튼 50%/50% */
   gap: 8px;
   padding: 12px 14px;
   border-top: 1px solid #eef2f7;
@@ -432,11 +467,20 @@ form[method="get"] > div button[type="submit"]:hover {
   background: #fff;
   font-size: 13px;
 }
-.place-item__link:hover { background: var(--chip-active-bg); }
+
+.place-item__link:hover {
+  background: var(--chip-active-bg);
+}
 
 /* 50% 버튼 분할 */
-.like-form { grid-column: 1 / 2; display: flex; }
-.add-to-route-btn { grid-column: 2 / 3; }
+.like-form {
+  grid-column: 1 / 2;
+  display: flex;
+}
+
+.add-to-route-btn {
+  grid-column: 2 / 3;
+}
 
 .like-button,
 .add-to-route-btn {
@@ -450,10 +494,23 @@ form[method="get"] > div button[type="submit"]:hover {
   background: #fff;
   border: 1px solid #e5e7eb;
 }
-.like-button { border-color: #f43f5e; color: #e11d48; }
-.like-button:hover { background: #fff0f3; }
-.add-to-route-btn { border-color: var(--border-color); }
-.add-to-route-btn:hover { background: var(--chip-active-bg); }
+
+.like-button {
+  border-color: #f43f5e;
+  color: #e11d48;
+}
+
+.like-button:hover {
+  background: #fff0f3;
+}
+
+.add-to-route-btn {
+  border-color: var(--border-color);
+}
+
+.add-to-route-btn:hover {
+  background: var(--chip-active-bg);
+}
 
 /* 태그 리스트 */
 .tag-list {
@@ -465,6 +522,7 @@ form[method="get"] > div button[type="submit"]:hover {
   border-top: 1px solid #eef2f7;
   margin: 0;
 }
+
 .tag {
   display: inline-block;
   font-size: 12px;
@@ -483,24 +541,38 @@ form[method="get"] > div button[type="submit"]:hover {
   position: absolute;
   top: calc(100% + 10px);
   right: 14px;
-  z-index: 10001;  /* 지도보다 항상 위 */
+  z-index: 10001;
+  /* 지도보다 항상 위 */
   display: none;
   width: min(360px, 86vw);
   padding: 14px;
   background: #fff;
   border: 1px solid #e5e7eb;
   border-radius: 16px;
-  box-shadow: 0 18px 40px rgba(0,0,0,.14);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .14);
   animation: rd-pop .12s ease-out;
 }
+
 @keyframes rd-pop {
-  from { transform: translateY(-4px); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
+  from {
+    transform: translateY(-4px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 /* 팝업 열릴 때 카드 자체를 위로 */
-.place-item.show-dropdown { z-index: 10000; }
-.place-item.show-dropdown .route-dropdown { display: block; }
+.place-item.show-dropdown {
+  z-index: 10000;
+}
+
+.place-item.show-dropdown .route-dropdown {
+  display: block;
+}
 
 /* 꼬리 */
 .route-dropdown::before {
@@ -512,6 +584,7 @@ form[method="get"] > div button[type="submit"]:hover {
   border-style: solid;
   border-color: transparent transparent #e5e7eb transparent;
 }
+
 .route-dropdown::after {
   content: "";
   position: absolute;
@@ -537,6 +610,7 @@ form[method="get"] > div button[type="submit"]:hover {
   flex-flow: row;
   gap: 10px;
 }
+
 .route-list div button {
   border: 1px solid var(--border-color);
   background-color: #fff;
@@ -544,7 +618,10 @@ form[method="get"] > div button[type="submit"]:hover {
   border-radius: 10px;
   transition: 0.3s;
 }
-.route-list div button:hover { background-color: var(--chip-active-bg); }
+
+.route-list div button:hover {
+  background-color: var(--chip-active-bg);
+}
 
 .route-dropdown hr {
   border: 0;
@@ -553,7 +630,10 @@ form[method="get"] > div button[type="submit"]:hover {
   margin: 12px 0;
 }
 
-.create-route-form { z-index: 99999; }
+.create-route-form {
+  z-index: 99999;
+}
+
 .route-dropdown .create-route-form input {
   width: 100%;
   padding: 11px 12px;
@@ -562,6 +642,7 @@ form[method="get"] > div button[type="submit"]:hover {
   border-radius: 10px;
   font-size: 14px;
 }
+
 .route-dropdown .create-route-form label {
   display: flex;
   align-items: center;
@@ -570,6 +651,7 @@ form[method="get"] > div button[type="submit"]:hover {
   color: #475569;
   margin-bottom: 8px;
 }
+
 .create-route-btn {
   width: 100%;
   height: 38px;
@@ -579,6 +661,7 @@ form[method="get"] > div button[type="submit"]:hover {
   color: #fff;
   font-size: 14px;
 }
+
 .create-route-btn:hover {
   background: var(--primary-hover);
   border-color: var(--primary-hover);
@@ -611,11 +694,41 @@ form[method="get"] > div button[type="submit"]:hover {
   border-color: var(--primary);
 }
 
-  .btn{display:inline-block;padding:8px 12px;margin-right:8px;border:1px solid var(--border-color);border-radius:8px;background:#fff}
-  .btn.active{background:var(--border-color);color:#fff;border-color:var(--border-color)}
-  .pagination{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:24px 0}
-  .pagination a,.pagination span{padding:6px 10px;border:1px solid var(--border-color);border-radius:6px;background:#fff}
-  .pagination .current{background:var(--border-color);color:#fff}
+.btn {
+  display: inline-block;
+  padding: 8px 12px;
+  margin-right: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: #fff
+}
+
+.btn.active {
+  background: var(--border-color);
+  color: #fff;
+  border-color: var(--border-color)
+}
+
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin: 24px 0
+}
+
+.pagination a,
+.pagination span {
+  padding: 6px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: #fff
+}
+
+.pagination .current {
+  background: var(--border-color);
+  color: #fff
+}
 
 
 /* =========================
@@ -644,11 +757,12 @@ form[method="get"] > div button[type="submit"]:hover {
 }
 
 /* 실제 버튼 모양은 span 하나만 담당 */
-.filter-bar label > span {
+.filter-bar label>span {
   display: inline-block !important;
   padding: 10px 16px !important;
   border-radius: 10px !important;
-  border: 1px solid var(--border-color) !important;  /* ← 테두리는 span만 */
+  border: 1px solid var(--border-color) !important;
+  /* ← 테두리는 span만 */
   background: #fff !important;
   font-size: 14px !important;
   color: inherit !important;
@@ -657,12 +771,12 @@ form[method="get"] > div button[type="submit"]:hover {
 }
 
 /* 비선택 hover */
-.filter-bar label:hover > span {
+.filter-bar label:hover>span {
   background: var(--chip-active-bg) !important;
 }
 
 /* 선택 상태 */
-.filter-bar input[type="radio"]:checked + span {
+.filter-bar input[type="radio"]:checked+span {
   background: var(--primary) !important;
   color: #fff !important;
   border-color: var(--primary) !important;
@@ -670,19 +784,19 @@ form[method="get"] > div button[type="submit"]:hover {
 }
 
 /* 선택 + hover */
-.filter-bar input[type="radio"]:checked + span:hover {
+.filter-bar input[type="radio"]:checked+span:hover {
   background: var(--primary-hover) !important;
   border-color: var(--primary-hover) !important;
 }
 
 /* 키보드 포커스일 때만 포커스 링은 span에만 */
-.filter-bar input[type="radio"]:focus-visible + span {
+.filter-bar input[type="radio"]:focus-visible+span {
   outline: 2px solid var(--primary) !important;
   outline-offset: 2px !important;
 }
 
 /* 마우스 클릭 후 포커스 링 제거 */
-.filter-bar input[type="radio"]:focus:not(:focus-visible) + span {
+.filter-bar input[type="radio"]:focus:not(:focus-visible)+span {
   outline: none !important;
 }
 
@@ -732,7 +846,7 @@ form[method="get"] > div button[type="submit"]:hover {
 }
 
 /* 선택 상태 */
-.unique-filter-bar input[type="checkbox"]:checked + .unique-filter-text {
+.unique-filter-bar input[type="checkbox"]:checked+.unique-filter-text {
   background: var(--primary) !important;
   color: #fff !important;
   border-color: var(--primary) !important;
@@ -740,25 +854,25 @@ form[method="get"] > div button[type="submit"]:hover {
 }
 
 /* 선택된 상태의 앞에 체크 아이콘 추가 */
-.unique-filter-bar input[type="checkbox"]:checked + .unique-filter-text::before {
+.unique-filter-bar input[type="checkbox"]:checked+.unique-filter-text::before {
   content: '✓ ';
   margin-right: 4px;
 }
 
 /* 선택 + hover */
-.unique-filter-bar input[type="checkbox"]:checked + .unique-filter-text:hover {
+.unique-filter-bar input[type="checkbox"]:checked+.unique-filter-text:hover {
   background: var(--primary-hover) !important;
   border-color: var(--primary-hover) !important;
 }
 
 /* 키보드 포커스 */
-.unique-filter-bar input[type="checkbox"]:focus-visible + .unique-filter-text {
+.unique-filter-bar input[type="checkbox"]:focus-visible+.unique-filter-text {
   outline: 2px solid var(--primary) !important;
   outline-offset: 2px !important;
 }
 
 /* 마우스 클릭 후 포커스 링 제거 */
-.unique-filter-bar input[type="checkbox"]:focus:not(:focus-visible) + .unique-filter-text {
+.unique-filter-bar input[type="checkbox"]:focus:not(:focus-visible)+.unique-filter-text {
   outline: none !important;
 }
 
@@ -774,10 +888,13 @@ form[method="get"] > div button[type="submit"]:hover {
   display: inline-block;
   padding: 10px 16px;
   border-radius: 10px;
-  border: 2px solid #ccc;         /* 회색 테두리 */
-  background: #fff;               /* 흰 배경 */
+  border: 2px solid #ccc;
+  /* 회색 테두리 */
+  background: #fff;
+  /* 흰 배경 */
   font-size: 14px;
-  color: #555;                    /* 회색 글씨 */
+  color: #555;
+  /* 회색 글씨 */
   font-weight: 500;
   transition: background .3s, color .3s, border-color .3s, box-shadow .3s;
   cursor: pointer;
@@ -793,17 +910,20 @@ form[method="get"] > div button[type="submit"]:hover {
 }
 
 /* 체크된 상태 */
-.custom-checkbox input[type="checkbox"]:checked + span {
-  background: #62B3B8;            /* 진한 파란/민트색 배경 */
-  color: #fff;                    /* 흰색 글씨 */
+.custom-checkbox input[type="checkbox"]:checked+span {
+  background: #62B3B8;
+  /* 진한 파란/민트색 배경 */
+  color: #fff;
+  /* 흰색 글씨 */
   border-color: #62B3B8;
   font-weight: 600;
-  box-shadow: 0 0 6px rgba(98,179,184,0.5);
+  box-shadow: 0 0 6px rgba(98, 179, 184, 0.5);
 }
 
 /* 체크 아이콘 추가 */
-.custom-checkbox input[type="checkbox"]:checked + span::before {
-  content: "✔";                   /* 체크 표시 */
+.custom-checkbox input[type="checkbox"]:checked+span::before {
+  content: "✔";
+  /* 체크 표시 */
   position: absolute;
   left: 10px;
   font-size: 14px;
