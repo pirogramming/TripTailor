@@ -708,6 +708,9 @@ form[method="get"] > div button[type="submit"]:hover {
   cursor: pointer !important;
   box-shadow: none !important;
   gap: 8px;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
 }
 
 /* 실제 버튼 모양 */

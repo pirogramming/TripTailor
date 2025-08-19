@@ -6,6 +6,8 @@
 2025 Pirogramming : **Triptailor**  
 <br/><br/>
 
+링크 : https://triptailor.kro.kr/
+
 ## 🚀 Triptailor
 
 > “여행지를 어떻게 선택하시나요?”  
@@ -45,31 +47,45 @@ AI와 데이터 기반으로 여행을 **쉽고 즐겁게 계획**할 수 있는
 
 ---
 
-## 🛠️ Tech Stack
 
-📌 **Stack**  
+## 📌 Stack  
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white) 
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white) 
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black) 
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)  
 
-📌 **Tools**  
+
+## 📌 Tools  
 ![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-007ACC?style=for-the-badge&logo=visualstudiocode&logoColor=white) 
 ![Figma](https://img.shields.io/badge/Figma-F24E1E?style=for-the-badge&logo=figma&logoColor=white) 
 ![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white)  
 
-📌 **Collaboration**  
+
+## 📌 Collaboration  
 ![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white) 
 ![Notion](https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=notion&logoColor=white) 
 ![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)  
 
----
+
+## 📌 Server  
+[![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white&style=for-the-badge)](https://www.docker.com/)
+[![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF?logo=githubactions&logoColor=white&style=for-the-badge)](https://github.com/features/actions)
+[![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?logo=ubuntu&logoColor=white&style=for-the-badge)](https://ubuntu.com/)
+[![Gunicorn](https://img.shields.io/badge/Gunicorn-499848?logo=gunicorn&logoColor=white&style=for-the-badge)](https://gunicorn.org/)
+[![Nginx](https://img.shields.io/badge/NGINX-009639?logo=nginx&logoColor=white&style=for-the-badge)](https://nginx.org/)
+
 
 ## ⚙️ Features
 
+| 기능 | 설명 | 화면 예시 |
+|------|------|-----------|
+| **태그 분류** | 여행지/후기/추천 시스템에서 태그를 자동 분류하여 검색 및 추천 정확도 향상 | <img width="500" alt="태그 분류" src="https://github.com/user-attachments/assets/372b5842-5afb-4fcc-9368-956fa362bf22" /> |
+| **장소 추천** | 사용자 입력(취향·키워드)에 맞는 장소를 벡터 검색 + AI 기반으로 추천 | <img width="500" alt="장소 추천" src="https://github.com/user-attachments/assets/ff6d7778-0a5a-4c3f-86bb-e5205606fdbb" /> |
+| **댓글 생성 및 조회** | 각 장소에 대한 댓글을 작성·조회 가능 (텍스트 + 이미지 첨부 지원) | <img width="500" alt="댓글 생성 및 조회" src="https://github.com/user-attachments/assets/b257b1ff-072e-4407-ab96-dc21b8b64f7f" /> |
+| **루트 추가** | 여행 루트를 직접 생성하고 장소를 추가/편집 가능 | <img width="250" alt="루트 추가1" src="https://github.com/user-attachments/assets/7b7ab98a-e309-4f9c-a901-5c36c67f582c" /> <img width="300" alt="루트 추가2" src="https://github.com/user-attachments/assets/7764c9de-5c2e-4496-b6ca-db31174dc3b6" /> <img width="220" alt="루트 추가3" src="https://github.com/user-attachments/assets/8e2f0546-66cb-4948-99bc-d065dfb134a9" /> |
+| **마이페이지 조회** | 내가 작성한 후기, 좋아요 누른 장소, 생성한 루트 등 개인화 정보 관리 | <img width="250" alt="마이페이지1" src="https://github.com/user-attachments/assets/b63aefb6-ee51-499a-92b2-3b9c87feac98" /> <img width="350" alt="마이페이지2" src="https://github.com/user-attachments/assets/a3c6d0a9-b40a-4429-a648-0028be616be8" /> <img width="350" alt="마이페이지3" src="https://github.com/user-attachments/assets/491431ea-5ff1-4afb-a4b2-9b9a220d2abc" /> <img width="350" alt="마이페이지4" src="https://github.com/user-attachments/assets/616d590d-8c21-4e34-a7cd-ab0ebdca25a6" /> |
+| **장소 검색** | 키워드, 태그, 지역 등을 기반으로 원하는 장소를 빠르게 검색 | <img width="350" alt="장소 검색1" src="https://github.com/user-attachments/assets/70ac374a-7749-43ae-ad5f-4f5a9bd0a4f2" /> <img width="350" alt="장소 검색2" src="https://github.com/user-attachments/assets/277c5d0e-ea26-4797-8726-84603203cf09" /> |
 
-
-  ---
 
 ## 📂 폴더 구조
 
@@ -104,9 +120,7 @@ TripTailor/
 ├─ manage.py
 ├─ README.md
 ├─ recommend.py
-├─ requirements.txt
-├─ triptailor_cosine_v2.index
-└─ triptailor_full_metadata.csv
+└─ requirements.txt
 
   ```
 

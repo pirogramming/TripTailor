@@ -41,6 +41,9 @@ nav{
 .logo_div { width:150px; height:75px; overflow:hidden;}
 .logo_div img { width:100%; height:100%; object-fit:contain; }
 
+/* 죄측 네비 */
+.left_nav{margin-left: 10px;}
+
 /* 우측 네비 */
 .right_nav{ display:flex; gap:10px; }
 .right_nav a{
