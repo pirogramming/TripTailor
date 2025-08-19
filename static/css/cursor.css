@@ -1,0 +1,12 @@
+html, body {
+  cursor: url("cursor_24.png") 8 8, auto; /* 8 8 = 핫스팟 좌표(x,y) */
+}
+
+a, button { cursor: pointer; }        /* 클릭 가능 */
+input[type="text"], textarea { cursor: text; }   /* 텍스트 선택 */
+[draggable="true"], .drag { cursor: grab; }
+.drag:active { cursor: grabbing; }
+.disabled, button:disabled { cursor: not-allowed; }
+.move { cursor: move; }                /* 이동 */
+.zoom-in { cursor: zoom-in; }          /* 확대 */
+.zoom-out { cursor: zoom-out; }        /* 축소 */

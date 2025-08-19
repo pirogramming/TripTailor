@@ -42,7 +42,7 @@ class Review(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.title
+        return self.content[:30]
 
     class Meta:
         ordering = ["-created_at"]  # 리스트뷰 페이지네이션 경고 방지용
