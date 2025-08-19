@@ -14,17 +14,7 @@
     <div id="form-container">
       <h2>회원가입</h2>
       <form method="post" action="{% url 'account_signup' %}">
-        {% csrf_token %}
-        {% if form.errors %}
-          <p style="color: red;">입력한 정보를 다시 확인해주세요 😥</p>
-          <ul>
-            {% for field in form %}
-              {% for error in field.errors %}
-                <li style="color:red">{{ field.label }}: {{ error }}</li>
-              {% endfor %}
-            {% endfor %}
-          </ul>
-        {% endif %}
+
         <div>
           {{ form.username }}
         </div>
@@ -37,6 +27,16 @@
         <div>
           {{ form.password2 }}
         </div>
+        {% csrf_token %}
+        {% if form.errors %}
+          <ul>
+            {% for field in form %}
+              {% for error in field.errors %}
+                <li style="color:red">*{{ field.label }}: {{ error }}</li>
+              {% endfor %}
+            {% endfor %}
+          </ul>
+        {% endif %}        
         <button type="submit"><span>가입</span></button>
       </form>   
       <div id="login-container">

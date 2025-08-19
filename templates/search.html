@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 {% block content %}
-<link rel="stylesheet" href="{% static 'css/search.css' %}">
+<link rel="stylesheet" href="{% static 'css/search.css' %}?v={% now 'U' %}">
 <form method="get" action="">
   {% if show_followup %}
     <!-- 기존 질문(수정 불가, 말풍선 표시) -->
@@ -60,47 +60,61 @@
 
 <!-- 초기 3개 카드 (가로 배치 유지) -->
 <div class="recommend-grid">
-    <div class="recommend-list" id="places-container">
-        {% for rec in recommended_places %}
-        <div class="place-card">
-            <div
-            id="map-{{rec.place.id}}"
-            class="place-item__map"
-            data-lat="{{rec.place.lat}}"
-            data-lng="{{rec.place.lng}}"
-            ></div>
-            <div class="place-card__body">
-                <h3 class="place-card__title">{{ rec.place.name }}</h3>
-                <p class="place-card__region">{{ rec.place.region }}</p>
-                <p class="place-card__summary">{{ rec.reason }}</p>
-                <p class="place-card__tip">{{ rec.tip }}</p>
-                {% if not rec.reason and not rec.tip %} 
-                <p class="place-card__summary">{{ rec.place.summary|truncatechars:200|default:"설명 없음" }}</p>
-                {% endif %}
-                <ul class="tag-list">
-                    {% for tag in rec.place.tags.all %}
-                    <li class="tag">#{{ tag.name }}</li>
-                    {% endfor %}
-                </ul>
-                {% if user.is_authenticated %}
-                <div class="card_btn">
-                    <form method="post" action="{% url 'places:place_like' rec.place.pk %}" class="like-form">
-                        {% csrf_token %}
-                        <button type="submit" class="like-button">
-                            {% if rec.place.is_liked %}
-                                ❤️ 찜취소
-                            {% else %}
-                                🤍 찜하기
-                            {% endif %}
-                        </button>
-                    </form>
-                    {% endif %}
-                    <a href="{% url 'places:place_detail' rec.place.pk %}" class="link">자세히 보기</a>
-                </div>
-            </div>
+
+
+  <ul class="place-list">
+    {% for rec in recommended_places %}
+    <li class="place-item">
+      <div 
+      id="map-{{ rec.place.id }}"
+      class="place-item__map"
+      data-lat="{{rec.place.lat}}"
+      data-lng="{{rec.place.lng}}"
+      ></div>
+      <div class="place-item__head">
+        <span class="place-item__name">{{ rec.place.name }}</span>
+        <span class="place-item__meta">({{ rec.place.region }})</span>
+      </div>
+      <p class="place-card__summary">{{ rec.reason }}</p>
+      {% if rec.tip %}
+      <p class="place-card__tip"><span id="tip">Tip</span>{{ rec.tip }}</p>
+      {% endif %}
+      {% if not rec.reason and not rec.tip %} 
+      <p class="place-card__summary">{{ rec.place.summary|truncatechars:200|default:"설명 없음" }}</p>
+      {% endif %}
+      <div class="place-item__head">
+        <a class="place-item__link" href="{% url 'places:place_detail' rec.place.pk %}">자세히 보기</a>
+
+        {% if user.is_authenticated %}
+        <form method="post" action="{% url 'places:place_like' rec.place.pk %}" class="like-form">
+          {% csrf_token %}
+          <button type="submit" class="like-button">
+            {% if place.is_liked %}❤️ 찜취소{% else %}🤍 찜하기{% endif %}
+          </button>
+        </form>
+
+        <button type="button" class="add-to-route-btn" data-place-id="{{ rec.place.id }}">➕ 루트에 추가</button>
+        <div class="route-dropdown" style="display:none; position:absolute; background:#fff; border:1px solid #ccc; padding:.5rem; z-index:10; min-width:200px;">
+          <div class="route-list">불러오는 중...</div>
+          <hr>
+          <div class="create-route-form">
+            <input type="text" class="new-route-title" placeholder="새 루트 제목" style="width:100%; margin-bottom:.25rem;">
+            <input type="text" class="new-route-summary" placeholder="루트 요약(선택, 200자 이내)" style="width:100%; margin-bottom:.25rem;">
+            <label class="custom-checkbox">
+              <input type="checkbox" class="new-route-public" checked>
+              <span>공개 루트로 만들기</span> 
+            </label>
+            <button type="button" class="create-route-btn">＋ 새 루트 만들기</button>
+          </div>
         </div>
-        {% endfor %}
-    </div>
+        {% endif %}
+      </div>
+    </li>
+    {% empty %}
+      <li>표시할 여행지가 없습니다.</li>
+    {% endfor %}
+  </ul>
+
 </div>
 {% endif %}
 <a href="{% url 'places:main' %}" class="back-link">← 메인으로 돌아가기</a>
@@ -112,4 +126,6 @@
   defer
 ></script>
 <script src="{% static 'js/like.js' %}"></script>
+<script src="{% static 'js/script.js' %}"></script>
+
 {% endblock %}

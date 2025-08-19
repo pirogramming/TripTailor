@@ -19,6 +19,18 @@ main > h1 {
     padding: 19px;
 }
 
+form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+ul {
+    width: 400px;
+    padding-top: 1vw;
+}
+
 #form-container {
     width: 500px;
     border-radius: 25px;
@@ -40,7 +52,7 @@ main > h1 {
 }
 
 #id_username, #id_email, #id_password1, #id_password2 {
-    width: 400px;
+    width: 376px;
     height: 55px;
     border: 1px solid rgba(128, 128, 128, 0.50);
     border-radius: 15px;
@@ -50,8 +62,12 @@ main > h1 {
 
 #id_username::placeholder, #id_email::placeholder, #id_password1::placeholder, #id_password2::placeholder {
     color: #80808080;
-    padding-left:10px;
     font-size: 1rem;
+}
+
+input[type="text"], input[type="email"], input[type="password"] {
+    font-size: 1rem;
+    padding: 0 12px;
 }
 
 button {
