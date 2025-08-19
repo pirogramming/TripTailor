@@ -74,6 +74,15 @@
       <div class="place-item__head">
         <span class="place-item__name">{{ rec.place.name }}</span>
         <span class="place-item__meta">({{ rec.place.region }})</span>
+      </div>
+      <p class="place-card__summary">{{ rec.reason }}</p>
+      {% if rec.tip %}
+      <p class="place-card__tip"><span id="tip">Tip</span>{{ rec.tip }}</p>
+      {% endif %}
+      {% if not rec.reason and not rec.tip %} 
+      <p class="place-card__summary">{{ rec.place.summary|truncatechars:200|default:"설명 없음" }}</p>
+      {% endif %}
+      <div class="place-item__head">
         <a class="place-item__link" href="{% url 'places:place_detail' rec.place.pk %}">자세히 보기</a>
 
         {% if user.is_authenticated %}
@@ -100,11 +109,6 @@
         </div>
         {% endif %}
       </div>
-      <ul class="tag-list">
-        {% for tag in rec.place.tags.all %}
-          <li class="tag">#{{ tag.name }}</li>
-        {% endfor %}
-      </ul>
     </li>
     {% empty %}
       <li>표시할 여행지가 없습니다.</li>

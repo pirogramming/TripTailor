@@ -248,7 +248,7 @@ form[method="get"] > div button[type="submit"]:hover {
 
 /* Media: square */
 .place-item__map {
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 4 / 3;
   width: 100%;
   background: linear-gradient(135deg,#f8fafc,#eef2f7);
   flex-shrink: 0;
@@ -267,6 +267,28 @@ form[method="get"] > div button[type="submit"]:hover {
   gap: 8px;
   padding: 12px 14px;
   border-top: 1px solid #eef2f7;
+}
+
+.place-card__summary {
+  padding: 12px 14px;
+  font-size: 0.8rem;
+  line-height: 130%;
+}
+
+.place-card__tip {
+  padding: 0 14px;
+  font-size: 0.8rem;
+  line-height: 130%;
+  color: #6b7280;
+}
+
+#tip {
+  background-color: #62B3B8;
+  color: white;
+  font-size: 0.6rem;
+  padding: 2px 5px;
+  margin-right: 5px;
+  border-radius: 6px;
 }
 
 /* 제목/메타 전체 폭 */
